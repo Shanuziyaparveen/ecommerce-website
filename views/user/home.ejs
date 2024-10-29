@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title><%= title %></title>
+    <meta name="description" content="<%= description %>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/user/stylesheets/home.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Asset&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-bar">
+        <div class="logo">Boots</div>
+        <div class="search">
+          <span class="material-symbols-outlined search-icon"> search </span>
+          <input
+            class="search-bar"
+            placeholder="Find Your Sole Mate..."
+            type="text"
+          />
+        </div>
+        <div class="log-in">
+          <a href="/register">Sign Up</a>
+          <a href="/login">Log In</a>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="selected-link">Home</a>
+        <a href="/products">Products</a>
+        <a href="/new-arrivals">New Arrivals</a>
+        <a href="/men">Men</a>
+        <a href="/women">Women</a>
+        <a href="/kids">Kids</a>
+        <a href="/sale">Sale</a>
+      </div>
+    </nav>
+
+    <main>
+      <section class="main-image">
+        <img src="https://i.ibb.co/GTFNRtw/main-shoe.png" alt="main-shoe" />
+        <h1 class="animated-text">
+          <span class="white-text">Jus</span>t Do
+          <span class="white-text">It.</span>
+        </h1>
+        <button class="expand-button">
+          <span class="material-symbols-outlined expand-icon">Shop Now</span>
+        </button>
+      </section>
+      <h1 style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;color: azure;font-size: xx-large; text-align: center;">Best Sellers</h1>
+      <section class="products-section">
+        <div class="item-container">
+            
+          <% products.forEach(product => { %>
+            <div class="item-card">
+              <div class="img-<%= product.id %>"></div>
+              <h1 class="item-name"><%= product.name %></h1>
+              <h2 class="item-category"><%= product.category %></h2>
+              <h3 class="item-price">Rs<%= product.price %></h3>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    </main>
+    <footer>
+        <div class="footer-container">
+          <!-- Footer Top: Newsletter Signup -->
+          <div class="footer-newsletter">
+            <p>Sign up for our newsletter to get the latest updates on new arrivals, exclusive deals, and more.</p>
+            <form class="newsletter-form">
+              <input type="email" placeholder="Enter your email address" required />
+              <button type="submit">Subscribe</button>
+            </form>
+          </div>
+      
+          <!-- Footer Middle: Quick Links, Contact Info, and Social Media -->
+          <div class="footer-middle">
+            <!-- Quick Links Section -->
+            <div class="footer-section">
+              <h3>Quick Links</h3>
+              <ul class="footer-links">
+                <li><a href="/about">About Us</a></li>
+                <li><a href="/contact">Contact Us</a></li>
+                <li><a href="/faqs">FAQs</a></li>
+                <li><a href="/return-policy">Return Policy</a></li>
+                <li><a href="/shipping-info">Shipping Info</a></li>
+                <li><a href="/privacy-policy">Privacy Policy</a></li>
+              </ul>
+            </div>
+      
+            <!-- Contact Info Section -->
+            <div class="footer-section">
+              <h3>Contact Info</h3>
+              <ul class="footer-contact">
+                <li><span class="material-symbols-outlined" >location_on</span><h2 style="font-family: 'Asset'">Boots</h2>   </li>
+                <li><span class="material-symbols-outlined">phone</span> +91 9895451667</li>
+                <li><span class="material-symbols-outlined">email</span> boots@footwearstore.com</li>
+              </ul>
+            </div>
+      
+            <!-- Social Media Section -->
+            <div class="footer-section">
+              <!-- <h3>Follow Us</h3>
+              <ul class="footer-social">
+                <li><a href="https://facebook.com"><img src="facebook-icon.png" alt="Facebook" /></a></li>
+                <li><a href="https://twitter.com"><img src="twitter-icon.png" alt="Twitter" /></a></li>
+                <li><a href="https://instagram.com"><img src="instagram-icon.png" alt="Instagram" /></a></li>
+                <li><a href="https://pinterest.com"><img src="pinterest-icon.png" alt="Pinterest" /></a></li>
+              </ul> -->
+            </div>
+          </div>
+      
+          <!-- Footer Bottom: Copyright -->
+          <div class="footer-bottom">
+            <p>&copy; 2024 Boots. All Rights Reserved.</p>
+          </div>
+        </div>
+      </footer>
+      
+  </body>
+</html>

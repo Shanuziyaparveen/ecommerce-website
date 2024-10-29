@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Products</title>
+  <link rel="stylesheet" href="/admin/stylesheets/stylep.css">
+</head>
+<body>
+  <div class="container">
+    <h1>All Products</h1>
+    
+    <!-- Add Product Button -->
+    <a href="/admin/products/add" class="add-product-btn">Add New Product</a>
+
+    <!-- Products Table -->
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Sale Price</th>
+          <th>Stock</th>
+          <th>Sizes</th>
+          <th>Colors</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% products.forEach(product => { %>
+          <tr>
+            <td><%= product.productName %></td>
+            <td><%= product.price %></td>
+            <td><%= product.salePrice %></td>
+            <td><%= product.stock %></td>
+            <td><%= product.sizesAvailable.join(', ') %></td>
+            <td><%= product.availableColors.join(', ') %></td>
+            <td>
+              <a href="/admin/products/<%= product._id %>" class="btn">View</a>
+              <a href="/admin/products/edit/<%= product._id %>" class="btn">Edit</a>
+              <form action="/admin/products/delete/<%= product._id %>" method="POST">
+                <button type="submit">Delete</button>
+              </form>
+              
+            
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+     <!-- Button to go to deleted products page -->
+     <a href="/admin/viewDeletedProducts" class="btn">View Deleted Products</a>
+     <a href="/admin/dashboard" class="btn">Back to Dashboard</a>
+  </div>
+</body>
+</html>

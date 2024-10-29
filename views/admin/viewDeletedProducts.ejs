@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleted Products</title>
+    <link rel="stylesheet" href="/admin/stylesheets/viewdeleted.css">
+</head>
+<body>
+    <h1>Deleted Products</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Deleted At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (deletedProducts.length > 0) { %>
+          <% deletedProducts.forEach(product => { %>
+            <tr>
+                <td><%= product.productName %></td>
+                <td><%= product.price %></td>
+               
+              <td><%= product.deletedAt || 'Not specified' %></td> <!-- Optional field -->
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="3">No deleted products found.</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+    <a href="/admin/products" class="btn">Back to Products</a>
+    </body>
+</html>

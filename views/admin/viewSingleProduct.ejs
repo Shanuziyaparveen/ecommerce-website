@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>Product: <%= product.productName %></h1>
+
+  <div class="product-details">
+    <div>
+      <h3>Description</h3>
+      <p><%= product.productDescription %></p>
+    </div>
+
+    <div>
+      <h3>Price</h3>
+      <p>₹<%= product.price %></p>
+      <% if (product.salePrice) { %>
+        <p>Sale Price: ₹<%= product.salePrice %></p>
+      <% } %>
+    </div>
+
+    <div>
+      <h3>Available Sizes</h3>
+      <ul>
+        <% product.sizesAvailable.forEach(size => { %>
+          <li><%= size %></li>
+        <% }); %>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Available Colors</h3>
+      <ul>
+        <% product.availableColors.forEach(color => { %>
+          <li><%= color %></li>
+        <% }); %>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Stock</h3>
+      <p><%= product.stock %> units available</p>
+    </div>
+
+    <div>
+      <h3>Images</h3>
+      <div class="image-gallery">
+        <% product.images.forEach(image => { %>
+          <img src="<%= image %>" alt="Product Image" width="150">
+        <% }); %>
+      </div>
+    </div>
+
+    <div>
+      <a href="/products/update/<%= product._id %>">Edit Product</a> |
+      <a href="/products/delete/<%= product._id %>" onclick="return confirm('Are you sure?')">Delete Product</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User List - Admin Panel</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" integrity="sha384-JQ0JdHUV0T/OROktDGT/qU4EEztw8fgqWcfHlfN4Q4H1E5PR2khP7VxL6g0ZBj3K" crossorigin="anonymous">
+        <link rel="stylesheet" href="/admin/stylesheets/styleu.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="mt-4">User List</h1>
+            <h3>Total Users: <%= users.length %></h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(function(user, index) { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= user.name %></td>
+                            <td><%= user.email %></td>
+                            <td>
+                                <span class="badge <%= user.isBlocked ? 'bg-danger' : 'bg-success' %>">
+                                    <%= user.isBlocked ? 'Blocked' : 'Active' %>
+                                </span>
+                            </td>
+                            <td>
+                                <form action="/admin/users/changeBlockStatus/<%= user._id %>" method="POST" style="display:inline;">
+                                    <input type="hidden" name="isBlocked" value="<%= user.isBlocked %>"> <!-- Pass the current block status -->
+                                    <button type="submit" class="btn btn-sm <%= user.isBlocked ? 'btn-success' : 'btn-warning' %>">
+                                        <%= user.isBlocked ? 'Unblock' : 'Block' %>
+                                    </button>
+                                </form>
+                                
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <div class="text-center mt-4">
+                <a href="/admin/dashboard" class="btn btn-primary">Go to Dashboard</a>
+            </div>
+        </div>
+    
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js" integrity="sha384-uwp3AqjIGgEE9tUR8ATwQWZ0C3uRbWz1YgLlmtz5P8I5tQ9vRTKXXIrnEnKrf9Z3" crossorigin="anonymous"></script>
+    </body>
+    </html>
+    
