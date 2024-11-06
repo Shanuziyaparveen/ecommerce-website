@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Asset
+- Font Author: Copyright 2023 The Asset Project Authors (https://github.com/SorkinType/Asset)
+- Font Source: https://fonts.gstatic.com/s/asset/v29/SLXGc1na-mM4cWImRJqExst1.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
