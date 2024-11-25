@@ -1,0 +1,425 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+  .main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .shop-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  /* Search Form Styles */
+  .search-form {
+    display: flex;
+    align-items: center;
+    background-color: #f1f1f1;
+    border-radius: 25px;
+    overflow: hidden;
+    max-width: 250px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+  }
+
+  .search-button {
+    padding: 8px 15px;
+    background-color: #1e918b;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 15px;
+    margin-right: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .search-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+
+  /* Sort Options Styles */
+  .sort-options {
+    display: flex;
+    align-items: center;
+  }
+
+  .sort-options label {
+    margin-right: 10px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  #sort-by {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+    cursor: pointer;
+  }
+
+  /* Sidebar and Product Grid Styles */
+  .sidebar {
+    padding: 20px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    width: 250px;
+    text-align: center;
+  }
+
+  .filter-section {
+    margin-bottom: 20px;
+  }
+
+  .filter-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .filter-item {
+    margin: 5px 0;
+  }
+
+  .filter-item a {
+    text-decoration: none;
+    color: #333;
+  }
+
+  .filter-item a:hover {
+    color: #007bff;
+  }
+
+  .product-list-container {
+    display: flex;
+    gap: 20px;
+  }
+
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: calc(100% - 270px);
+  }
+
+  .product-card {
+    width: calc(33.333% - 20px);
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+  }
+
+  .product-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+
+  .wishlist-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(237, 247, 247, 0.8);
+    color: #fff;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .add-to-cart-btn {
+    background-color: #46698f;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    text-align: center; /* Centers the pagination controls */
+    margin-top: 20px; /* Adjust spacing as needed */
+  }
+
+  .pagination a {
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #333;
+    text-decoration: none;
+  }
+
+  .pagination .active {
+    background-color: #007bff;
+    color: #fff;
+  }
+ 
+
+  .price-filter {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+
+  .price-filter .price-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .price-button {
+    padding: 12px 20px;
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .price-button:hover {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+  }
+
+  .price-button:active {
+    transform: scale(0.95);
+  }
+
+  .category-brand-container {
+    text-align: center;
+  }
+</style>
+
+<div class="main-container">
+  <section class="shop-page container">
+    <div class="shop-topbar">
+      <div class="search-bar">
+        <form action="/search" method="POST" class="search-form">
+          <input type="text" name="query" placeholder="Search items..." class="search-input" />
+          <button type="submit" class="search-button">Search</button>
+        </form>
+      </div>
+    
+      <!-- Sort Dropdown -->
+      <div class="sort-options">
+        <form  id="sort-form" method="get" action="/filtersort">
+        <label for="sort-by">Sort By:</label>
+        <select id="sort-by" name="sort" onchange="applySort()">
+            <option value="popularity" <%= sortOption === 'popularity' ? 'selected' : '' %>>Popularity</option>
+            <option value="priceLowToHigh" <%= sortOption === 'priceLowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
+            <option value="priceHighToLow" <%= sortOption === 'priceHighToLow' ? 'selected' : '' %>>Price: High to Low</option>
+           
+            <option value="Discount" <%= sortOption === 'Discount' ? 'selected' : '' %>>Discount</option>
+            <option value="newArrivals" <%= sortOption === 'newArrivals' ? 'selected' : '' %>>New Arrivals</option>
+            <option value="aToZ" <%= sortOption === 'aToZ' ? 'selected' : '' %>>A-Z</option>
+            <option value="zToA" <%= sortOption === 'zToA' ? 'selected' : '' %>>Z-A</option>
+        </select>
+      </form>
+    </div>
+    </div>
+    
+    <div class="product-list-container">
+      <aside class="sidebar">
+        <div class="filter-section">
+          <div class="filter-title">Categories</div>
+          <div class="category-brand-container">
+            <form action="/categorySort" method="post">
+              <% category.forEach(function(cat, index) { %>
+                <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                    <input 
+                        type="checkbox" 
+                        name="catg" 
+                        class="custom-control-input" 
+                        value="<%= cat.name %>"  
+                        id="category-<%= index %>">
+                    <label class="custom-control-label" for="category-<%= index %>">
+                        <%= cat.name %>
+                    </label>
+                </div>
+              <% }); %>
+              <button class="btn btn-primary" type="submit">Filter</button>
+            </form>
+            
+          
+          
+          </div>
+        </div>
+        
+        <div class="filter-section">
+          <div class="filter-title">Brands</div>
+          <div class="category-brand-container">
+            <ul>
+              <% for(let i = 0; i < brand.length; i++) { %>
+                <li class="filter-item">
+                  <a href="/filter?brand=<%= brand[i]._id %>"><%= brand[i].brandName %></a>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="price-filter">
+          <div class="filter-title">Filter by Price</div>
+          <form id="price-filter-form" action="/filterByPrice" method="get">
+            <div class="price-options">
+              <button 
+              type="submit" 
+              name="gt" value="0" 
+              name="lt" value="500" 
+              class="price-button <%= selectedPriceRange && selectedPriceRange.lt === 500 ? 'active' : '' %>">
+              view all
+          </button>
+                          <button type="submit" name="gt" value="500" class="price-button <%= selectedPriceRange && selectedPriceRange.gt === 500 ? 'active' : '' %>">₹500 onwards</button>
+                <button type="submit" name="gt" value="1000" class="price-button <%= selectedPriceRange && selectedPriceRange.gt === 1000 ? 'active' : '' %>">₹1000 onwards</button>
+                <button type="submit" name="gt" value="1500" class="price-button <%= selectedPriceRange && selectedPriceRange.gt === 1500 ? 'active' : '' %>">Above ₹1500</button>
+            </div>
+        </form>
+        </div>
+      </aside>
+      
+      <div class="product-grid">
+        <% if (products.length === 0) { %>
+            <p>No products available</p>
+        <% } else { %>
+            <% for (let i = 0; i < products.length; i++) { %>
+                <div class="product-card">
+                    <span class="wishlist-btn" onclick="">❤️</span>
+                    <a href="/product/<%= products[i]._id %>">
+                        <img src="/uploads/re-image/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>" />
+                        <h3><%= products[i].productName %></h3>
+                        <p>Price:₹<%= products[i].salePrice.toLocaleString('en-IN') %> 
+                            <span class="text-muted">
+                                <strike>₹<%= products[i].regularPrice.toLocaleString('en-IN') %></strike>
+                            </span>
+                        </p>
+                        <p><%= products[i].category %></p>
+                        <p>Brand:<%= products[i].brand %></p>
+                    </a>
+                    <button class="add-to-cart-btn" onclick="addToCart('<%= products[i]._id %>')">Add to Cart</button>
+                </div>
+            <% } %>
+        <% } %>
+    </div>
+  </div>
+  <div class="container mt-3">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center mb-20">
+          <!-- Previous Page Link -->
+          <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+              <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo; Previous</a>
+          </li>
+  
+          <!-- Page Number Links -->
+          <% for (let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+              </li>
+          <% } %>
+  
+          <!-- Next Page Link -->
+          <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+              <a class="page-link" href="?page=<%= currentPage + 1 %>">Next &raquo;</a>
+          </li>
+      </ul>
+    </nav>
+  </div>
+  
+
+<script>
+function applySort() {
+    const sortBy = document.getElementById('sort-by').value;
+    console.log("Sort option selected:", sortBy);
+
+    // Submit the form
+    document.getElementById('sort-form').submit();
+}
+
+
+  // Filter by price range
+  function filterByPrice(priceRange) {
+    window.location.href = "/filter?price=" + priceRange;
+  }
+
+// Check if the user is logged in
+const isLoggedIn = <%= user ? 'true' : 'false' %>;
+function addToCart(productId) {
+    if (!isLoggedIn) {
+        Swal.fire({
+            title: 'Login required!',
+            text: 'You need to be logged in to add products to your cart.',
+            icon: 'warning',
+            confirmButtonText: 'Login'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/login';
+            }
+        });
+        return;
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: '/addToCart',
+        contentType: 'application/json', // Set content type to JSON
+        data: JSON.stringify({ productId: productId }), // Send the data as JSON
+        success: function(response) {
+            if (response.success) {
+                // If the product was added to the cart successfully
+                Swal.fire({
+                    title: 'Product added to cart!',
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                // Handle specific errors like out of stock
+                Swal.fire({
+                    title: 'Out of Stock!',
+                    text: response.message || 'Sorry, this product is currently out of stock.',
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                });
+            }
+        },
+        error: function(error) {
+            // General error handling
+            Swal.fire({
+                title: 'Error',
+                text: 'Could not add product to cart. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'Okay'
+            });
+        }
+    });
+}
+
+
+</script>
+
+<%- include("../../views/partials/user/footer") %>

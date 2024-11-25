@@ -1,0 +1,73 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+  .pagination-container {
+    text-align: center;
+  }
+  .pagination {
+    display: inline-block;
+  }
+
+  .pagination a,
+  .pagination .current-page {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 2px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .pagination a:hover {
+    background-color: #f5f5f5;
+  }
+  .error-message {
+    color: red;
+  }
+</style>
+
+<section class="content-main">
+  <div class="content-header">
+    <div>
+      <h2 class="content-title card-title">Edit Brand</h2>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <form method="post" action="/admin/editBrand/<%= brand._id %>" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<%= brand._id %>" />
+            <div class="mb-4">
+              <label for="brand_name" class="form-label">Brand Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Type here"
+                class="form-control"
+                value="<%= brand.brandName %>"
+              />
+            </div>
+            <label for="brand_image" class="form-label">Brand Image</label>
+            <div class="input-upload">
+              <img
+                src="/uploads/re-image/<%= brand.brandImage[0] %>"
+                alt="<%= brand.brandName %>"
+                class="img-fluid mb-2"
+                style="width: 100px; height: auto; border-radius: 5px;"
+              />
+              <input class="form-control border" name="image" type="file" />
+            </div>
+            <div class="d-grid">
+              <button class="btn btn-primary mt-20" type="submit">
+                Update Brand
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("../../views/partials/admin/footer") %>

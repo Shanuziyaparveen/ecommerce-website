@@ -1,0 +1,147 @@
+<%- include("../../views/partials/user/header") %>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #2e1a47;
+      color: #fff;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #3f2a73;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #dcdcdc;
+    }
+
+    input[type="text"], input[type="tel"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #4f3a8c;
+      color: #fff;
+    }
+
+    button[type="submit"] {
+      padding: 12px;
+      border: none;
+      background-color: #6a4c9c;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #5a3e8b;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group input {
+      margin-top: 5px;
+    }
+
+    .back-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-button a {
+      text-decoration: none;
+      color: #9b7ed6;
+      font-size: 16px;
+    }
+
+    .back-button a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Edit Address</h1>
+    <form action="/checkout/edit-address/<%= address._id %>" method="POST">
+      <div class="form-group">
+        <label for="addressType">Address Type:</label>
+        <input type="text" name="addressType" id="addressType" value="<%= address.addressType %>">
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" value="<%= address.name %>">
+      </div>
+
+      <div class="form-group">
+        <label for="street">Street:</label>
+        <input type="text" name="street" id="street" value="<%= address.street %>">
+      </div>
+
+      <div class="form-group">
+        <label for="landMark">Landmark:</label>
+        <input type="text" name="landMark" id="landMark" value="<%= address.landMark %>">
+      </div>
+
+      <div class="form-group">
+        <label for="city">City:</label>
+        <input type="text" name="city" id="city" value="<%= address.city %>">
+      </div>
+
+      <div class="form-group">
+        <label for="state">State:</label>
+        <input type="text" name="state" id="state" value="<%= address.state %>">
+      </div>
+
+      <div class="form-group">
+        <label for="pincode">Pincode:</label>
+        <input type="text" name="pincode" id="pincode" value="<%= address.pincode %>">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <input type="tel" name="phone" id="phone" value="<%= address.phone %>">
+      </div>
+
+      <div class="form-group">
+        <label for="altPhone">Alternate Phone (Optional):</label>
+        <input type="tel" name="altPhone" id="altPhone" value="<%= address.altPhone %>">
+      </div>
+
+      <button type="submit">Update Address</button>
+    </form>
+
+    <div class="back-button">
+      <a href="/checkout">Back to Checkout</a>
+    </div>
+  </div>
+</body>
+<%- include("../../views/partials/user/footer") %>
+

@@ -1,7 +1,7 @@
 const User = require("../../models/userSchema")
 const mongoose=require("mongoose")
 const bcrypt= require("bcrypt")
-
+const Order=require ("../../models/orderSchema")
 
 const pageerror= async(req,res)=>{
     res.render("admin-error")
@@ -72,8 +72,85 @@ const logout=async(req,res)=>{
 //         })
 //         .catch(err => console.log(err));
 // }
-
+const getOrderList = async (req, res) => {
+    try {
+      const orders = await Order.find()
+        .populate('userId', 'name email') // Populate user details
+        .populate('orderedItems.product', 'productName')
+        .sort({ createdOn: -1 }); // Populate product name in orderedItems
+  
+      // Debugging: Log the orders to check if they have populated products
+      console.log(orders); // Log orders to see if orderedItems.product is populated
+  
+      // Map statuses to user-friendly names for orders
+      const statusMap = {
+        Pending: 'Order Placed',
+        Processing: 'Processing',
+        Shipped: 'Shipped',
+        Delivered: 'Delivered',
+        Cancelled: 'Order Cancelled',
+        'Return Request': 'Return Requested',
+        Returned: 'Returned',
+      };
+  
+      // Map product statuses inside each order
+      const updatedOrders = orders.map(order => ({
+        ...order._doc, // Spread the existing order data
+        displayStatus: statusMap[order.status] || 'Unknown', // Map order status
+        orderedItems: order.orderedItems.map(item => ({
+          ...item._doc, // Spread the existing item data
+          productStatus: statusMap[item.productStatus] || 'Unknown', // Map product status
+        }))
+      }));
+  
+      // Pass the updated orders to the template
+      res.render('orderList', { orders: updatedOrders });
+    } catch (error) {
+      console.error('Error fetching order list:', error);
+      res.redirect('errorPage'); // Redirect to an error page if needed
+    }
+  };
+  
+  const updateOrderStatus = async (req, res) => {
+    try {
+      const { orderId, status } = req.body;
+  
+      // Prepare the fields to be updated
+      let updateFields = { status };
+  
+      // Update timestamps based on the order status
+      if (status === 'Ordered') {
+        updateFields.ordered = new Date();
+      } else if (status === 'Shipped') {
+        updateFields.shipped = new Date();
+      } else if (status === 'Delivered') {
+        updateFields.delivered = new Date();
+      }
+  
+      // Update the order status in the database
+      const updatedOrder = await Order.findByIdAndUpdate(orderId, updateFields, { new: true });
+  
+      // If the order exists, update all the products' statuses to match the order status
+      if (updatedOrder) {
+        // Update productStatus for each ordered item
+        updatedOrder.orderedItems.forEach(item => {
+          item.productStatus = status; // Set the product status to match the order status
+        });
+  
+        // Save the updated order with updated product statuses
+        await updatedOrder.save();
+      }
+  
+      // Redirect back to the order list page
+      res.redirect('orderList');
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      res.redirect('errorPage'); // Redirect to an error page if needed
+    }
+  };
+  
 
 module.exports={
-    loadLogin,login,loadDashboard,pageerror,logout
+    loadLogin,login,loadDashboard,pageerror,logout,getOrderList,updateOrderStatus
+  
 }

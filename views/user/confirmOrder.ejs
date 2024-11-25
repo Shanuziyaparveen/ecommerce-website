@@ -1,0 +1,160 @@
+<main class="main">
+  <div class="page-header breadcrumb-wrap mb-3">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="/" rel="nofollow">Home</a>
+        <span>></span>
+        <a href="/Wishlist" rel="nofollow">Wishlist</a>
+        <span>></span>
+        <a href="/cart" rel="nofollow">Cart</a>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <h1 class="text-center">Order Confirmation</h1>
+
+    <!-- Address Section -->
+    <div class="section">
+      <h2>Delivery Address</h2>
+      <div class="content-box">
+        <h3><%= address.name %></h3>
+        <p><%= address.city %>, <%= address.pincode %></p>
+        <p><%= address.state %></p>
+      </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="section">
+      <h2>Cart Summary</h2>
+      <div class="content-box">
+        <ul class="cart-items">
+          <% cart.items.forEach(item => { %>
+            <li>
+              <strong><%= item.productId.productName %></strong> - Quantity: <%= item.quantity %> - Price: ₹<%= item.price %>
+            </li>
+          <% }) %>
+        </ul>
+        <p class="total-amount"><strong>Total Amount: ₹<%= totalAmount %></strong></p>
+      </div>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="section">
+      <h2>Payment Method</h2>
+      <div class="content-box">
+        <p><%= paymentMethod %></p>
+      </div>
+    </div>
+
+    <!-- Confirm Order Button -->
+    <div class="text-center">
+      <form action="/confirm-order" method="POST">
+        <button type="submit" class="confirm-order-button">Confirm Order</button>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #211234;
+      color: #eae3f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 40px auto;
+      padding: 40px;
+      background-color: #2e184d;
+      border-radius: 15px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h1, h2 {
+      color: #c6a9f7;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      font-size: 2.5rem;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .content-box {
+      background-color: #3c1f5b;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .cart-items li {
+      margin-bottom: 12px;
+      list-style: none;
+    }
+
+    .cart-items li strong {
+      color: #d9b9ff;
+    }
+
+    .total-amount {
+      margin-top: 20px;
+      font-size: 1.4rem;
+      color: #f2d8ff;
+    }
+
+    .confirm-order-button {
+      background-color: #734edc;
+      color: #fff;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .confirm-order-button:hover {
+      background-color: #5b3db8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(115, 78, 220, 0.4);
+    }
+
+    .breadcrumb {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .breadcrumb a {
+      color: #c6a9f7;
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .breadcrumb a:hover {
+      color: #b091d4;
+    }
+
+    .breadcrumb span {
+      color: #9b8eb7;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+  </style>
+</main>
+
+<%- include("../../views/partials/user/footer") %>

@@ -9,6 +9,8 @@
    <title>Boots || Footwears</title>
    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
    rel="stylesheet">
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
    <link rel="icon" href="/favicon-16x16.png" type="image/x-icon">
    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
@@ -18,6 +20,7 @@
    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
    <link rel="stylesheet" href="css/style.css" type="text/css">
+   <link rel="stylesheet" href="./user/css/maind134.css">
    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
    
    <style>
@@ -79,22 +82,28 @@
            <div class="row">
                <div class="col-lg-3 col-md-3">
                    <div class="header__logo">
-                       <a href="#"><img src="img/logo.png" alt=""></a>
+                       <a href="/"><img src="img/logo.png" alt=""></a>
                    </div>
                </div>
+               <% var loggedin= typeof loggedin !== "undefined" ? loggedin: true%>
+               <%if (loggedin){%>
                <div class="col-lg-6 col-md-6">
                    <nav class="header__menu mobile-menu">
                        <ul>
-                           <li class="active"><a href="#">Home</a></li>
-                           <li><a href="/shop">Shop</a></li>
+                           <li class="active"><a href="/">Home</a></li>
+                           <li><a href="/getAllProducts">Shop</a></li>
+                           <!-- <li><a href="">Cart</a></li> -->
                        </ul>
                    </nav>
                </div>
+               <%}%>
                <div class="col-lg-3 col-md-3">
                    <div class="header__nav__option">
-                       <%if(locals.user){%>
+                    <%= console.log(locals.user) %>  <!-- Log the locals.user object -->
+
+                       <%if(user){%>
                         <div class="dropdown">
-                            <a href="#" class="sign-in-link" aria-haspopup="true" aria-expanded="false"><%= locals.user.name %></a>
+                            <a href="#" class="sign-in-link" aria-haspopup="true" aria-expanded="false"><%= user.name %></a>
                             <div class="dropdown-content" role="menu" aria-labelledby="userMenu">
                                 <a href="/userProfile" role="menuitem">Profile</a>
                                 <a href="/logout" role="menuitem">Logout</a>
@@ -109,9 +118,9 @@
                        <a href="/signup" class="sign-in-link">Sign Up</a>
                        <a href="/login" class="sign-in-link">Log in</a>
                        <%}%>
-                       <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
+                       <a href="/shop" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                        <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                       <a href="./shopping-cart.html"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
+                       <a href="/cart"><img src="img/icon/cart.png" alt="">  <span></span></a>
                    </div>
                </div>
            </div>

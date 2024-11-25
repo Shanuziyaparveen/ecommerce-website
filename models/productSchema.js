@@ -12,13 +12,10 @@ const productSchema = new Schema({
         required:true,
     },
     brand: {
-        type:String,
-        required:true,
+        type:String
     },
     category: {
-        type:Schema.Types.ObjectId,
-        ref:"Category",
-        required:true,
+        type:String
     },
     regularPrice:{
         type:Number,
@@ -34,7 +31,7 @@ const productSchema = new Schema({
     },
     quantity:{
         type:Number,
-        default:true
+        default:0
     },
     color: {
         type:String,
@@ -54,6 +51,7 @@ const productSchema = new Schema({
         required:true,
         default:"Available"
     },
+    
 },{timestamps:true});
 
 const Product = mongoose.model("Product",productSchema);

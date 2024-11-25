@@ -19,9 +19,10 @@ const userSchema = new Schema({
         sparse:true,
         default:null
     },
+
     googleId: {
         type : String,
-        unique:true,
+        
     },
     password : {
         type:String,
@@ -36,8 +37,8 @@ const userSchema = new Schema({
         default:false
     },
     cart: [{
-        type: Schema.Types.ObjectId,
-        ref:"Cart",
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Product",
     }],
     wallet:{
         type:Number,
@@ -51,6 +52,10 @@ const userSchema = new Schema({
         type:Schema.Types.ObjectId,
         ref:"Order"
     }],
+    address: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Address'
+      }],
     createdOn : {
         type:Date,
         default:Date.now,

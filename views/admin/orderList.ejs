@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Order List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2d1e40; /* Dark purple background */
+      color: #ffffff; /* White text */
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #d4b5f3; /* Light purple heading */
+    }
+    .card {
+      background-color: #3b2b57; /* Darker purple for cards */
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .card-header {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .card-body p {
+      margin: 5px 0;
+    }
+    .btn {
+      background-color: #6a4793; /* Purple button */
+      color: #ffffff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #5a3a7a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Order List</h1>
+    <div class="row">
+      <% if (orders && orders.length > 0) { %>
+        <% orders.forEach((order) => { %>
+          <div class="card">
+            <div class="card-header">
+              Order ID: <%= order.orderId %>
+            </div>
+            <div class="card-body">
+              <!-- Display first product name -->
+              <p><strong>First Product:</strong> <%= order.orderedItems[0]?.product?.productName || 'Unnamed Product' %></p>
+              <p><strong>and </strong> <%= order.orderedItems.length %> others</p>
+              <p><strong>Order Total:</strong> ₹<%= order.finalAmount %></p>
+              <p><strong>Status:</strong> <%= order.displayStatus %></p>
+              <a href="/admin/orderDetails/<%= order._id %>" class="btn">View Details</a>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="card">
+          <div class="card-header">
+            No Orders Found
+          </div>
+          <div class="card-body">
+            <p>There are no orders to display.</p>
+          </div>
+        </div>
+      <% } %>
+      
+    </div>
+  </div>
+  
+</body>
+</html>

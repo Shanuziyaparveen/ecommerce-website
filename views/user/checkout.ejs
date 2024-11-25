@@ -1,0 +1,216 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+    /* Styling remains the same as your original code */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #2c1e5a;
+        color: white;
+    }
+    h1 {
+        text-align: center;
+        padding: 20px 0;
+        background-color: #4b2f77;
+        color: white;
+    }
+    .address-section, .address-form-section {
+        margin: 20px;
+        padding: 20px;
+        background-color: #3f1e69;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    .address-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #7a529e;
+        padding: 10px 0;
+    }
+    .address-card:last-child {
+        border-bottom: none;
+    }
+    .address-card input[type="radio"] {
+        margin-right: 10px;
+        width: 20px;
+        height: 20px;
+    }
+    .address-card label {
+        flex-grow: 1;
+        cursor: pointer;
+    }
+    .address-card p {
+        margin: 5px 0;
+        color: #ccc;
+    }
+    .address-card button {
+        padding: 6px 12px;
+        background-color: #a957c3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .address-card button:hover {
+        background-color: #9e49b4;
+    }
+    .toggle-button {
+        margin: 20px;
+        background-color: #a957c3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .toggle-button:hover {
+        background-color: #9e49b4;
+    }
+    .address-form-section {
+        display: none;
+    }
+    .address-form-section input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #7a529e;
+        border-radius: 4px;
+        background-color: #5b3d8c;
+        color: white;
+    }
+    .address-form-section input:focus {
+        outline: none;
+        border-color: #a957c3;
+    }
+    .address-form-section button {
+        padding: 10px 20px;
+        background-color: #a957c3;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .address-form-section button:hover {
+        background-color: #9e49b4;
+    }
+    .payment-button {
+        width: 100%;
+        padding: 12px;
+        background-color: #f2b01e;
+        color: black;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 30px;
+        transition: background-color 0.3s;
+    }
+    .payment-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    .payment-button:hover:enabled {
+        background-color: #d99d1a;
+    }
+</style>
+
+<h1>Checkout</h1>
+
+<!-- Section for Selecting Saved Addresses -->
+<form method="POST" action="/checkout/select-address" id="address-selection-form">
+    <div class="address-section">
+        <% savedAddresses.forEach(function(address, index) { %>
+            <div class="address-card">
+                <input type="radio" name="selectedAddress" value="<%= address._id %>" id="address-<%= index %>" onclick="enablePaymentButton()">
+                <label for="address-<%= index %>">
+                    <p><strong><%= address.name %></strong></p>
+                    <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+                    <p>Phone: <%= address.phone %></p>
+                    <% if (address.altPhone) { %>
+                        <p>Alternate Phone: <%= address.altPhone %></p>
+                    <% } %>
+                </label>
+                <button type="button" onclick="editAddress('<%= address._id %>')">Edit</button>
+            </div>
+        <% }); %>
+        <button type="submit" class="toggle-button">Confirm Address</button>
+    </div>
+</form>
+ <!-- Display selected address -->
+<% if (selectedAddress) { %>
+    <div id="selected-address-display" style="display:block;">
+        <h3>Selected Address</h3>
+        <p>
+            <strong><%= selectedAddress.name %></strong><br>
+            <%= selectedAddress.city %>, <%= selectedAddress.state %> - <%= selectedAddress.pincode %><br>
+            Phone: <%= selectedAddress.phone %><br>
+            <% if (selectedAddress.altPhone) { %>
+                Alternate Phone: <%= selectedAddress.altPhone %><br>
+            <% } %>
+        </p>
+    </div>
+<% } %>
+
+  
+<!-- Button to Toggle Address Form -->
+<button class="toggle-button" onclick="toggleAddAddressForm()">Add New Address</button>
+
+<!-- Add New Address Form -->
+<div class="address-form-section" id="address-form-section">
+    <h2>Add New Address</h2>
+    <form method="POST" action="/checkout/save-address" id="address-form">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="addressType" placeholder="Address Type" required>
+        <input type="text" name="city" placeholder="City" required>
+        <input type="text" name="state" placeholder="State" required>
+        <input type="text" name="pincode" placeholder="Pincode" required>
+        <input type="text" name="phone" placeholder="Phone" required pattern="^[0-9]{10}$" title="Please enter a valid 10-digit phone number">
+        <input type="text" name="altPhone" placeholder="Alternate Phone" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit phone number (Optional)">
+        <button type="submit">Save Address</button>
+    </form>
+</div>
+
+<!-- Proceed to Payment Button -->
+<button type="button" id="payment-button" class="payment-button"  onclick="proceedToPayment()">Proceed to Payment</button>
+
+<script>
+function selectAddress(id, name, city, state, pincode, phone, altPhone) {
+    // Show the selected address section
+    document.getElementById("selected-address-display").style.display = "block";
+    
+    // Update the address details dynamically
+    document.getElementById("selected-address-details").innerText = `
+        Address: ${name}\n
+        ${city}, ${state} - ${pincode}\n
+        Phone: ${phone}\n
+        Alternate Phone: ${altPhone ? altPhone : 'N/A'}`;
+    
+    // Enable the payment button
+    document.getElementById("payment-button").disabled = false;
+}
+
+
+
+    function enablePaymentButton() {
+        document.getElementById("payment-button").disabled = false;
+    }
+
+    function toggleAddAddressForm() {
+        var formSection = document.getElementById("address-form-section");
+        if (formSection.style.display === "none" || formSection.style.display === "") {
+            formSection.style.display = "block";
+        } else {
+            formSection.style.display = "none";
+        }
+    }
+
+    function proceedToPayment() {
+        window.location.href = "/payment";
+    }
+</script>
+
+<%- include("../../views/partials/user/footer") %>

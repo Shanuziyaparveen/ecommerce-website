@@ -1,0 +1,353 @@
+<%- include("../../views/partials/user/header") %>
+
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 0 0 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        /* Header and Footer */
+        header,
+        footer {
+            background-color: #4B0082;
+            /* Dark purple */
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        footer {
+            font-size: 0.9em;
+        }
+
+        /* Cart Page Styles */
+        .cart-page {
+            background-color: #f5f5f5;
+            padding: 40px 0;
+        }
+
+        .cart-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .cart-header h2 {
+            font-size: 2em;
+            color: #4B0082;
+            /* Dark purple */
+        }
+
+        .cart-items {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item img {
+            width: 100px;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .cart-item-details h5 {
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .cart-item-details .price {
+            color: #ff6b6b;
+            /* Price color */
+            font-size: 1.1em;
+            margin-top: 5px;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .remove-item {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .remove-item:hover {
+            background-color: #c0392b;
+        }
+
+        /* Cart Summary Section */
+        .cart-summary {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .cart-summary h4 {
+            font-size: 1.5em;
+            color: #4B0082;
+            /* Dark purple */
+        }
+
+        .cart-summary p {
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+
+        .checkout-btn {
+            background-color: #4B0082;
+            /* Dark purple */
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background-color: #5D3FD3;
+            /* Lighter purple */
+        }
+
+        .checkout-btn:active {
+            background-color: #3A0069;
+            /* Darker purple */
+        }
+        .increment-btn, .decrement-btn {
+  padding: 5px 10px;  /* Reduce padding to make the button smaller */
+  font-size: 14px;  /* Smaller font size */
+  border: 1px solid #6a3b91;  /* Dark purple border */
+  background-color: #6a3b91;  /* Dark purple button background */
+  color: white;  /* White text color */
+  cursor: pointer;  /* Cursor pointer on hover */
+  border-radius: 4px;  /* Rounded corners */
+  transition: background-color 0.3s ease, color 0.3s ease;  /* Smooth background and color transition */
+}
+
+.increment-btn:hover, .decrement-btn:hover {
+  background-color: #5c2e7d;  /* Darker purple for hover effect */
+  color: #f2f2f2;  /* Lighter text color on hover */
+}
+
+.increment-btn:disabled, .decrement-btn:disabled {
+  background-color: #bfa6d9;  /* Light purple for disabled state */
+  color: #7a6a8c;  /* Darker text for disabled state */
+  cursor: not-allowed;  /* Disabled cursor */
+}
+.price {
+  font-size: 16px;
+}
+
+.regular-price {
+  text-decoration: line-through;
+  color: #a9a9a9; /* Gray color for the strikethrough price */
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.highlighted-price {
+  color: #3b0b44; /* Highlighted color for the current price */
+  font-weight: bold;
+  font-size: 18px;
+}
+
+    </style>
+
+<body>
+    <div class="container cart-page">
+        <div class="cart-header">
+            <h2>Your Shopping Cart</h2>
+        </div>
+        <% let disableCheckout = false; %> 
+        <% if (totalItems > 0) { %>
+            <div class="cart-items">
+                <% cartItems.forEach(item => { %>
+                    <div class="cart-item">
+                        <img src="/uploads/re-image/<%= item.image %>" alt="<%= item.name %>">
+                        <div class="cart-item-details">
+                            <h5><%= item.name %></h5>
+                            <p class="price">
+                                <span class="regular-price">₹<%= item.regularPrice %></span>
+                                <span class="highlighted-price">₹<%= item.price %></span>
+                              </p>
+                              
+                            <div class="quantity-controls">
+                                <% if (item.stock === 0) { %>
+                                    <!-- Case: Product is out of stock -->
+                                    <button class="increment-btn" disabled>Out of Stock</button>
+                                    <% disableCheckout = true; %>
+                                <% } else if (item.quantity >= item.stock) { %>
+                                    <!-- Case: Stock is limited and matches the quantity in the cart -->
+                                    <button class="increment-btn" disabled>Stock Limit Reached</button>
+                                    <% disableCheckout = true; %>
+                                <% } else if (item.quantity < 5 && item.quantity < item.stock) { %>
+                                    <form action="/cart/increment" method="POST">
+                                        <input type="hidden" name="productId" value="<%= item.id %>" />
+                                        <button type="submit" class="increment-btn">+</button>
+                                    </form>
+                                <% } else { %>
+                                    <button class="increment-btn" disabled>Max Quantity</button>
+                                <% } %>
+                                <span><%= item.quantity %></span>
+                                <% if (item.quantity > 1) { %>
+                                    <form action="/cart/decrement" method="POST">
+                                        <input type="hidden" name="productId" value="<%= item.id %>" />
+                                        <button type="submit" class="decrement-btn">-</button>
+                                    </form>
+                                <% } else { %>
+                                    <button class="decrement-btn" disabled>Min Quantity</button>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <p>Total: ₹<%= item.totalPrice %></p>
+                            <button class="remove-item" onclick="removeFromCart('<%= item.id %>')">Remove</button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <div class="cart-summary">
+                <h4>Cart Summary</h4>
+                <p>Total Items: <%= totalItems %></p>
+                <p>Subtotal: ₹<%= cartSubtotal %></p>
+                <p>Tax: ₹<%= cartTax %></p>
+                <p>Total: ₹<%= cartTotal %></p>
+
+               
+        <% if (disableCheckout) { %>
+            <p style="color: red; font-weight: bold;">Some items are out of stock or the quantity exceeds available stock. Please adjust your cart.</p>
+        <% } %>
+
+        <!-- Checkout button: Disabled if any item is out of stock or quantity exceeds stock -->
+        <button class="checkout-btn" onclick="checkout()" <% if (disableCheckout) { %> disabled <% } %>>Proceed to Checkout</button>
+    </div>
+            
+
+        <% } else { %>
+            <div class="empty-cart-message"
+                style="text-align: center; padding: 40px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                <h3>Your cart is empty!</h3>
+                <p>It looks like you haven't added any products to your cart yet. Start shopping now!</p>
+                <a href="/getAllProducts" style="color: #4B0082; text-decoration: none; font-size: 16px;">Go to Shop</a>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include("../../views/partials/user/footer") %>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Function to handle item removal from the cart
+        function removeFromCart(productId) {
+            $.ajax({
+                type: 'POST',
+                url: '/removeFromCart',  // URL to the route that will handle item removal
+                contentType: 'application/json',  // Set the correct content type to JSON
+                data: JSON.stringify({ productId: productId }),  // Send the productId as JSON
+                success: function(response) {
+                    Swal.fire({
+                        title: 'Item removed from cart!',
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.reload();  // Reload page to reflect changes in cart
+                    });
+                },
+                error: function(error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Could not remove item from cart. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'Okay'
+                    });
+                }
+            });
+        }
+    
+
+        // Checkout function
+        function checkout() {
+            // Check if user is logged in
+            const isLoggedIn = <%= user ? 'true' : 'false' %>;
+
+            if (!isLoggedIn) {
+                Swal.fire({
+                    title: 'Login required!',
+                    text: 'You need to be logged in to proceed to checkout.',
+                    icon: 'warning',
+                    confirmButtonText: 'Login'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to the login page
+                        window.location.href = '/login';
+                    }
+                });
+                return;
+            }
+
+            // Redirect to checkout page
+            window.location.href = '/checkout';
+        }
+    </script>

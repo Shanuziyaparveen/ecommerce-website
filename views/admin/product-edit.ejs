@@ -38,30 +38,31 @@
 
 
                    <div class="card-body">
-                       <form method="post" action="" enctype=""
-                           onsubmit="">
+                       <form method="post" action="/admin/editProduct/<%=product._id%>" enctype="multipart/form-data"
+                           onsubmit="return validateForm()">
                            <div class="mb-4">
                                <label for="product_name" class="form-label">Product Name</label>
-                               <input type="text" name="productName" value=""
+                               <input type="text" name="productName" value="<%=product.productName%>"
                                    class="form-control border" id="product_name">
                                    <div id="productName-error" class="error-message"></div>
                            </div>
                            <div class="col-lg-4 mb-4">
                                <label class="form-label">Brand</label>
                                <select class="form-select border" name="brand">
-                                  
-                                       <option value="">
-                                          
+                                  <%for(let i=0;i<brand.length;i++){%>
+                                       <option value="<%=brand[i].brandName%>">
+                                        <%=brand[i].brandName%>
                                        </option>
-                                      
-                               </select>
+                                       <%}%>
+                                      </select>
+                              
                                <div id="brand-error" class="error-message"></div>
 
 
                            </div>
                            <div class="mb-4">
                                <label class="form-label">Full description</label>
-                               <input name="descriptionData" value=""  class="form-control border"
+                               <input name="descriptionData" value="<%=product.description%>"  class="form-control border"
                                    rows="4">
                                    <div id="description-error" class="error-message"></div>
                            </div>
@@ -70,14 +71,14 @@
                                    <div class="mb-4">
                                        <label class="form-label">Regular price</label>
                                        <input placeholder="$" name="regularPrice" type="text"
-                                           value="" class="form-control border">
+                                           value="<%=product.regularPrice%>" class="form-control border">
                                            <div id="regularPrice-error" class="error-message"></div>
                                    </div>
                                </div>
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Sale price</label>
-                                       <input name="salePrice" type="text" value=""
+                                       <input name="salePrice" type="text" value="<%=product.salePrice%>"
                                            class="form-control border">
                                    </div>
                                    <div id="salePrice-error" class="error-message"></div>
@@ -85,7 +86,7 @@
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Quantity</label>
-                                       <input name="quantity" type="text" value=""
+                                       <input name="quantity" type="text" value="<%=product.quantity%>"
                                            class="form-control border">
                                            <div id="quantity-error" class="error-message"></div>
                                    </div>
@@ -96,7 +97,7 @@
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Color</label>
-                                       <input name="color" type="text" value=""
+                                       <input name="color" type="text" value="<%=product.color%>"
                                            class="form-control border">
                                            <div id="color-error" class="error-message"></div>
                                    </div>
@@ -111,13 +112,15 @@
                                        <div class="col-sm-6 mb-3">
                                            <label class="form-label">Category</label>
                                            <select class="form-select border" style="width: 150px;" name="category">
-                                              
-                                                   <option value="">
-                                                      
-                                                   </option>
-                                                  
-                                           </select>
-
+                                            <% for (let i = 0; i < cat.length; i++) { %>
+                                                <option 
+                                                    value="<%= cat[i]._id %>" 
+                                                    <%= product.category.toString() === cat[i]._id.toString() ? 'selected' : '' %>>
+                                                    <%= cat[i].name %>
+                                                </option>
+                                            <% } %>
+                                        </select>
+                                        
 
                                            <div id="category-error" class="error-message"></div>
                                        </div>
@@ -128,21 +131,22 @@
                                <div class="card-header">
                                    <h4>Choose images</h4>
                                </div>
-                                  
+                                  <%for(let i = 0;i<product.productImage.length;i++){%>
                                        <div class="col-md-12">
                                            <div class="mb-4">
                                                <div class="col-12">
                                                    <td>
-                                                       <input type="hidden" value="" id="imageDatas">
+                                                       <input type="hidden" value="<%=product.productImage[i]%>" id="imageDatas">
                                                        <img class="rounded" style="width: 50px; height: 60px;"
-                                                           src=""
+                                                           src="/uploads/re-image/<%=product.productImage[i]%>"
                                                            alt="">
-                                                       <i onclick="" style="position: absolute; margin-left: .5rem; cursor: pointer;" class="fa-thin fa-x"></i>
+                                                       <i onclick="deleteSingleImage('<%=product.productImage[i]%>','<%=product._id%>')" style="position: absolute; margin-left: .5rem; cursor: pointer;" class="fa-thin fa-x"></i>
                                                    </td>
                                                </div>
                                               
                                            </div>
                                        </div>
+                                       <%}%>
                               
                                   
                                <div class="card-body">
@@ -205,7 +209,7 @@
 
 
                                <button class="btn btn-md rounded font-sm hover-up" id="updatebtn"
-                                   type="button"  onclick="">Update</button>
+                                   type="button"  onclick="validateAndSubmit()">Update</button>
                            </div>
                        </form>
                    </div>
@@ -395,7 +399,29 @@ function viewImage1(event) {
                addedImagesContainer.appendChild(thumbnail);
            }
        };
-       
+       function deleteSingleImage(imageId, productId) {
+    $.ajax({
+        url: "/admin/deleteImage",
+        method: "POST", // Fixed the HTTP method to POST
+        data: {
+            imageNameToServer: imageId,
+            productIdToServer: productId
+        },
+        success: (response) => {
+            if (response.status === true) {
+                window.location.reload();
+            } else {
+                alert(response.message || "Failed to delete image.");
+            }
+        },
+        error: (err) => {
+            console.error(err);
+            alert("An error occurred while deleting the image.");
+        }
+    });
+}
+
+
    </script>
 
 
