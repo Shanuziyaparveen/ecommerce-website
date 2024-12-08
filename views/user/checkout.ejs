@@ -175,7 +175,7 @@
 </div>
 
 <!-- Proceed to Payment Button -->
-<button type="button" id="payment-button" class="payment-button"  onclick="proceedToPayment()">Proceed to Payment</button>
+<button type="button" id="payment-button" class="payment-button"  onclick="proceedToConfirmation()">Proceed to Confirmation</button>
 
 <script>
 function selectAddress(id, name, city, state, pincode, phone, altPhone) {
@@ -208,8 +208,8 @@ function selectAddress(id, name, city, state, pincode, phone, altPhone) {
         }
     }
 
-    function proceedToPayment() {
-        window.location.href = "/payment";
+    function proceedToConfirmation() {
+        window.location.href = "/confirm-checkout";
     }
 </script>
 

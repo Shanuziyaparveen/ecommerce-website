@@ -31,17 +31,19 @@
       margin-bottom: 20px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #d4b5f3;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
-    }
-    .card-body {
-      margin-top: 10px;
-    }
+   
+.card {
+  background: linear-gradient(145deg, #3a3a50, #2e2e40);
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  color: #f5f5f5;
+}
+
+.card-body img {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
     .badge {
       padding: 5px 10px;
       border-radius: 4px;
@@ -76,6 +78,10 @@
       <div class="card-body">
         <p><strong>Invoice Date:</strong> <%= new Date(order.invoiceDate).toLocaleDateString() %></p>
         <p><strong>Status:</strong> <span class="badge badge-info"><%= order.status || 'Pending' %></span></p>
+        
+    <% if (order.status === 'Return Request' || order.status === 'Returned') { %>
+      <p><strong>Return Reason:</strong> <span><%= order.returnReason || 'No reason provided' %></span></p>
+    <% } %>
         <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
         <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
       </div>
@@ -87,7 +93,6 @@
       </div>
       <div class="card-body">
         <p><strong>Name:</strong> <%= order.address.name %></p>
-        <p><strong>Street:</strong> <%= order.address.street %></p>
         <p><strong>Landmark:</strong> <%= order.address.landMark %></p>
         <p><strong>City:</strong> <%= order.address.city %></p>
         <p><strong>State:</strong> <%= order.address.state %></p>
@@ -97,23 +102,82 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <h5>Ordered Items</h5>
-      </div>
-      <div class="card-body">
-        <% order.orderedItems.forEach(item => { %>
+    <!-- Ordered Items Section -->
+    <h5>Ordered Items</h5>
+    <% order.orderedItems.forEach((item) => { %>
+      <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between">
+          <img 
+          src="/uploads/re-image/<%= item.product.productImage[0] %>" 
+          alt="<%= item.name %>" 
+          style="width: 100px; height: auto; object-fit: cover;">
+        
           <div>
-            <p><strong>Product:</strong> <%= item.product.productName %></p>
+           <a href="/" style="color: #888;" > <p><strong>Product:</strong> <%= item.product.productName %></p></a>
             <p><strong>Quantity:</strong> <%= item.quantity %></p>
-            <p><strong>Price:</strong> ₹<%= item.price %></p>
-            <p><strong>Status:</strong> <%= item.product.productStatus || item.productStatus || 'Active' %></p>            <hr>
           </div>
-        <% }) %>
-      </div>
-    </div>
+          <div>
+            <p><strong>Price:</strong> 
+              <!-- Regular price with strikethrough -->
+              <span style="text-decoration: line-through; color: #888;">₹<%= item.product.regularPrice %></span> 
+              <!-- Sale price -->
+              <span style="color: #ff7f50; font-weight: bold;">₹<%= item.price %></span>
+            </p>
 
-    <!-- Order Status Update Form -->
+           
+            
+          </div>
+          <div>
+          <form id="updateProductStatusForm">
+            <input type="hidden" id="orderId" value="<%= order._id %>">
+            <input type="hidden" id="productId" value="<%= item.product._id %>">
+            <select id="productStatus">
+              <option value="Pending" <%= item.productStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+              <option value="Processing" <%= item.productStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+              <option value="Shipped" <%= item.productStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+              <option value="Delivered" <%= item.productStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+              <option value="Cancelled" <%= item.productStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+              <option value="Return Request" <%= item.productStatus === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+              <option value="Returned" <%= item.productStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
+            </select>
+            <button type="submit" id="updateButton" class="btn btn-sm btn-primary mt-2">Update</button>
+          </form>
+        </div>
+          <!-- Display the product status -->
+          <span id="productStatusDisplay" style="color: #888;">
+            <%= item.productStatus %>
+          </span>
+          
+        </div>
+      </div>
+    <% }) %>
+    <hr>
+   
+      
+    <div class="card-body">
+      <!-- Subtotal -->
+      <p><strong>Subtotal:</strong> ₹<%= order.totalPrice %></p>
+  
+      <!-- Tax Calculation (10%) -->
+      <% const tax = (order.totalPrice || 0) * 0.10; %>
+      <p><strong>Tax (10%):</strong> ₹<%= tax.toFixed(2) %></p>
+  
+      <!-- Discount -->
+      <p><strong>Discount:</strong> ₹<%= discount %></p>
+  
+      <!-- Wallet Amount (if any) -->
+      <% if (walletAmount > 0) { %>
+        <p><strong>Wallet Applied:</strong> ₹<%= walletAmount %></p>
+      <% } %>
+      <p><strong>Total Amount (Including Tax):</strong> ₹<%= (order.totalPrice + tax - discount - walletAmount).toFixed(2) %></p>
+      <p><strong>
+Wallet Used:
+      <%= (order.totalPrice + tax - discount - walletAmount)- order.finalAmount %></strong></p>
+      <!-- Final Amount -->
+      <!-- Total Amount (with Tax) -->
+      <p><strong>Total Amount Paid:</strong> ₹<%= order.finalAmount %></p>
+    </div>
+  
     <div class="card">
       <div class="card-header">
         <h5>Update Order Status</h5>
@@ -142,6 +206,63 @@
     </div>
 
   </div>
-
+</div>
+</div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+ document.getElementById("updateProductStatusForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const orderId = document.getElementById("orderId").value;
+  const productId = document.getElementById("productId").value;
+  const productStatus = document.getElementById("productStatus").value;
+
+  try {
+    const response = await fetch('/admin/updateProductStatus', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orderId: orderId,
+        productId: productId,
+        productStatus: productStatus,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Update the product status on the page dynamically
+      document.getElementById("productStatusDisplay").textContent = productStatus;
+
+      // If all items in the order are updated to the same status, update the order status display
+      if (result.orderStatus) {
+        document.querySelector('.badge-info').textContent = result.orderStatus;
+      }
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Product status updated successfully!',
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update product status.',
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error updating product status.',
+    });
+  }
+});
+
+</script>
 </html>

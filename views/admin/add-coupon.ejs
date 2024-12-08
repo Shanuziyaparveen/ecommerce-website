@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Coupon</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .btn-custom {
+      background-color: #D19C97;
+      color: #fff;
+      border: none;
+      width: 100%;
+    }
+    .btn-custom:hover {
+      background-color: #b17d74;
+    }
+    .form-label {
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-size: 0.875rem;
+      display: none; /* Initially hidden */
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card">
+          <div class="card-body p-4 p-lg-5">
+            <h3 class="text-center mb-4">Add New Coupon</h3>
+
+            <!-- Form Start -->
+            <form id="couponForm" action="/admin/add-coupon" method="post">
+              
+              <!-- Name Input -->
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" id="name" class="form-control" name="name" required>
+                <div id="errorName" class="error">Name is required and should only contain alphabets and spaces.</div>
+              </div>
+
+              <!-- Coupon Code Input -->
+              <div class="mb-3">
+                <label for="couponcode" class="form-label">Coupon Code</label>
+                <input type="text" id="couponcode" class="form-control" name="couponcode" required>
+                <div id="errorCouponCode" class="error">Coupon code is required.</div>
+              </div>
+
+              <!-- Cashback Input -->
+              <div class="mb-3">
+                <label for="cashback" class="form-label">Cashback Amount</label>
+                <input type="number" id="cashback" class="form-control" name="cashback" required>
+                <div id="errorCashback" class="error">Cashback must be a positive number.</div>
+              </div>
+
+              <!-- Minimum Amount Input -->
+              <div class="mb-3">
+                <label for="minamount" class="form-label">Minimum Purchase Amount</label>
+                <input type="number" id="minamount" class="form-control" name="minamount" required>
+                <div id="errorMinAmount" class="error">Minimum amount must be a positive number.</div>
+              </div>
+
+              <!-- Expiry Date Input -->
+              <div class="mb-3">
+                <label for="expdate" class="form-label">Expiry Date</label>
+                <input type="date" id="expdate" class="form-control" name="expdate" required>
+                <div id="errorExpiryDate" class="error">Expiry date cannot be a past date.</div>
+              </div>
+
+              <!-- Status Input -->
+              <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <input type="text" id="status" class="form-control" name="status" required>
+                <div id="errorStatus" class="error">Status must be either 'active' or 'inactive'.</div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-custom btn-lg mt-3">Add</button>
+            </form>
+            <!-- Form End -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const couponForm = document.getElementById('couponForm');
+      const nameInput = document.getElementById('name');
+      const couponCodeInput = document.getElementById('couponcode');
+      const cashbackInput = document.getElementById('cashback');
+      const minAmountInput = document.getElementById('minamount');
+      const expDateInput = document.getElementById('expdate');
+      const statusInput = document.getElementById('status');
+  
+      const errorName = document.getElementById('errorName');
+      const errorCouponCode = document.getElementById('errorCouponCode');
+      const errorCashback = document.getElementById('errorCashback');
+      const errorMinAmount = document.getElementById('errorMinAmount');
+      const errorExpiryDate = document.getElementById('errorExpiryDate');
+      const errorStatus = document.getElementById('errorStatus');
+  
+      couponForm.addEventListener('submit', function(e) {
+        let isValid = true;
+  
+        // Name Validation
+        const namePattern = /^[A-Za-z\s]+$/;
+        if (!nameInput.value.trim() || !namePattern.test(nameInput.value)) {
+          errorName.style.display = "block";
+          isValid = false;
+        } else {
+          errorName.style.display = "none";
+        }
+  
+        // Coupon Code Validation
+        if (!couponCodeInput.value.trim()) {
+          errorCouponCode.style.display = "block";
+          isValid = false;
+        } else {
+          errorCouponCode.style.display = "none";
+        }
+  
+         // Cashback Validation (Check if it's a valid number)
+  if (isNaN(cashbackInput.value) || cashbackInput.value <= 0) {
+    errorCashback.style.display = "block";
+    errorCashback.textContent = "Please enter a valid cashback amount greater than 0.";
+    isValid = false;
+  } else {
+    errorCashback.style.display = "none";
+  }
+
+  // Minimum Amount Validation (Check if it's a valid number)
+  if (isNaN(minAmountInput.value) || minAmountInput.value <= 0) {
+    errorMinAmount.style.display = "block";
+    errorMinAmount.textContent = "Please enter a valid minimum amount greater than 0.";
+    isValid = false;
+  } else {
+    errorMinAmount.style.display = "none";
+  }
+        // Expiry Date Validation
+        const expiryDate = new Date(expDateInput.value);
+        if (!expDateInput.value || expiryDate < new Date()) {
+          errorExpiryDate.style.display = "block";
+          isValid = false;
+        } else {
+          errorExpiryDate.style.display = "none";
+        }
+  
+        // Status Validation
+        const validStatuses = ["active", "inactive"];
+        if (!validStatuses.includes(statusInput.value.trim().toLowerCase())) {
+          errorStatus.style.display = "block";
+          isValid = false;
+        } else {
+          errorStatus.style.display = "none";
+        }
+  
+        // If any validation fails, prevent form submission
+        if (!isValid) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+  
+</body>
+</html>

@@ -73,44 +73,55 @@ const logout=async(req,res)=>{
 //         .catch(err => console.log(err));
 // }
 const getOrderList = async (req, res) => {
-    try {
-      const orders = await Order.find()
-        .populate('userId', 'name email') // Populate user details
+  try {
+    const perPage = 10; // Number of orders per page
+    const page = parseInt(req.query.page) || 1; // Current page, default to 1
+
+    // Fetch paginated orders with total count
+    const [orders, totalOrders] = await Promise.all([
+      Order.find()
+        .populate('userId', 'name email')
         .populate('orderedItems.product', 'productName')
-        .sort({ createdOn: -1 }); // Populate product name in orderedItems
-  
-      // Debugging: Log the orders to check if they have populated products
-      console.log(orders); // Log orders to see if orderedItems.product is populated
-  
-      // Map statuses to user-friendly names for orders
-      const statusMap = {
-        Pending: 'Order Placed',
-        Processing: 'Processing',
-        Shipped: 'Shipped',
-        Delivered: 'Delivered',
-        Cancelled: 'Order Cancelled',
-        'Return Request': 'Return Requested',
-        Returned: 'Returned',
-      };
-  
-      // Map product statuses inside each order
-      const updatedOrders = orders.map(order => ({
-        ...order._doc, // Spread the existing order data
-        displayStatus: statusMap[order.status] || 'Unknown', // Map order status
-        orderedItems: order.orderedItems.map(item => ({
-          ...item._doc, // Spread the existing item data
-          productStatus: statusMap[item.productStatus] || 'Unknown', // Map product status
-        }))
-      }));
-  
-      // Pass the updated orders to the template
-      res.render('orderList', { orders: updatedOrders });
-    } catch (error) {
-      console.error('Error fetching order list:', error);
-      res.redirect('errorPage'); // Redirect to an error page if needed
-    }
-  };
-  
+        .sort({ createdOn: -1 })
+        .skip((page - 1) * perPage) // Skip orders for previous pages
+        .limit(perPage), // Limit to perPage orders
+      Order.countDocuments() // Count total orders
+    ]);
+
+    const statusMap = {
+      Pending: 'Order Placed',
+      Processing: 'Processing',
+      Shipped: 'Shipped',
+      Delivered: 'Delivered',
+      Cancelled: 'Order Cancelled',
+      'Return Request': 'Return Requested',
+      Returned: 'Returned',
+    };
+
+    const updatedOrders = orders.map(order => ({
+      ...order._doc,
+      displayStatus: statusMap[order.status] || 'Unknown',
+      orderedItems: order.orderedItems.map(item => ({
+        ...item._doc,
+        productStatus: statusMap[item.productStatus] || 'Unknown',
+      }))
+    }));
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalOrders / perPage);
+
+    // Render the paginated data
+    res.render('orderList', {
+      orders: updatedOrders,
+      currentPage: page,
+      totalPages,
+    });
+  } catch (error) {
+    console.error('Error fetching order list:', error);
+    res.redirect('errorPage');
+  }
+};
+
   const updateOrderStatus = async (req, res) => {
     try {
       const { orderId, status } = req.body;
@@ -148,9 +159,50 @@ const getOrderList = async (req, res) => {
       res.redirect('errorPage'); // Redirect to an error page if needed
     }
   };
+  const updateProductStatus = async (req, res) => {
+    const { orderId, productId, productStatus } = req.body;
   
-
+    try {
+      // Fetch the order by ID
+      const order = await Order.findById(orderId);
+  
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+  
+      // Find the product item to be updated
+      const itemIndex = order.orderedItems.findIndex(item => item.product._id.toString() === productId);
+  
+      if (itemIndex === -1) {
+        return res.status(404).json({ success: false, message: 'Product not found in order' });
+      }
+  
+      // Update the product status
+      order.orderedItems[itemIndex].productStatus = productStatus;
+  
+      // If there is only one item in the order, the productStatus becomes the order status
+      if (order.orderedItems.length === 1) {
+        order.status = productStatus;  // set order status to productStatus
+      } else {
+        // If all products in the order have the same status, set order status to that status
+        const allSameStatus = order.orderedItems.every(item => item.productStatus === productStatus);
+        if (allSameStatus) {
+          order.status = productStatus;
+        }
+      }
+  
+      // Save the updated order
+      await order.save();
+  
+      return res.json({ success: true, message: 'Product status updated successfully' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: 'Error updating product status' });
+    }
+  };
+  
+  
 module.exports={
-    loadLogin,login,loadDashboard,pageerror,logout,getOrderList,updateOrderStatus
+    loadLogin,login,loadDashboard,pageerror,logout,getOrderList,updateOrderStatus, updateProductStatus
   
 }

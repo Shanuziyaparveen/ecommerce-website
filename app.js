@@ -1,5 +1,6 @@
 const express = require('express'); 
 const path = require('path');
+const errorHandler = require('./middlewares/errorHandler'); // Adjust the path if needed
 const app = express();
 const session = require('express-session');
 const passport = require('./config/passport');
@@ -10,10 +11,10 @@ const db = require('./config/db.js');
 db();
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
-
-const bodyParser = require('body-parser');
-
-app.use(bodyParser.urlencoded({ extended: true }));
+const methodOverride = require('method-override');
+// Import session-related middleware
+const userMiddleware = require('./middlewares/session/userMiddleware');
+const cartMiddleware = require('./middlewares/session/cartMiddleware');
 
 // // Logging middleware first
 // app.use(logger('dev'));
@@ -22,7 +23,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     secret: process.env.SESSION_SECRET || "arandomsecretkey",
-    store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/bootsEcom' }),
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
         secure: false,  // Set to false for development over HTTP
         httpOnly: true,
@@ -35,23 +36,9 @@ app.use(session({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(methodOverride('_method')); // Looks for a `_method` parameter in POST requests
 
 
-app.use((req, res, next) => {
-    console.log('Session user:', req.session.user);  // Check if the session user is set
-    res.locals.user = req.session.user;  // Make user accessible in views
-    next();
-});
-// Middleware to initialize cart
-app.use((req, res, next) => {
-    if (!req.session.cart) {
-      req.session.cart = {
-        items: [],
-        cartTotal: 0, // Initialize with zero total
-      };
-    }
-    next();
-  });
   // Flash middleware
 app.use(flash());
 
@@ -75,6 +62,10 @@ app.use(passport.session());
 // Static file setup
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Use session-related middleware
+app.use(userMiddleware);
+app.use(cartMiddleware);
+
 // View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')]);
@@ -85,28 +76,16 @@ const adminRouter = require('./routes/adminRouter.js');
 app.use('/', userRouter);  // User routes
 app.use('/admin', adminRouter);  // Admin routes
 
+app.use(errorHandler);
 
+// Centralized Error Handler
+app.use((err, req, res, next) => {
+  console.error(`[${new Date().toISOString()}] ${err.stack}`); // Log error details
+  res.status(err.status || 500).render('error', { 
+      errorMessage: err.message || 'Internal Server Error' 
+  });
+});
 
-// // 404 Middleware for undefined routes
-// app.use((req, res, next) => {
-//   const error = new Error('Page Not Found');
-//   error.status = 404;
-//   next(error); // Forward the error to the centralized error handler
-// });
-
-// // Centralized Error Handling Middleware
-// app.use((err, req, res, next) => {
-//   console.error(`[${new Date().toISOString()}] ${err.stack}`); // Log the error
-
-//   const statusCode = err.status || 500;
-//   const errorMessage = err.message || 'Internal Server Error';
-
-//   // Render the custom error page with dynamic message
-//   res.status(statusCode).render('error', { 
-//     errorMessage: errorMessage 
-//   });
-// });
-// Starting the Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT} http://localhost:${PORT}/`)); 
 

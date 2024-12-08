@@ -42,10 +42,8 @@ const sendVerificationEmail=async (email,otp)=>{
         const info=await transporter.sendMail(mailOptions);
         console.log("email sent", info.messageId)
         return true;
-    } catch (error) {
-        console.log("error sending email", error);
-        return false;
-        
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 
@@ -53,15 +51,15 @@ const securePassword= async (password)=>{
     try {
         const passwordHash = await bcrypt.hash(password,10);
         return passwordHash;
-    } catch (error) {
-        
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const getForgotPassPage=async (req,res)=>{
     try {
         res.render("forgot-password")
-    } catch (error) {
-        res.redirect('/pageNotFound')
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const forgotEmailValid=async (req, res)=>{
@@ -84,8 +82,8 @@ try {
 }else{
     res.render("forgot-password",{message: "user with this email doesnt exist"})
 }
-} catch (error) {
-    res.redirect("/pageNotFound")
+}catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
 }
 
 
@@ -101,9 +99,8 @@ const verifyForgotPassOtp= async(req, res)=>{
         }else{
             res.json({success:false,message:"OTP not matching"})
         }
-    } catch (error) {
-        res.status(500).json({success:false,message:"an error occured,please try again"})
-        res.redirect("/pageNotFound")
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const getResetPassPage= async (req, res) => {
@@ -111,7 +108,7 @@ const getResetPassPage= async (req, res) => {
         res.render('reset-password')
         
     } catch (error) {
-        res.redirect("/pageNotFound");
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 
@@ -127,10 +124,8 @@ const resendOtp=async (req, res)=>{
             res.status(200).json({success:true, message:"resend otp successfully"});
             
         }
-    } catch (error) {
-        console.error("error in resend otp:",error);
-        res.status(500).json({success:false, message:"internal server error, please try again"});
-        
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const postNewPassword= async (req, res) => {
@@ -148,21 +143,24 @@ const postNewPassword= async (req, res) => {
 
     } 
 }catch (error) {
-        res.redirect("/pageNotFound")
-    }
+    next(error); // Pass the error to the errorHandler middleware
+}
 }
 const userProfile = async (req, res) => {
     try {
       const userId = req.session.user;
+      const page = parseInt(req.query.page) || 1; // Get current page (default to 1 if not provided)
   
-      // Fetch user data
-      const userData = await User.findById(userId);
+     
+      
+      // Fetch user data including wallet transactions
+      const userData = await User.findById(userId).populate('transactions.orderId');
   
       // Fetch the user's address
       const addressData = await Address.findOne({ userId });
   
-      // Pagination setup
-      const page = parseInt(req.query.page) || 1; // Current page number, default to 1
+      // Pagination setup for orders
+      
       const limit = 10; // Number of orders per page
       const skip = (page - 1) * limit; // Number of orders to skip
   
@@ -176,28 +174,29 @@ const userProfile = async (req, res) => {
       const totalOrders = await Order.countDocuments({ userId });
       const totalPages = Math.ceil(totalOrders / limit);
   
-      // Render the profile page with the retrieved data and pagination info
+      // Render the profile page with user, wallet, address, and order details
       res.render("profile", {
         user: userData,
         userAddress: addressData,
         orders,
         currentPage: page,
-        totalPages
+        totalPages,
+        wallet: {
+          balance: userData.wallet,
+          transactions: userData.transactions, // Pass wallet transactions to EJS
+        },
       });
-    } catch (error) {
-      console.error("Error retrieving profile", error);
-      res.redirect('/pageNotFound');
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
   };
-  
-  
   
 
 const changeEmail = async (req, res) => {
     try {
       res.render("change-email");
-    } catch (error) {
-      res.redirect('/pageNotFound');
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
   };
   
@@ -226,7 +225,7 @@ const changeEmail = async (req, res) => {
         });
       }
     } catch (error) {
-      res.redirect("/pageNotFound");
+        next(error); // Pass the error to the errorHandler middleware
     }
   };
   
@@ -243,10 +242,8 @@ const changeEmail = async (req, res) => {
           userData: req.session.userData,
         });
       }
-    } catch (error) {
-        console.log(error);
-        
-      res.redirect("/pageNotFound");
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
   };
   const updateEmail=async (req, res) => {
@@ -265,8 +262,8 @@ try {
 
 try {
     res.render("change-password")
-} catch (error) {
-    res.redirect("/pageNotFound")
+}catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
 }
   }
 
@@ -296,9 +293,7 @@ try {
         })
     }
     } catch (error) {
-        console.log("error in validation",error)
-        res.redirect("/pageNotFound")
-
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 
@@ -311,7 +306,7 @@ try {
         res.json({success:false,message:"OTP does not match"})
     }
 } catch (error) {
-    res.status(500).json({success:false,message:"Error occured"})
+    next(error); // Pass the error to the errorHandler middleware
 }
 
 
@@ -320,8 +315,8 @@ const addAddress=async (req, res) => {
 try {
     const user=req.session.user;
     res.render("add-address",{user:user})
-} catch (error) {
-    res.redirect("/pageNotFound")
+}catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
 }
 
 
@@ -434,8 +429,6 @@ const deleteAddress=async (req,res)=>{
         res.redirect("/pageNotFound")
     }
 }
-
-
 
 
 

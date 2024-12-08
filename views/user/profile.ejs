@@ -290,7 +290,7 @@
                             <tr>
                               <td><%= order.orderId %></td>
                               <td><%= order.orderedItems.length %></td>
-                              <td>₹<%= order.totalPrice %></td>
+                              <td>₹<%= order.finalAmount %></td>
                               <td><span class="badge badge-info"><%= order.status || 'Pending' %></span></td>
                               <td>
                                 <a href="/viewOrder/<%= order._id %>" class="btn btn-sm btn-primary">View Details</a>
@@ -315,96 +315,112 @@
                 </div>
               </div>
               
-               <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
-                 <div class="card">
-                   <div class="card-header">
-                     <h5 class="mb-0">Wallet</h5>
-                   </div>
-                   <div class="card-body contact-from-area">
-                     <div class="row">
-                       <div class="col-lg-8 mx-auto text-center mt-90">
-                         <form>
-                           <div class="form-group">
-                             <label for="walletAmount" class="h4">Amount</label>
-                             <div class="h3"></div>
-                           </div>
-                           <button type="button" class="btn btn-success" onclick="">Add Money</button>
-                         </form>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
+              <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Wallet</h5>
+                  </div>
+                  <div class="card-body contact-from-area">
+                    <div class="row">
+                      <div class="col-lg-8 mx-auto text-center mt-90">
+                        <form action="/wallet/add-money" method="POST">
+                          <div class="form-group">
+                            <label for="walletAmount" class="h4">Current Balance</label>
+                            <div class="h3">₹<%= wallet.balance %></div>
+                          </div>
+                          <div class="form-group">
+                            <label for="addAmount" class="h4">Add Amount</label>
+                            <input type="number" id="addAmount" name="amount" class="form-control" placeholder="Enter amount" required min="1">
+                          </div>
+                          <button type="submit" class="btn btn-success">Add Money</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
 
-
-               <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="orders-tab">
-                 <div class="card">
-                   <div class="card-header">
-                     <h5 class="mb-0">Wallet History</h5>
-                   </div>
-                   <div class="card-body">
-                     <div class="table-responsive">
-                       <table class="table">
-                         <thead>
-                           <tr>
-                             <th>Date</th>
-                             <th>Status</th>
-                             <th>Amount</th>
-                           </tr>
-                         </thead>
-                         <tbody>
-                           <tr>
-                             <td></td>
-                             <td></td>
-                             <td></td>
-                           </tr>
-                         </tbody>
-                       </table>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-
-
-               <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="track-orders-tab">
-                 <div class="card">
-                   <div class="card-header">
-                     <h5 class="mb-0">Referal</h5>
-                   </div>
-                   <div class="card-body">
-                     <h6 class="mb-3">Refer your friends and earn money!</h6>
-                     <p>Share this link: <strong>></strong></p>
-                     <p>Earned: ₹</p>
-                   </div>
-                 </div>
-               </div>
+              <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="orders-tab">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">Wallet History</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                            <% wallet.transactions
+                              .sort((a, b) => new Date(b.date) - new Date(a.date))
+                              .forEach(transaction => { %>
+                                <tr>
+                                  <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                                  <td><%= transaction.type %></td>
+                                  <td><%= transaction.amount.toFixed(2) %></td>
+                                </tr>
+                            <% }) %>
+                          <% } else { %>
+                            <tr>
+                              <td colspan="3" class="text-center">No wallet transactions found</td>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                      </table>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="track-orders-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Referral</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="mb-3">Refer your friends and earn rewards!</h6>
+                        <p>Share this link: 
+                            <strong><%= user.referralCode %></strong>
+                        </p>
+                        <p>Earned: ₹<%= user.rewards %></p> <!-- Display the rewards earned -->
+                    </div>
+                </div>
+            </div>
+            
        </div>
      </div>
    </div>
  </section>
-<<div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+<div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
   <!-- Previous Button -->
   <% if (currentPage > 1) { %>
-    <a href="?page=<%= currentPage - 1 %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #333; background-color: #f8f9fa;">Previous</a>
+    <a href="/userProfile?page=<%= currentPage - 1 %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #333; background-color: #f8f9fa;">Previous</a>
   <% } else { %>
     <span style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #ccc; background-color: #f8f9fa;">Previous</span>
   <% } %>
 
   <!-- Page Number Links -->
   <% for (let i = 1; i <= totalPages; i++) { %>
-    <a href="?page=<%= i %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid <%= currentPage === i ? '#007bff' : '#ccc' %>; border-radius: 4px; color: <%= currentPage === i ? '#fff' : '#333' %>; background-color: <%= currentPage === i ? '#007bff' : 'transparent' %>;">
+    <a href="/userProfile?page=<%= i %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid <%= currentPage === i ? '#007bff' : '#ccc' %>; border-radius: 4px; color: <%= currentPage === i ? '#fff' : '#333' %>; background-color: <%= currentPage === i ? '#007bff' : 'transparent' %>;">
       <%= i %>
     </a>
   <% } %>
 
   <!-- Next Button -->
   <% if (currentPage < totalPages) { %>
-    <a href="?page=<%= currentPage + 1 %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #333; background-color: #f8f9fa;">Next</a>
+    <a href="/userProfile?page=<%= currentPage + 1 %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #333; background-color: #f8f9fa;">Next</a>
   <% } else { %>
     <span style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #ccc; background-color: #f8f9fa;">Next</span>
   <% } %>
 </div>
-
 
 <%- include("../../views/partials/user/footer") %>
 

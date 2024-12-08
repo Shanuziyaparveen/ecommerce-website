@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist | EShopper</title>
+
+    <!-- Favicon -->
+    <link href="/img/favicon.ico" rel="icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Custom Stylesheet -->
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+    
+        * {
+            box-sizing: inherit;
+            margin: 0;
+            padding: 0;
+        }
+    
+        /* Centered Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+    
+        .navbar-left img {
+            height: 60px;
+        }
+    
+        .breadcrumb {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    
+        .breadcrumb a {
+            text-decoration: none;
+            color: #333;
+            margin: 0 5px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+    
+        .breadcrumb a:hover {
+            color: #fc0c7f;
+        }
+    
+        /* Navbar Right Section */
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+    
+        .navbar-right .btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s, color 0.3s;
+        }
+    
+        .navbar-right .btn:hover {
+            background-color: #fc0c7f;
+            color: #fff;
+        }
+    
+        /* Wishlist Section */
+        .container.mt-5 {
+            margin-top: 8rem;
+        }
+    
+        /* Product Grid Layout */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            justify-content: center;
+        }
+    
+        /* Product Card */
+        .product-card {
+            max-width: 280px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+    
+        .product-card img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    
+        .product-card h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #222;
+        }
+    
+        .product-card span {
+            font-size: 1rem;
+            color: #fc0c7f;
+        }
+    
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+    
+        .action-buttons .btn {
+            background-color: #fc0c7f;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            width: 48%;
+        }
+    
+        .action-buttons .btn:hover {
+            background-color: #e0276c;
+        }
+    
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #fc0c7f;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+    
+        .back-to-top:hover {
+            background-color: #e0276c;
+        }
+    
+        /* Media Queries */
+        @media (max-width: 767px) {
+            .navbar-right .btn {
+                padding: 8px 10px;
+                font-size: 1.1rem;
+            }
+        }
+    
+        @media (max-width: 480px) {
+            .navbar {
+                flex-wrap: wrap;
+            }
+    
+            .navbar-left img {
+                margin-bottom: 10px;
+            }
+    
+            .product-card {
+                width: 100%;
+            }
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <a href="/" class="navbar-brand">
+                <img src="img/logo.png" alt="Logo" style="height: 60px;">
+            </a>
+        </div>
+        <div class="navbar-center">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span>&gt;</span>
+                <a href="/getAllProducts" rel="nofollow">Shop</a>
+                <span>&gt;</span>
+            </div>
+        </div>
+        <div class="navbar-right">
+            <a href="/userProfile" class="btn border">
+                <i class="fas fa-user text-primary"></i>
+            </a>
+            <a href="/cart" class="btn border">
+                <i class="fas fa-shopping-cart text-primary"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Wishlist Start -->
+    <div class="container mt-5">
+        <% if (products.length === 0) { %>
+            <div class="d-flex flex-column align-items-center">
+                <img src="img/wish2.jpg" alt="Empty Wishlist" style="max-height: 300px;">
+                <h2 class="mt-3">Your Wishlist is Empty!</h2>
+                <a href="/shop" class="btn btn-lg mt-4" style="background-color:#45154f; color:white;">Add Items</a>
+            </div>
+        <% } else { %>
+            <div class="product-grid">
+                <% products.forEach(product => { %>
+                    <div class="product-card">
+                        <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>">
+                        <h4><%= product.productName %></h4>
+                        <span>Rs. <del><%= product.regularPrice %></del> <b>Rs. <%= product.salePrice %></b></span>
+                        <div class="action-buttons mt-3">
+                            <button class="btn btn-primary">Add to Cart</button>
+                            <button class="btn btn-danger small-btn" onclick="removeFromWishlist(event, '<%= product._id %>')">
+                                Remove from Wishlist
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" onclick="window.scrollTo(0, 0)">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+        function removeFromWishlist(event, productId) {
+            event.preventDefault();
+            fetch(`/deleteProduct/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Removed from Wishlist', 'The product has been removed.', 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'Something went wrong.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    Swal.fire('Error', 'An unexpected error occurred.', 'error');
+                });
+        }
+    </script>
+</body>
+
+</html>

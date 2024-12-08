@@ -34,7 +34,15 @@
             </li>
           <% }) %>
         </ul>
-        <p class="total-amount"><strong>Total Amount: ₹<%= totalAmount %></strong></p>
+      <div class="cart-summary">
+        <p>SubTotal: ₹<%= initialCartTotal %></p>
+        <p>Tax (10%): ₹<%= cartTax %></p>
+        <p>Total: ₹<%= finalAmount %></p>
+        <p>Amount to be paid after wallet deduction: ₹<%= remainingAmountToPay %></p>
+        
+   
+  </div>
+  
       </div>
     </div>
 

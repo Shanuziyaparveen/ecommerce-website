@@ -40,14 +40,21 @@ const userSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:"Product",
     }],
-    wallet:{
-        type:Number,
-        default:0,
+    wallet: {
+        type: Number,
+        default: 0,
+      },
+      transactions: [
+        {
+            amount: { type: Number },
+            type: { type: String }, // 'Refund', 'Payment', etc.
+            date: { type: Date, default: Date.now },
+            orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
+            status: { type: String }, // e.g., 'Used'
+          },
+      ] ,wishlist:{
+        type:Array
     },
-    wishlist:[{
-        type:Schema.Types.ObjectId,
-        ref:"Wishlist"
-    }],
     orderHistory:[{
         type:Schema.Types.ObjectId,
         ref:"Order"
@@ -59,10 +66,9 @@ const userSchema = new Schema({
     createdOn : {
         type:Date,
         default:Date.now,
-    },
-    referalCode:{
-        type:String
-    },
+    }, referralCode: { type: String, unique: true },
+    referredBy: { type: String, default: null }, // tracks who referred them
+    rewards: { type: Number, default: 0 },
     redeemed:{
         type:Boolean
     },
@@ -85,7 +91,9 @@ const userSchema = new Schema({
     }]
    
 })
-
+userSchema.methods.generateReferralCode = function() {
+    return this.email.split('@')[0] + '-' + Math.random().toString(36).substring(7);
+  };
 
 const User = mongoose.model("User",userSchema,'users');
 

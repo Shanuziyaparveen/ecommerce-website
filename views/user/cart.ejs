@@ -1,214 +1,216 @@
 <%- include("../../views/partials/user/header") %>
+<style>
+    /* General Styles */
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+    }
 
-    <style>
-        /* General Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
+    a {
+        text-decoration: none;
+        color: #007bff;
+    }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            margin: 0 0 10px;
-        }
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
 
-        a {
-            text-decoration: none;
-            color: #007bff;
-        }
+    /* Header and Footer */
+    header, footer {
+        background-color: #4B0082;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 0;
-        }
+    footer {
+        font-size: 0.9em;
+    }
 
-        /* Header and Footer */
-        header,
-        footer {
-            background-color: #4B0082;
-            /* Dark purple */
-            color: #fff;
-            text-align: center;
-            padding: 10px 0;
-        }
+    /* Cart Page Styles */
+    .cart-page {
+        padding: 40px 0;
+    }
 
-        footer {
-            font-size: 0.9em;
-        }
+    .cart-header h2 {
+        font-size: 2em;
+        color: #4B0082;
+    }
 
-        /* Cart Page Styles */
-        .cart-page {
-            background-color: #f5f5f5;
-            padding: 40px 0;
-        }
+    .cart-items {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
 
-        .cart-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding: 15px 0;
+    }
 
-        .cart-header h2 {
-            font-size: 2em;
-            color: #4B0082;
-            /* Dark purple */
-        }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
 
-        .cart-items {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+    .cart-item img {
+        width: 100px;
+        border-radius: 5px;
+    }
 
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
+    .cart-item-details {
+        flex: 1;
+        padding-left: 20px;
+    }
 
-        .cart-item:last-child {
-            border-bottom: none;
-        }
+    .cart-item-details h5 {
+        font-size: 1.2em;
+    }
 
-        .cart-item img {
-            width: 100px;
-            height: auto;
-            border-radius: 5px;
-        }
+    .cart-item-details .price {
+        color: #ff6b6b;
+        font-size: 1.1em;
+        margin-top: 5px;
+    }
 
-        .cart-item-details {
-            flex: 1;
-            padding-left: 20px;
-        }
+    .cart-item-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
 
-        .cart-item-details h5 {
-            font-size: 1.2em;
-            margin: 0;
-        }
+    .remove-item {
+        background-color: #e74c3c;
+        color: #fff;
+        border: none;
+        padding: 8px 15px;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
 
-        .cart-item-details .price {
-            color: #ff6b6b;
-            /* Price color */
-            font-size: 1.1em;
-            margin-top: 5px;
-        }
+    .remove-item:hover {
+        background-color: #c0392b;
+    }
 
-        .cart-item-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
+    /* Cart Summary */
+    .cart-summary {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
 
-        .remove-item {
-            background-color: #e74c3c;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
+    .cart-summary h4 {
+        font-size: 1.5em;
+        color: #4B0082;
+    }
 
-        .remove-item:hover {
-            background-color: #c0392b;
-        }
+    .checkout-btn {
+        background-color: #4B0082;
+        color: #fff;
+        border: none;
+        padding: 15px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+    }
 
-        /* Cart Summary Section */
-        .cart-summary {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-top: 30px;
-        }
+    .checkout-btn:hover {
+        background-color: #5D3FD3;
+    }
 
-        .cart-summary h4 {
-            font-size: 1.5em;
-            color: #4B0082;
-            /* Dark purple */
-        }
+    /* Quantity Buttons */
+    .increment-btn, .decrement-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+        border: 1px solid #6a3b91;
+        background-color: #6a3b91;
+        color: white;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-        .cart-summary p {
-            font-size: 1.1em;
-            margin: 5px 0;
-        }
+    .increment-btn:hover, .decrement-btn:hover {
+        background-color: #5c2e7d;
+    }
 
-        .checkout-btn {
-            background-color: #4B0082;
-            /* Dark purple */
-            color: #fff;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
+    /* Price Styling */
+    .regular-price {
+        text-decoration: line-through;
+        color: #a9a9a9;
+        font-size: 14px;
+        margin-right: 10px;
+    }
 
-        .checkout-btn:hover {
-            background-color: #5D3FD3;
-            /* Lighter purple */
-        }
+    .highlighted-price {
+        color: #3b0b44;
+        font-weight: bold;
+        font-size: 18px;
+    }
 
-        .checkout-btn:active {
-            background-color: #3A0069;
-            /* Darker purple */
-        }
-        .increment-btn, .decrement-btn {
-  padding: 5px 10px;  /* Reduce padding to make the button smaller */
-  font-size: 14px;  /* Smaller font size */
-  border: 1px solid #6a3b91;  /* Dark purple border */
-  background-color: #6a3b91;  /* Dark purple button background */
-  color: white;  /* White text color */
-  cursor: pointer;  /* Cursor pointer on hover */
-  border-radius: 4px;  /* Rounded corners */
-  transition: background-color 0.3s ease, color 0.3s ease;  /* Smooth background and color transition */
-}
+    /* Wallet Section */
+    .wallet-balance {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
 
-.increment-btn:hover, .decrement-btn:hover {
-  background-color: #5c2e7d;  /* Darker purple for hover effect */
-  color: #f2f2f2;  /* Lighter text color on hover */
-}
+    .wallet-balance-text {
+        font-size: 18px;
+        font-weight: bold;
+    }
 
-.increment-btn:disabled, .decrement-btn:disabled {
-  background-color: #bfa6d9;  /* Light purple for disabled state */
-  color: #7a6a8c;  /* Darker text for disabled state */
-  cursor: not-allowed;  /* Disabled cursor */
-}
-.price {
-  font-size: 16px;
-}
+    .remaining-amount {
+        background-color: #f8f8f8;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
 
-.regular-price {
-  text-decoration: line-through;
-  color: #a9a9a9; /* Gray color for the strikethrough price */
-  margin-right: 10px;
-  font-size: 14px;
-}
+    .coupon-section {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
 
-.highlighted-price {
-  color: #3b0b44; /* Highlighted color for the current price */
-  font-weight: bold;
-  font-size: 18px;
-}
+    .coupon-input {
+        padding: 8px;
+        width: 60%;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+    }
 
-    </style>
+    .btn-primary {
+        background-color: #fc0c7f;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
 
 <body>
     <div class="container cart-page">
@@ -233,7 +235,7 @@
                                     <!-- Case: Product is out of stock -->
                                     <button class="increment-btn" disabled>Out of Stock</button>
                                     <% disableCheckout = true; %>
-                                <% } else if (item.quantity >= item.stock) { %>
+                                <% } else if (item.quantity > item.stock) { %>
                                     <!-- Case: Stock is limited and matches the quantity in the cart -->
                                     <button class="increment-btn" disabled>Stock Limit Reached</button>
                                     <% disableCheckout = true; %>
@@ -263,15 +265,39 @@
                     </div>
                 <% }) %>
             </div>
+            <div class="coupon-section">
+                <input type="text" id="couponCode" class="coupon-input" placeholder="Enter Coupon Code">
+                <input type="hidden" id="totalAmount" value="<%= cartTotal %>">
+                <button onclick="applyCoupon()" class="btn-primary">Apply Coupon</button>
+            </div>
+            
 
-            <div class="cart-summary">
-                <h4>Cart Summary</h4>
-                <p>Total Items: <%= totalItems %></p>
-                <p>Subtotal: ₹<%= cartSubtotal %></p>
-                <p>Tax: ₹<%= cartTax %></p>
-                <p>Total: ₹<%= cartTotal %></p>
+<!-- Cart Summary -->
+<h4>Cart Summary</h4>
+<p>Total Items: <%= totalItems %></p>
+<p>Subtotal: ₹<%= cartSubtotal %></p>
+<p>Tax: ₹<%= cartTax %></p>
+<p>Discount: <span id="discount">0</span></p>
+<p>Total: ₹<span id="updatedAmount"><%= cartTotal %></span></p>
 
-               
+
+<!-- Wallet Balance Section -->
+<div class="wallet-balance">
+    <p class="wallet-balance-text">Available Wallet Balance: ₹<span id="wallet-balance-display"><%= walletBalance %></span></p>
+    <form class="wallet-form" id="wallet-form">
+        <!-- Apply Wallet Button -->
+        <button type="button" id="apply-wallet-button" class="wallet-button" <%= walletBalance > 0 ? '' : 'disabled' %>>Apply Wallet</button>
+    </form>
+    <div class="remaining-amount" id="remaining-amount" style="display:none;">
+        <p>Remaining Amount to Pay: ₹<span id="remaining-amount-display"><%= remainingAmountToPay %></span></p>
+    </div>
+</div>
+
+
+
+
+
+
         <% if (disableCheckout) { %>
             <p style="color: red; font-weight: bold;">Some items are out of stock or the quantity exceeds available stock. Please adjust your cart.</p>
         <% } %>
@@ -350,4 +376,77 @@
             // Redirect to checkout page
             window.location.href = '/checkout';
         }
+    
+        document.getElementById('apply-wallet-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/cart/select-wallet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ paymentMethod: 'wallet' })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('wallet-balance-display').innerText = data.walletBalance;
+            document.getElementById('remaining-amount-display').innerText = data.remainingAmountToPay;
+            document.getElementById('remaining-amount').style.display = 'block';
+        } else {
+            const error = await response.text();
+            alert(error);
+        }
+    } catch (error) {
+        console.error("Error applying wallet:", error);
+        alert("An error occurred while applying the wallet.");
+    }
+});
+
+function applyCoupon() {
+    const couponCode = document.getElementById("couponCode").value;
+    const totalAmount = document.getElementById("totalAmount").value;
+
+    fetch('/couponApply', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ couponCode, totalAmount })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Coupon Applied!',
+                text: `Discount: ₹${data.discount}`,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Update the cart summary dynamically
+                document.getElementById('updatedAmount').innerText = data.updatedAmount;
+                document.getElementById('discount').innerText = `-₹${data.discount}`;
+
+                // Optionally, save the coupon details to the session (server-side)
+                // This could be done by making an additional request to the backend if needed
+            });
+        } else {
+            Swal.fire({
+                title: 'Invalid Coupon',
+                text: data.message || 'Please enter a valid coupon code.',
+                icon: 'error',
+                confirmButtonText: 'Try Again'
+            });
+        }
+    })
+    .catch(err => {
+        console.error("Error applying coupon", err);
+        Swal.fire({
+            title: 'Error',
+            text: 'An error occurred while applying the coupon. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+}
+
     </script>

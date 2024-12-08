@@ -1,0 +1,420 @@
+<%- include("../../views/partials/admin/header") %>
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.24/jspdf.plugin.autotable.min.js"></script>
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .filter-container, .summary-container, .chart-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .chart-container canvas {
+            max-width: 300px;
+            max-height: 300px;
+            margin: auto;
+        }
+
+        .db__container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .db__cell {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .db__top-stat {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .db__progress {
+            position: relative;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .db__progress-fill {
+            position: absolute;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 5px;
+        }
+
+        .db__counter {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .db__counter-value {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        .db__counter-label {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .db__counter-label strong {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sales Report</h1>
+
+    <!-- Filter section -->
+    <div class="filter-container">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate">
+        <button id="generateReportButton">Generate Report</button>
+    </div>
+
+    <!-- Summary section -->
+    <div class="summary-container">
+        <h3>Total Orders: <%= report.totalOrders %></h3>
+        <h3>Total Sales: ₹<%= report.totalSales.toFixed(2) %></h3>
+        <h3>Total Discounts: ₹<%= report.totalDiscount.toFixed(2) %></h3>
+    </div>
+
+    <!-- Dashboard statistics -->
+    <div class="db__container">
+        <div class="db__cell">
+            <h2 class="db__top-stat">Today’s Revenue</h2>
+            <div class="db__progress">
+                <div class="db__progress-fill" style="transform: translateX(15%);"></div>
+            </div>
+            <div class="db__counter">
+                <div class="db__counter-value" id="revenueValue">₹0</div>
+                <div class="db__counter-label">
+                    <strong id="revenueChange">+0%</strong><br><small>vs yesterday</small>
+                </div>
+            </div>
+        </div>
+        <div class="db__cell">
+            <h2 class="db__top-stat">Today’s Orders</h2>
+            <div class="db__progress">
+                <div class="db__progress-fill"></div>
+            </div>
+            <div class="db__counter">
+                <div id="ordersValue" class="db__counter-value">0</div>
+                <div class="db__counter-label">
+                    <strong id="ordersChange">+0%</strong><br><small>vs yesterday</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart for order status -->
+    <div class="chart-container">
+        <canvas id="paymentMethodChart"></canvas>
+    </div>
+
+    <!-- Download buttons -->
+    <div class="download-buttons">
+        <button onclick="downloadPdf()">Download as PDF</button>
+        <button onclick="downloadExcel()">Download as Excel</button>
+    </div>
+
+    <!-- Sales table -->
+    <table id="salesTable">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total Amount</th>
+                <th>After Discount</th>
+                <th>Discount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (report.orders.length > 0) { %>
+                <% report.orders.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn)).forEach(order => { %>
+                    <tr>
+                        <td><%= order._id %></td>
+                        <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
+                        <td><%= order.status %></td>
+                        <td>Rs <%= order.totalAmount ? order.totalAmount.toFixed(2) : '0.00' %></td>
+                        <td>Rs <%= order.finalAmount ? order.finalAmount.toFixed(2) : '0.00' %></td>
+                        <td>Rs <%= order.coupon && order.coupon.discount ? order.coupon.discount.toFixed(2) : '0.00' %></td>
+                        
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5">No orders found for the selected range.</td>
+                </tr>
+            <% } %>
+        </tbody>
+        
+    </table>
+
+    <script>
+        document.getElementById('generateReportButton').addEventListener('click', function () {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (startDate && endDate) {
+                window.location.href = `/admin/sales?startDate=${startDate}&endDate=${endDate}`;
+            } else {
+                window.location.href = '/admin/sales';
+            }
+        });
+
+    
+const ctx = document.getElementById('paymentMethodChart').getContext('2d');
+    const paymentMethodCounts = <%- JSON.stringify(paymentMethodCounts) %>;
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: paymentMethodCounts.map(method => method._id), // Payment Methods (e.g., 'COD', 'Razorpay')
+            datasets: [{
+                data: paymentMethodCounts.map(method => method.count), // Order counts per payment method
+                backgroundColor: [
+                    '#36A2EB', // Color for each payment method
+                    '#FF6384',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF',
+                    '#FF9F40'
+                ].slice(0, paymentMethodCounts.length) // Limit colors to available payment methods
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        boxWidth: 20
+                    }
+                }
+            }
+        }
+    });
+        // Fetch today's revenue data
+        fetch('/admin/revenue/today')
+            .then(response => response.json())
+            .then(data => {
+                const revenueValue = document.getElementById('revenueValue');
+                const revenueChange = document.getElementById('revenueChange');
+
+                const totalRevenue = data.todaysRevenue.toFixed(2);
+                const revenueComparison = data.revenueComparison;
+                revenueValue.textContent = '₹' + totalRevenue;
+
+                const percentageChange = ((revenueComparison / totalRevenue) * 100).toFixed(2);
+                revenueChange.textContent = (percentageChange > 0 ? '+' : '') + percentageChange + '%';
+            });
+
+        // Fetch today's orders data
+        fetch('/admin/orders/today')
+            .then(response => response.json())
+            .then(data => {
+                const ordersValue = document.getElementById('ordersValue');
+                const ordersChange = document.getElementById('ordersChange');
+
+                const totalOrders = data.todaysOrders;
+                const ordersComparison = data.ordersComparison;
+
+                ordersValue.textContent = totalOrders;
+                const percentageChange = ((ordersComparison / totalOrders) * 100).toFixed(2);
+                ordersChange.textContent = (percentageChange > 0 ? '+' : '') + percentageChange + '%';
+            });
+            function downloadPdf() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4'); // A4 size with millimeter units
+
+    // Set the font size for the summary
+    doc.setFontSize(16); // Adjust for larger text
+    const totalOrders = <%- JSON.stringify(report.totalOrders) %>;
+    const totalSales = <%- JSON.stringify(report.totalSales.toFixed(2)) %>;
+    const totalDiscount = <%- JSON.stringify(report.totalDiscount.toFixed(2)) %>;
+
+    // Add summary at the top
+    doc.text(`Total Orders: ${totalOrders}`, 10, 20); 
+    doc.text(`Total Sales: INR ${totalSales}`, 10, 30);
+    doc.text(`Total Discounts: INR ${totalDiscount}`, 10, 40);
+
+    // Set font size for table text
+    doc.setFontSize(12); // Adjust table text size to a readable size
+
+    // Add the sales table below the summary
+    doc.autoTable({
+        html: '#salesTable', // Table from the HTML page
+        startY: 50, // Start the table 50mm down from the top
+        margin: { horizontal: 10 }, // Horizontal margins for the table
+        styles: {
+            fontSize: 12,  // Font size for the table text
+            overflow: 'linebreak', // Ensure the content wraps properly
+        },
+        columnStyles: {
+            0: { cellWidth: 50 }, // Adjust the width of the first column
+            1: { cellWidth: 30 }, // Adjust the width of the second column
+            2: { cellWidth: 30 },
+            3: { cellWidth: 30 }, 
+            4: { cellWidth: 30 },
+            5: { cellWidth: 30 },
+        },
+        bodyStyles: {
+            minCellHeight: 10, // Ensure enough height for cells
+        },
+        didDrawPage: function (data) {
+            // This is for handling page breaks
+            const pageHeight = doc.internal.pageSize.height;
+            const tableHeight = data.cursor.y; // Get the current position after the table is drawn
+            if (tableHeight > pageHeight - 10) {  // Check if the table exceeds the page height
+                doc.addPage(); // Add a new page
+            }
+        }
+    });
+
+    // Save the PDF
+    doc.save('sales-report.pdf');
+}
+
+function downloadExcel() {
+    const table = document.getElementById('salesTable'); // Get the table element by ID
+
+    if (!table) {
+        alert('Sales table not found!');
+        return;
+    }
+
+    // Get summary data (ensure it's dynamically inserted from your template engine)
+    const totalOrders = <%- JSON.stringify(report.totalOrders) %>;
+    const totalSales = <%- JSON.stringify(report.totalSales.toFixed(2)) %>;
+    const totalDiscount = <%- JSON.stringify(report.totalDiscount.toFixed(2)) %>;
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // Combine the summary data and table data in one array
+    const summaryData = [
+        ["Total Orders", totalOrders],
+        ["Total Sales", `₹${totalSales}`],
+        ["Total Discounts", `₹${totalDiscount}`],
+        [],
+        // Empty row for separation
+        ["Order ID", "Date", "Status", "Total Amount", "After Discount", "Discount"], // Table headers
+    ];
+
+    // Append rows from the table to summary data
+    const rows = table.querySelectorAll('tr');
+    rows.forEach((row, index) => {
+        if (index === 0) return; // Skip the header row
+
+        const rowData = [];
+        row.querySelectorAll('td').forEach(cell => {
+            rowData.push(cell.innerText.trim());
+        });
+        summaryData.push(rowData); // Add each row from table to summaryData
+    });
+
+    // Convert combined summary data to a sheet
+    const combinedSheet = XLSX.utils.aoa_to_sheet(summaryData);
+    combinedSheet['!cols'] = [
+        { wpx: 100 }, // Order ID
+        { wpx: 150 }, // Date
+        { wpx: 100 }, // Status
+        { wpx: 120 }, // Total Amount
+        { wpx: 120 }, // After Discount
+        { wpx: 120 }, // Discount
+    ];
+    // Append combined sheet to workbook
+    XLSX.utils.book_append_sheet(wb, combinedSheet, "Sales Report");
+
+    // Write the file and trigger download
+    XLSX.writeFile(wb, 'sales-report.xlsx');
+}
+
+
+    </script>
+</body>
+
+</html>

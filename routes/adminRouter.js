@@ -8,6 +8,8 @@ const brandController=require("../controllers/admin/brandController")
 const productController=require("../controllers/admin/productController");
 const bannerController=require("../controllers/admin/bannerController")
 const orderController=require("../controllers/admin/orderController")
+const adminsalesController=require("../controllers/admin/adminsalesController")
+const couponController=require("../controllers/admin/couponController")
 const multer=require("multer");
 const storage=require("../helpers/multer");
 const uploads=multer({storage:storage});
@@ -65,9 +67,26 @@ router.get('/orderList', adminController.getOrderList);
 
 // Route to update the order status
 router.post('/updateOrderStatus', adminController.updateOrderStatus);
+router.put('/updateProductStatus', adminController.updateProductStatus);
 
 router.get("/orderDetails/:orderId", orderController.getOrderDetails);
+//sales management
+router.get('/sales', adminsalesController.getAdminSalesReport)
 
+
+router.get('/revenue/today',adminsalesController.getTodaysRevenue);
+
+router.get('/orders/today',adminsalesController.getTodaysOrders);
+
+//coupon management
+
+
+router.get('/add-coupon', couponController.getaddcoupon)
+router.post('/add-coupon', couponController.addCoupon)
+router.get('/coupon', couponController.getCoupon)
+router.get("/delete-coupon/:id", couponController.deleteCoupon)
+router.get("/edit-coupon/:id", couponController.getEditCoupon)
+router.post("/edit-coupon", couponController.editCoupon)
 
 
 

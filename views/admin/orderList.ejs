@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include("../../views/partials/admin/header") %>
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,53 +8,170 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #2d1e40; /* Dark purple background */
-      color: #ffffff; /* White text */
+      background-color: #fcf9ff; /* Light background */
+      color: #391147; /* Darker text for contrast */
       margin: 0;
       padding: 20px;
     }
     .container {
-      max-width: 800px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
     }
     h1 {
       text-align: center;
       margin-bottom: 20px;
-      color: #d4b5f3; /* Light purple heading */
-    }
-    .card {
-      background-color: #3b2b57; /* Darker purple for cards */
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    }
-    .card-header {
-      font-size: 1.2em;
+      color: #d4b5f3; /* Light purple */
+      font-size: 36px;
       font-weight: bold;
-      margin-bottom: 10px;
     }
-    .card-body p {
-      margin: 5px 0;
+
+    .d-flex {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
     }
+
     .btn {
       background-color: #6a4793; /* Purple button */
       color: #ffffff;
       border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
+      padding: 12px 20px;
+      border-radius: 5px;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
+
     .btn:hover {
       background-color: #5a3a7a;
     }
+
+    /* Order Cards */
+    .card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-header {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #3b2b57;
+      text-align: center;
+    }
+
+    .card-body p {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .order-info p {
+      color: #555;
+      margin: 8px 0;
+    }
+
+    .order-info strong {
+      color: #391147; /* Darker purple for emphasis */
+    }
+
+    /* If no orders found */
+    .no-orders {
+      background-color: #fff;
+      color: #391147;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 28px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .card-body {
+        font-size: 14px;
+      }
+
+      .order-list {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pagination {
+  display: flex; /* Flexbox for horizontal alignment */
+  justify-content: center; /* Center the pagination container */
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination ul {
+  display: flex; /* Make the list items align horizontally */
+  gap: 5px; /* Space between pagination buttons */
+  padding: 0;
+  margin: 0;
+}
+
+.pagination li {
+  list-style: none; /* Remove bullet points */
+}
+
+.pagination a {
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  background-color: #6a4793; /* Purple color */
+  color: #ffffff;
+  font-weight: bold;
+  transition: background-color 0.3s ease, cursor 0.3s ease;
+}
+
+.pagination a:hover {
+  background-color: #5a3a7a; /* Darker purple */
+}
+
+.pagination a.active {
+  background-color: #ccc; /* Light grey for active page */
+  color: #555; /* Darker text for contrast */
+  cursor: not-allowed; /* Disabled cursor */
+}
+
+.pagination a.active:hover {
+  background-color: #ccc; /* Prevent hover effect for active */
+}
+
+.pagination a.disabled {
+  background-color: #ddd; /* Disabled state */
+  color: #aaa;
+  cursor: not-allowed;
+}
+
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="d-flex justify-content-end mt-3">
+      <a href="/admin/" class="btn btn-sm btn-danger">Back to home</a>
+    </div>
+
     <h1>Admin Order List</h1>
     <div class="row">
       <% if (orders && orders.length > 0) { %>
@@ -85,6 +202,43 @@
       <% } %>
       
     </div>
+
+    <div class="pagination">
+      <% if (totalPages > 1) { %>
+        <ul>
+          <% if (currentPage > 1) { %>
+            <li>
+              <a href="?page=<%= currentPage - 1 %>">Previous</a>
+            </li>
+          <% } else { %>
+            <li>
+              <a class="disabled">Previous</a>
+            </li>
+          <% } %>
+    
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <li>
+              <a 
+                href="?page=<%= i %>" 
+                class="<%= currentPage === i ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            </li>
+          <% } %>
+    
+          <% if (currentPage < totalPages) { %>
+            <li>
+              <a href="?page=<%= currentPage + 1 %>">Next</a>
+            </li>
+          <% } else { %>
+            <li>
+              <a class="disabled">Next</a>
+            </li>
+          <% } %>
+        </ul>
+      <% } %>
+    </div>
+    
   </div>
   
 </body>

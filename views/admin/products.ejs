@@ -35,7 +35,7 @@
                 <tr>
                     <td><%= data[i].productName %></td>
                     <td><%= data[i].brand ? data[i].brand : 'No Brand' %></td>
-                    <td><%= data[i].category ? data[i].category.name : 'No Category' %></td>
+                    <td><%= data[i].category ? data[i].category : 'No Category' %></td>
                     <td><%= data[i].salePrice %></td>
                     <td>
                         <% if (data[i].productOffer) { %>
@@ -45,16 +45,16 @@
                         <% } %>
                     </td>
                     <td>
-                        <% if (data[i].productOffer === 0) { %>
-                            <button class="btn btn-info" onclick="addOffer('<%=data[i]._id%>', '<%=data[i].category._id%>')" style="width: 100px;">
-                                <a href="#" class="text-white">Add Offer</a>
-                            </button>
-                            
-                        <% } else { %>
+                        <% if (data[i].productOffer && data[i].productOffer > 0) { %>
                             <button class="btn btn-info" onclick="removeOffer('<%= data[i]._id %>')" style="width: 100px;">
                                 <a href="#" class="text-white">Remove</a>
                             </button>
+                        <% } else { %>
+                            <button class="btn btn-info" onclick="addOffer('<%= data[i]._id %>', '<%= data[i].category %>')" style="width: 100px;">
+                                <a href="#" class="text-white">Add Offer</a>
+                            </button>
                         <% } %>
+                        
                         </td>
             
                 <td><%=data[i].quantity%></td>
@@ -104,16 +104,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script>
+async function addOffer(productId, category) {
+    console.log("Product ID:", productId, "Category:", category); // Debugging
 
-async function addOffer(productId, categoryId) {
+    if (!productId || !category) {
+        Swal.fire('Error', 'Invalid product or category.', 'error');
+        return;
+    }
+
     const { value: amount } = await Swal.fire({
         title: 'Offer in percentage',
         input: 'number',
         inputLabel: 'Percentage',
         inputPlaceholder: '%',
         inputValidator: (value) => {
-            if (!value || value <= 0 || value > 100) {
-                return 'Please enter a valid percentage between 1 and 100';
+            if (!value || value < 0 || value > 100) {
+                return 'Please enter a valid percentage between 0 and 100';
             }
         }
     });
@@ -125,37 +131,23 @@ async function addOffer(productId, categoryId) {
             data: {
                 percentage: amount,
                 productId: productId,
-                categoryId: categoryId  // Ensure categoryId is sent
+                category: category
             },
             success: (response) => {
                 if (response.status === true) {
                     location.reload();
-                    Swal.fire(
-                        'Offer Added',
-                        'The offer has been added successfully.',
-                        'success'
-                    );
+                    Swal.fire('Offer Added', 'The offer has been added successfully.', 'success');
                 } else {
-                    Swal.fire(
-                        'Failed',
-                        'Something went wrong while adding the offer.',
-                        'error'
-                    );
+                    Swal.fire('Failed', response.message, 'error');
                 }
             },
             error: (err) => {
                 console.error(err);
-                Swal.fire(
-                    'Error',
-                    'An unexpected error occurred.',
-                    'error'
-                );
+                Swal.fire('Error', 'An unexpected error occurred.', 'error');
             }
         });
     }
 }
-
-
 function removeOffer(productId) {
     try {
         Swal.fire({
@@ -174,7 +166,7 @@ function removeOffer(productId) {
                     url: "/admin/removeProductOffer",
                     method: 'POST',
                     data: {
-                        productId: productId
+                        productId: productId // ensure this ID is valid
                     },
                     success: (response) => {
                         if (response.status === true) {
@@ -212,6 +204,7 @@ function removeOffer(productId) {
         );
     }
 }
+
 
 </script>
 <%- include("../../views/partials/admin/footer") %>

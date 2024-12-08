@@ -8,7 +8,7 @@ const orderController = require("../controllers/user/orderController")
 const {userAuth,adminAuth}=require("../middlewares/auth");
 const isLoggedin=require("../middlewares/isLoggedin");
 const Product = require('../models/productSchema');
-
+const wishlistController=require("../controllers/user/wishlistController")
 
 router.get('/', userController.loadHomepage);
 router.get("/shop",userAuth,userController.loadShoppingPage);
@@ -91,10 +91,32 @@ router.get('/payment',userAuth, orderController.getPaymentPage);
 router.post("/process-payment",userAuth, orderController.processPayment);
 
 router.post("/confirm-order", userAuth, orderController.confirmOrder);
+router.get("/confirm-order", userAuth, orderController.getconfirmOrder);
 
 router.get('/viewOrder/:id',userAuth,orderController.viewOrder);
 router.get('/cancelOrder',userAuth,orderController.cancelOrder);
 
 router.get('/cancel-product/:id', userAuth, orderController.cancelSpecificItem);
-router.get('/returnOrder',userAuth, orderController.returnOrder);
+router.post('/returnOrder',userAuth, orderController.returnOrder);
+
+//wishlist
+
+router.get('/wishList', wishlistController.getwishList)
+router.post('/addTowishList', wishlistController.addTowishList)
+router.post('/deleteProduct/:id',wishlistController.getRemoveFromWishlist)
+router.post('/couponApply',orderController.couponApply)
+
+
+//wallet
+
+router.post('/wallet/add-money', userController.addMoney);
+router.post('/cart/select-wallet',userController.selectWallet);
+
+//confirmcheckout
+router.get('/confirm-checkout', orderController.confirmCheckout);
+
+//return single product 
+
+router.post('/return-product/:productId',orderController.returnSingleProduct)
+
 module.exports = router;  // Make sure to export the router

@@ -44,7 +44,7 @@ const orderSchema = new Schema({
   },
   finalAmount: {
     type: Number,
-    required: true
+   
   },
   address: {
     name: String,
@@ -74,25 +74,50 @@ const orderSchema = new Schema({
     ordered: Date,
     shipped: Date,
     delivered: Date,
+  } ,
+  coupon: {
+    applied: {
+      type: Boolean,
+      default: false
+    },
+    code: String,
+    discount: {
+      type: Number,
+      default: 0
+    }
   },
-  couponApplied: {
-    type: Boolean,
-    default: false
+  returnReason: {
+    type: String,
+    default: null, // Optional field for storing the return reason
   },
   paymentMethod: { // Add paymentMethod field
     type: String,
     required: true,
-    enum: ['Credit Card', 'Debit Card', 'PayPal', 'COD'],
-  }
+    enum: ['Razorpay', 'Debit Card', 'PayPal', 'COD'],
+  }, wallet: {
+    used: {
+      type: Number,
+      default: 0, // Amount of wallet balance used for the current order
+    },
+    remaining: {
+      type: Number,
+      default: 0, // Remaining wallet balance after usage
+    }
+  },
+  totalAmount: {
+    type: Number,
+   
+  },
 });
 
-// Pre-save hook to calculate totalPrice and finalAmount
-  orderSchema.pre('save', function(next) {
-    if (this.orderedItems.length === 0) {
-      return next(new Error('Cannot place an order with an empty cart.'));
-    }
+orderSchema.pre('save', function (next) {
+  // Check if orderedItems are empty
+  if (!this.orderedItems || this.orderedItems.length === 0) {
+    return next(new Error('Cannot place an order with an empty cart.'));
+  }
+
   // Validate payment method
-  const validPaymentMethods = ['Credit Card', 'Debit Card', 'PayPal', 'COD'];
+  const validPaymentMethods = ['Razorpay', 'Debit Card', 'PayPal', 'COD'];
   if (!validPaymentMethods.includes(this.paymentMethod)) {
     return next(new Error('Invalid payment method.'));
   }
@@ -102,22 +127,17 @@ const orderSchema = new Schema({
     if (!item.price || item.price <= 0) {
       return total; // Skip item if price is invalid
     }
-    return total + (item.quantity * item.price);
+    return total + item.quantity * item.price;
   }, 0);
 
-  // Ensure totalPrice is not 0 before applying a discount
+  // Check if the total price is zero
   if (this.totalPrice === 0) {
     return next(new Error('Total price cannot be zero.'));
   }
 
-  // Apply discount but make sure the final amount is not negative
-  this.finalAmount = this.totalPrice - this.discount;
-  if (this.finalAmount < 0) {
-    return next(new Error('Final amount cannot be negative.'));
-  }
-
   next(); // Proceed with saving the order
 });
+
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

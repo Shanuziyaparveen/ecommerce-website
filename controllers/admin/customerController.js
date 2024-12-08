@@ -1,5 +1,4 @@
 const User= require("../../models/userSchema");
-
 const customerInfo = async (req, res) => {
     try {
         let search = "";
@@ -7,12 +6,16 @@ const customerInfo = async (req, res) => {
             search = req.query.search;
         }
 
-        let page = 1;
+        let page = 1; // Default page is 1
         if (req.query.page) {
             page = parseInt(req.query.page);
+            if (isNaN(page) || page < 1) {
+                page = 1; // Fallback to 1 if the input is invalid or negative
+            }
         }
 
-        const limit = 3;
+        const limit = 3; // Number of records per page
+
         const userData = await User.find({
             isAdmin: false,
             $or: [

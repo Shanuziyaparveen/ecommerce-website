@@ -9,6 +9,7 @@ const Category=require("../../models/categorySchema");
 const Brand=require("../../models/brandSchema")
 const mongoose = require('mongoose');
 
+const { generateReferralCode } = require('../../utils/cryptoUtils');
 
 
 
@@ -28,45 +29,52 @@ const loadHomepage = async (req, res) => {
            productData = productData.slice(0,4);
         
     
-        if (user) {
-        
-            // Make sure user._id is defined
-            console.log("User ID from session:", user._id);
-            const userData = await User.findById(user._id); // Use findById for clarity
-            console.log("User data from DB:", userData);
-           return res.render('home', { user: userData,products:productData,banner:findBanner||[] });
+           if (user) {
+            // Check if the user is blocked
+            const userData = await User.findById(user._id);
+            if (userData && userData.isBlocked) {
+                // If the user is blocked, destroy the session and redirect to login
+                req.session.destroy((err) => {
+                    if (err) {
+                        console.log("Error while destroying session", err);
+                        return res.redirect("/pageNotFound");
+                    }
+                    return res.redirect("/login");
+                });
+            } else {
+                // If the user is not blocked, render the homepage
+                return res.render('home', { user: userData, products: productData, banner: findBanner || [] });
+            }
         } else {
-            return res.render('home',{products:productData ,banner:findBanner||[] });
+            // If no user is logged in, render the homepage without user data
+            return res.render('home', { products: productData, banner: findBanner || [] });
         }
     } catch (error) {
-        console.log("Home page not found",error);
-        res.status(500).send("Server error");
+        next(error); // Pass the error to the errorHandler middleware
     }
-}
+};
 
-const pageNotFound=async(req,res)=>{
-    try{
-        res.render("page-404")
-    }catch(error){
-        res.redirect("/pageNotFound")
+const pageNotFound = async (req, res) => {
+    try {
+        // Passing the statusCode (404) to the EJS template
+        res.status(404).render("page-404", { statusCode: 404 });
+    }  catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
-}
+};
+
 const loadSignup=async(req,res)=>{
     try{
         res.render("signup")
-    }catch(error){
-        console.log("signup page not loading", error);
-        
-        res.status(500).send("server error")
+    } catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const loadShopping=async(req,res)=>{
     try{
         res.render("shop")
-    }catch(error){
-        console.log("shopping page not loading", error);
-        
-        res.status(500).send("server error")
+    } catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 function generateOtp(){
@@ -95,13 +103,12 @@ async function sendVerificationEmail(email,otp){
         })
         return info.accepted.length>0
     } catch (error) {
-        console.error("error sending email",error);
-        return false;
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const signup = async(req,res)=>{
     try{
-const{name, phone ,email,password,cPassword}=req.body;
+const{name, phone ,email,password,cPassword ,referralCode }=req.body;
 if(password!==cPassword){
     return res.render("signup",{message:"Password do not match"});
 
@@ -111,6 +118,18 @@ if(findUser){
     return res.render("signup",{message:"User with this email already exists"});
 
 }
+const newReferralCode = generateReferralCode();
+
+// Check if a referral code was provided and if it is valid
+let referredBy = null;
+if (referralCode) {
+    const referringUser = await User.findOne({ referralCode: referralCode });
+    if (referringUser) {
+        referredBy = referringUser.referralCode; // Store the referral code of the user who referred them
+    } else {
+        return res.render("signup", { message: "Invalid referral code" });
+    }
+}
 const otp=generateOtp();
 const emailSend = await sendVerificationEmail(email,otp);
 if(!emailSend){
@@ -118,21 +137,20 @@ if(!emailSend){
 }
 
 req.session.userOtp = otp;
-req.session.userData={name,phone,email,password};
+req.session.userData={name,phone,email,password, referralCode: newReferralCode, referredBy};
 res.render("verify-otp");
 console.log("OTP sent",otp);
 
-    }catch(error){
-        console.error("signup error",error);
-        res.redirect("/pageNotFound")
+    } catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const securePassword=async(password)=>{
     try {
         const passwordHash=await bcrypt.hash(password,10)
         return passwordHash;
-    } catch (error) {
-        
+    }  catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const verifyOtp=async (req,res)=>{
@@ -147,7 +165,23 @@ const verifyOtp=async (req,res)=>{
                 email:user.email,
                 phone:user.phone,
                 password:passwordHash,
+                referralCode: user.referralCode,
+                referredBy: user.referredBy,
             })
+            await saveUserData.save();
+
+              // If the user was referred by someone, reward both the referrer and the referred user
+              if (user.referredBy) {
+                // Reward the referrer (the user who referred)
+                const referrer = await User.findOne({ referralCode: user.referredBy });
+                if (referrer) {
+                    referrer.rewards += 10; // Example reward points
+                    await referrer.save();
+                }
+            }
+
+            // Reward the new user (optional)
+            saveUserData.rewards += 5; // Example reward points for the new user
             await saveUserData.save();
             req.session.user=saveUserData._id;
             res.json({success:true,redirectUrl:"/"})
@@ -156,8 +190,7 @@ const verifyOtp=async (req,res)=>{
         }
         
     } catch (error) {
-        console.error("Error Verifying OTP",error);
-        res.status(500).json({success:false,message:"An error occured"})
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 
@@ -178,10 +211,8 @@ const resendOtp=async(req,res)=>{
         }else{
             res.status(500).json({success:false,message:"Failed to Resend OTP, please try again"})
         }
-    } catch (error) {
-        console.error("error resending the OTP",error);
-        res.status(500).json({success:false,message:"Internal Server Error,please try again"})
-        
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const loadLogin = async (req,res)=>{
@@ -191,9 +222,8 @@ const loadLogin = async (req,res)=>{
         }else{
             res.redirect("/")
         }
-    } catch (error) {
-        res.redirect("/pageNotFound")
-        
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 
 }
@@ -227,9 +257,8 @@ req.session.user = {
 
         // Redirect to home page
         res.redirect("/");
-    } catch (error) {
-        console.error("login error", error);
-        res.render("login", { message: "Login failed. Please try again" });
+    }  catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 
@@ -242,9 +271,8 @@ const logout=  async(req,res)=>{
             }
             return res.redirect("/login")
         })
-    } catch (error) {
-        console.log("Logout error",error);
-        res.redirect("/pageNotFound")
+    }  catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 }
 const getAllProducts = async (req, res) => {
@@ -255,6 +283,15 @@ const getAllProducts = async (req, res) => {
         })
         .populate('category') // Populate category if needed
         .exec();
+  // Get the user ID from session to check the wishlist
+  const userId = req.session.user; // Assuming the user ID is stored in session
+
+  // Fetch the user document to access the wishlist
+  const user = await User.findOne({ _id: userId });
+  let wishlist = [];
+  if (user) {
+    wishlist = user.wishlist; // Get the user's wishlist
+  }
 
         // Generate image paths for each product
         products.forEach(product => {
@@ -266,15 +303,17 @@ const getAllProducts = async (req, res) => {
 
             // Add an 'outOfStock' field to each product based on quantity
             product.outOfStock = product.quantity <= 0;
+            product.isInWishlist = wishlist.includes(product._id.toString()); // Compare IDs as strings
         });
+        
+        
 
         // Render the product list page with fetched products
         res.render('product-list', {
             products
         });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error fetching products');
+    } catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 
@@ -315,9 +354,8 @@ const getProductDetails = async (req, res) => {
             product, 
             relatedProducts 
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
+    }  catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 const loadShoppingPage = async (req, res) => {
@@ -389,8 +427,7 @@ const loadShoppingPage = async (req, res) => {
             sortOption,
         });
     } catch (error) {
-        console.error("Error loading shopping page:", error);
-        res.redirect('/pageNotFound');
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 
@@ -472,9 +509,8 @@ const filterProduct = async (req, res) => {
             selectedPriceRange,
             sortOption
         });
-    } catch (error) {
-        console.error("Error in filterProduct:", error);
-        res.redirect("/pageNotFound");
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 
@@ -550,8 +586,7 @@ const currentProduct = findProducts.slice(startIndex, endIndex);
         });
 
     } catch (error) {
-        console.log(error);
-        res.redirect("/pageNotFound");
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 const searchProducts = async (req, res) => {
@@ -628,8 +663,7 @@ const searchProducts = async (req, res) => {
             searchQuery: search // Send the search query back to the template
         });
     } catch (error) {
-        console.error("Error in searchProducts:", error);
-        res.redirect("/pageNotFound");
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 
@@ -715,8 +749,7 @@ const getCategorySort = async (req, res) => {
             search
         });
     } catch (error) {
-        console.error("Error in getCategorySort:", error);
-        res.redirect("/pageNotFound");
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 
@@ -802,15 +835,81 @@ const filterSort = async (req, res) => {
             selectedPriceRange,
             search
         });
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
+    }
+};
+const addMoney = async (req, res) => {
+    try {
+      const userId = req.session.user;
+      const { amount } = req.body;
+  
+      // Find the user by ID
+      const user = await User.findById(userId);
+      
+      // Update the user's wallet balance
+      user.wallet += parseFloat(amount);
+      
+      // Add a new transaction entry with status 'Pending'
+      user.transactions.push({
+        amount: parseFloat(amount),
+        type: 'Payment', // Type of the transaction
+        date: new Date(), // Date of transaction
+        orderId: null, // No associated order for wallet top-up
+        status: 'Active', 
+      });
+  
+      // Save the updated user data
+      await user.save();
+  
+      res.redirect('/userProfile'); // Redirect to the profile page after updating the wallet
     } catch (error) {
-        console.error('Error fetching sorted products:', error);
-        res.render("pageNotFound");
+        next(error); // Pass the error to the errorHandler middleware
+    }
+  };
+  const selectWallet = async (req, res) => {
+    try {
+        const { paymentMethod } = req.body;
+
+        // Check if the selected payment method is 'wallet'
+        if (paymentMethod === 'wallet') {
+            // Store this in the session so we know the wallet was applied
+            req.session.applyWallet = true;
+
+            // Fetch user details including wallet balance
+            const user = req.session.user;
+            const userId = user._id;
+            const userDetails = await User.findById(userId).select('wallet');
+            const walletBalance = userDetails.wallet || 0;
+
+            // Calculate remaining amount to pay (you can modify this calculation as per your logic)
+            const cartTotal = req.session.cartTotal || 0;  // Make sure cartTotal is stored in session
+            const updatedAmount=req.session.updatedAmount || cartTotal; //
+            const remainingAmountToPay = Math.max(updatedAmount - walletBalance, 0);
+
+            // Update session with the wallet balance and remaining amount to pay
+            req.session.walletBalance = walletBalance;
+            req.session.remainingAmountToPay = remainingAmountToPay;
+
+            // Send the updated data to the frontend
+            res.json({
+                walletBalance,
+                remainingAmountToPay,
+            });
+        } else {
+            // If paymentMethod is not 'wallet', return an error
+            res.status(400).send('Invalid payment method');
+        }
+    }catch (error) {
+        next(error); // Pass the error to the errorHandler middleware
     }
 };
 
+
+  
 module.exports = {
    pageNotFound,
     loadHomepage,
 loadShopping,loadSignup,signup,verifyOtp,resendOtp,loadLogin,login,logout, 
-getAllProducts,getProductDetails,loadShoppingPage,filterProduct,filterByPrice,searchProducts,filterSort,getCategorySort
+getAllProducts,getProductDetails,loadShoppingPage,filterProduct,filterByPrice,searchProducts,filterSort,getCategorySort,addMoney,selectWallet
  };

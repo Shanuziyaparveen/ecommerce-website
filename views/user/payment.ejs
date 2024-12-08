@@ -1,5 +1,7 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
- <style>
+ 
   body {
     background-color: #1c1832;
     color: #e9e9f4;
@@ -139,18 +141,174 @@
         <a href="/cart" rel="nofollow">Cart</a>
       </div>
     </div>
-    <h1>Select Payment Method</h1>
-    <form action="/process-payment" method="POST">
-      <div class="payment-methods">
-        <% availableMethods.forEach(method => { %>
-          <div class="payment-option">
-            <input type="radio" id="<%= method %>" name="paymentMethod" value="<%= method %>">
-            <label for="<%= method %>"><%= method %></label>
-          </div>
-        <% }) %>
-      </div>
-      <button type="submit" class="confirm-payment-button">Confirm and Proceed</button>
-    </form>
+   
+    <!-- Payment Selection Form -->
+<h1>Select Payment Method</h1>
+<form class="pay-form" action="/process-payment" method="POST">
+  <div class="payment-methods">
+    <!-- Payment Methods -->
+    <div class="payment-option">
+      <input type="radio" id="Razorpay" name="paymentMethod" value="Razorpay">
+      <label for="Razorpay">Razorpay</label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" id="DebitCard" name="paymentMethod" value="Debit Card">
+      <label for="DebitCard">Debit Card</label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" id="UPI" name="paymentMethod" value="UPI">
+      <label for="UPI">UPI</label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" id="NetBanking" name="paymentMethod" value="Net Banking">
+      <label for="NetBanking">Net Banking</label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" id="COD" name="paymentMethod" value="COD">
+      <label for="COD">COD</label>
+    </div>
   </div>
-  <%- include("../../views/partials/user/footer") %>
-</body>
+  <button type="submit" class="confirm-payment-button">Confirm and Proceed</button>
+</form>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('.pay-form').submit(function(e) {
+      e.preventDefault();
+
+      var formData = $(this).serialize(); // Serialize the form data to send in AJAX
+
+      // Get the selected payment method
+      var paymentMethod = $('input[name="paymentMethod"]:checked').val();
+
+      // Check if a payment method is selected
+      if (!paymentMethod) {
+        Swal.fire({
+          title: 'Error',
+          text: 'Please select a payment method.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        return;  // Exit if no payment method is selected
+      }
+
+      // Check if the payment method is COD
+      if (paymentMethod === "COD") {
+        // Handle COD (Cash On Delivery) payment
+       // Assuming formData includes necessary data like paymentMethod, user details, cart, etc.
+$.ajax({
+  url: "/process-payment",  // Server endpoint for COD processing
+  type: "POST",
+  data: formData,  // Send form data including payment method
+  success: function(res) {
+    console.log("Response from Server:", res);
+
+    if (res.success) {
+      Swal.fire({
+        title: 'Order Confirmed',
+        text: 'Your order will be shipped and payment will be collected on delivery.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(function() {
+        window.location.href = "/confirm-order";  // Redirect to the order confirmation page
+      });
+    } else {
+      Swal.fire({
+        title: 'Error',
+        text: res.msg,  // Show error message from the server
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  },
+  error: function(err) {
+    console.error("Error during COD payment:", err);
+    Swal.fire({
+      title: 'Error',
+      text: 'Something went wrong with the payment processing. Please try again.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+});
+
+      } else {
+        // Handle Razorpay payment
+        $.ajax({
+          url: "/process-payment",  // Server endpoint for Razorpay order creation
+          type: "POST",
+          data: formData,
+          success: function(res) {
+            console.log("Response from Server:", res);  // Log the entire response to inspect its structure
+
+            if (res.success) {
+              // Proceed with Razorpay payment initiation
+              var options = {
+                "key": res.key_id,  // Razorpay key ID from the server
+                "amount": res.amount * 100,  // Convert amount to paise (Razorpay expects it in paise)
+                "currency": "INR",
+                "order_id": res.order_id,
+                "handler": function (response) {
+                  Swal.fire({
+                    title: 'Payment Succeeded',
+                    text: 'Your payment was successful!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                  }).then(function() {
+                    window.location.href = "/confirm-order";  // Redirect to the order success page
+                  });
+                },
+                "prefill": {
+                  "contact": res.contact,  // User's contact (phone number)
+                  "name": res.name,        // User's name
+                  "email": res.email       // User's email
+                },
+                "notes": {
+                  "description": res.description
+                },
+                "theme": {
+                  "color": "#2300a3"
+                }
+              };
+
+              var razorpayObject = new Razorpay(options);
+
+              // Handle payment failure
+              razorpayObject.on('payment.failed', function(response) {
+                Swal.fire({
+                  title: 'Payment Failed',
+                  text: 'There was an issue with your payment. Please try again.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              });
+
+              // Open the Razorpay payment gateway
+              razorpayObject.open();
+            } else {
+              Swal.fire({
+                title: 'Error',
+                text: res.msg,  // Show error message from the server
+                icon: 'error',
+                confirmButtonText: 'OK'
+              });
+            }
+          },
+          error: function(err) {
+            console.error("Error during Razorpay payment:", err);
+            Swal.fire({
+              title: 'Error',
+              text: 'Something went wrong with the payment processing. Please try again.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+        });
+      }
+    });
+  });
+</script>
+
+

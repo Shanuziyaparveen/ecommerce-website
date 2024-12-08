@@ -49,82 +49,124 @@ const addToCart = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Product is out of stock' });
       }
     }
-    
+
     // Recalculate cart total
     cart.cartTotal = cart.items.reduce((total, item) => total + item.totalPrice, 0);
 
     // Save the updated cart to the database
     await cart.save();
 
+    // Optionally, update the product stock after an item is added to the cart (if your system requires this)
+    // product.quantity -= 1;
+    // await product.save();
+
     // Also save the cart in the session (if you want to use session for quick access)
     req.session.cart = cart;
 
     res.status(200).json({ success: true, message: 'Product added to cart', cart });
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
-  }
-}; 
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
+};
 const getCartPage = async (req, res) => {
   try {
     const user = req.session.user;
-    if (!user) {
-      console.error('No user found in session');
+    if (!user || !user._id) {
+      console.error('No valid user found in session');
       return res.redirect('/login');
     }
 
     const userId = user._id;
     console.log('Session User:', user);
 
-    // Find the cart and populate product details
+    // Fetch user details including wallet
+    const userDetails = await User.findById(userId).select('wallet transactions');
+    const walletBalance = userDetails.wallet || 0;
+
+    // Log user details fetched from database
+    console.log('User Details:', userDetails);
+
+    // Find the cart for the user and populate product details
     const cart = await Cart.findOne({ userId }).populate('items.productId');
 
     if (!cart || cart.items.length === 0) {
       console.log('No items found in cart for user:', userId);
-      return res.render('cart', { 
-        cartItems: [], 
-        cartSubtotal: 0, 
-        cartTax: 0, 
-        cartTotal: 0, 
+      return res.render('cart', {
+        cartItems: [],
+        cartSubtotal: 0,
+        cartTax: 0,
+        cartTotal: 0,
         totalItems: 0,
         user,
         hasOutOfStockItems: false,
+        walletBalance,
+        remainingAmountToPay: 0,
       });
     }
 
-    // Map cart items to include dynamic pricing and stock
-    const cartItems = cart.items.map(item => {
-      const product = item.productId;
-      if (!product) return null; // Skip if product is not found
-      
-      const regularPrice = product.regularPrice || 0;
-      const salePrice = product.salePrice || regularPrice;
-      const priceToShow = salePrice < regularPrice ? salePrice : regularPrice;
+    // Map cart items with product details
+    const cartItems = cart.items
+      .map(item => {
+        const product = item.productId;
+        if (!product) return {}; // Returning empty object instead of null
+        const priceToShow = Math.min(product.salePrice, product.regularPrice);
+        return {
+          id: product._id,
+          name: product.productName,
+          image: product.productImage[0],
+          regularPrice: product.regularPrice,
+          salePrice: product.salePrice,
+          price: priceToShow,
+          quantity: item.quantity,
+          totalPrice: item.totalPrice,
+          stock: product.quantity,
+        };
+      })
+      .filter(item => item.id); // Ensures only valid products are kept
 
-      return {
-        id: product._id,
-        name: product.productName,
-        image: product.productImage[0],
-        regularPrice,
-        salePrice,
-        price: priceToShow, // Use the effective price
-        quantity: item.quantity,
-        totalPrice: item.totalPrice,
-        stock: product.quantity,
-      };
-    }).filter(item => item !== null); // Remove null entries
-
-    // Calculate totals
+    // Calculate cart totals
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     const cartSubtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-    const cartTax = cartSubtotal * 0.1; // Example tax calculation
+    const taxRate = 0.1; // You can make this configurable
+    const cartTax = cartSubtotal * taxRate;
     const cartTotal = cartSubtotal + cartTax;
+    req.session.updatedAmount=cartTotal;
+    let discountedAmount = cartTotal;
 
-    // Check for out-of-stock items
+    // Apply coupon discount if applied
+    const applyCoupon = req.session.couponApplied;
+    if (applyCoupon) {
+      discountedAmount = Math.max(cartTotal - req.session.couponDiscount, 0);
+    }
+
+    // Apply wallet balance if applied
+    const applyWallet = req.session.applyWallet;
+    let remainingAmountToPay = cartTotal;
+
+    if (applyCoupon) {
+      remainingAmountToPay -= req.session.couponDiscount;
+    }
+
+    if (applyWallet) {
+      remainingAmountToPay -= walletBalance;
+    }
+
+    remainingAmountToPay = Math.max(remainingAmountToPay, 0);
+
+    // Log session data for debugging
+    if (applyWallet) {
+      console.log('Session Data (Wallet Applied):', req.session);
+      console.log('Remaining Amount to Pay:', remainingAmountToPay);
+      console.log('Wallet Balance:', walletBalance);
+      console.log('Cart Items:', cartItems);
+      console.log('Cart Subtotal:', cartSubtotal);
+      console.log('Cart Tax:', cartTax);
+      console.log('Total Items:', totalItems);
+    }
+
     const hasOutOfStockItems = cartItems.some(item => item.quantity > item.stock);
 
-    // Render the cart page with updated values
-    res.render('cart', {
+    return res.render('cart', {
       cartItems,
       cartSubtotal,
       cartTax,
@@ -132,13 +174,13 @@ const getCartPage = async (req, res) => {
       totalItems,
       user,
       hasOutOfStockItems,
+      walletBalance,
+      remainingAmountToPay,
     });
-  } catch (error) {
-    console.error('Error fetching cart:', error.message);
-    res.status(500).send('Internal Server Error');
-  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
-
 
 const incrementQuantity = async (req, res) => {
   try {
@@ -186,10 +228,9 @@ const incrementQuantity = async (req, res) => {
 
     // Redirect to the cart page to show the updated quantity
     return res.redirect('/cart');
-  } catch (error) {
-    console.error('Error incrementing quantity:', error);
-    return res.render('error', { errorMessage: 'Internal Server Error' });
-  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 
 
@@ -227,10 +268,9 @@ const decrementQuantity = async (req, res) => {
     } else {
       return res.status(400).send('Quantity cannot be less than 1');
     }
-  } catch (error) {
-    console.error('Error decrementing quantity:', error);
-    return res.render('error', { errorMessage: 'Internal Server Error' });
-  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 const removeFromCart = async (req, res) => {
   const { productId } = req.body;
@@ -261,10 +301,9 @@ const removeFromCart = async (req, res) => {
     await cart.save();
 
     res.status(200).json({ success: true, message: 'Product removed from cart', cart });
-  } catch (error) {
-    console.error('Error removing from cart:', error);
-    return res.render('error', { errorMessage: 'Internal Server Error' });
-  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 const getCheckout = async (req, res) => {
   try {
@@ -281,10 +320,9 @@ const getCheckout = async (req, res) => {
       selectedAddress,
       savedAddresses: savedAddresses 
     });
-  } catch (error) {
-    console.error('Error fetching saved addresses:', error);
-    res.status(500).send('Server Error');
-  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 const selectAddress = async (req, res) => {
   console.log("selectAddress function called");
@@ -325,9 +363,9 @@ const selectAddress = async (req, res) => {
 
 
      return res.redirect("/checkout");
-  } catch (error) {
-    console.error("Error selecting address:", error);
-    return res.render('error', { errorMessage: 'Internal Server Error' });  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 
 
@@ -357,8 +395,8 @@ const saveAddress = async (req, res) => {
       // Redirect to the checkout page
       res.redirect('/checkout');
   } catch (error) {
-      console.error("Error saving address:", error);
-      return res.render('error', { errorMessage: 'Internal Server Error' });  }
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 const productDetails = async (req, res) => {
   try {
@@ -390,10 +428,9 @@ const productDetails = async (req, res) => {
       totalOffer: totalOffer,
       category: findCategory,
     });
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    return res.render('error', { errorMessage: 'Internal Server Error' });
-  }
+  }catch (error) {
+    next(error); // Pass the error to the errorHandler middleware
+}
 };
 
 module.exports = {

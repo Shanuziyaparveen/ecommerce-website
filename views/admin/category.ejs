@@ -199,9 +199,31 @@
 
   <script>
       function addOffer(categoryId) {
-    const percentage = prompt("Enter offer percentage:");
-
-    if (percentage && !isNaN(percentage)) {
+  Swal.fire({
+    title: 'Enter Offer Percentage',
+    input: 'number', // Input type set to 'number'
+    inputAttributes: {
+      min: 1,
+      max: 100,
+      step: 1
+    },
+    inputPlaceholder: 'Enter a number between 1 and 100',
+    showCancelButton: true,
+    confirmButtonText: 'Submit',
+    cancelButtonText: 'Cancel',
+    showLoaderOnConfirm: true,
+    preConfirm: (percentage) => {
+      // Validate the input
+      if (!percentage || isNaN(percentage) || percentage < 1 || percentage > 100) {
+        Swal.showValidationMessage('Please enter a valid percentage between 1 and 100');
+        return false;
+      }
+      return percentage;  // Return the valid percentage
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const percentage = result.value;  // Get the valid percentage from the input
+      // Send the offer data to the server
       fetch('/admin/addCategoryOffer', {
         method: 'POST',
         headers: {
@@ -233,14 +255,10 @@
           text: 'An error occurred while adding the offer.',
         });
       });
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Invalid Input',
-        text: 'Please enter a valid percentage.',
-      });
     }
-  }
+  });
+}
+
 
   function removeOffer(categoryId) {
     fetch('/admin/removeCategoryOffer', {
