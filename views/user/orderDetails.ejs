@@ -1,169 +1,206 @@
-
 <%- include("../../views/partials/user/header") %>
 <style>
   /* General Page Styles */
   .order-confirmed-page {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    color: #343a40;
+    background: #f4f8fb;
+    color: #333;
     text-align: center;
     padding: 40px 20px;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Roboto', sans-serif;
   }
 
   .order-confirmed-page h1 {
-    font-size: 2.8em;
+    font-size: 3em;
     margin-bottom: 20px;
-    color: #28a745;
-    font-weight: 600;
+    color: #4caf50;
+    font-weight: 700;
+  }
+
+  /* Confirmation Icon */
+  .confirmation-icon {
+    font-size: 5em;
+    color: #4caf50;
+    margin-bottom: 20px;
+    animation: fade-in 0.5s ease-in-out;
+  }
+
+  .confirmation-icon p {
+    font-size: 1.4em;
+    color: #555;
+    margin: 0;
+    font-weight: 500;
   }
 
   /* Order Summary Styles */
   .order-summary, .address-section, .payment-method {
-    background: #ffffff;
-    border-radius: 10px;
+    background: #fff;
+    border-radius: 12px;
     padding: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 800px;
   }
 
   .order-summary h2, .address-section h2, .payment-method h2 {
-    font-size: 1.8em;
-    margin-bottom: 15px;
+    font-size: 1.6em;
+    margin-bottom: 20px;
     color: #007bff;
-    border-bottom: 3px solid #007bff;
-    display: inline-block;
+    font-weight: 600;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    text-align: left;
   }
 
   .cart-item {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 10px 0;
-    border-bottom: 1px solid #dee2e6;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
   }
 
   .cart-item img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
     border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .cart-item-details {
+    flex-grow: 1;
+    text-align: left;
   }
 
   .cart-item-details h5 {
     font-size: 1.2em;
-    margin: 0;
-    color: #495057;
+    margin: 0 0 5px 0;
+    color: #333;
+    font-weight: 600;
+  }
+
+  .cart-item-details p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #555;
+  }
+
+  .order-total {
+    text-align: right;
+    margin-top: 20px;
   }
 
   .order-total h3 {
-    color: #495057;
+    color: #333;
+    font-size: 1.4em;
     font-weight: 700;
     margin-bottom: 5px;
   }
 
-  /* Confirmation Icon and Message */
-  .confirmation-icon {
-    font-size: 4em;
-    color: #28a745;
-    margin-bottom: 10px;
-    animation: bounce-in 0.6s ease;
+  .order-total p {
+    font-size: 1.2em;
+    color: #555;
   }
 
-  .confirmation-icon p {
-    font-size: 1.3em;
-    color: #6c757d;
+  /* Address Section */
+  .address-section h3 {
+    font-size: 1.2em;
+    color: #333;
+    font-weight: 600;
+  }
+
+  .address-section p {
+    font-size: 1em;
+    color: #555;
+  }
+
+  /* Payment Method Section */
+  .payment-method p {
+    font-size: 1.2em;
+    color: #555;
+    font-weight: 500;
   }
 
   /* Button Styles */
   .home-button {
     display: inline-block;
-    padding: 12px 30px;
+    margin-top: 30px;
+    padding: 15px 40px;
     background: #007bff;
     color: #fff;
-    border-radius: 5px;
+    border-radius: 30px;
+    font-size: 1.2em;
     text-decoration: none;
-    font-size: 1em;
-    transition: all 0.3s;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
   }
 
   .home-button:hover {
     background: #0056b3;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    transform: translateY(-3px);
   }
 
-  /* Keyframe Animation */
-  @keyframes bounce-in {
-    0% {
-      transform: scale(0.8);
+  /* Keyframe Animations */
+  @keyframes fade-in {
+    from {
       opacity: 0;
+      transform: scale(0.8);
     }
-    100% {
-      transform: scale(1);
+    to {
       opacity: 1;
+      transform: scale(1);
     }
   }
 </style>
 
-  <body>
-    <!-- Order Confirmed Page -->
-    <div class="order-confirmed-page">
-        <h1>Order Confirmed</h1>
+<body>
+  <div class="order-confirmed-page">
+    <i class="fas fa-check-circle confirmation-icon"></i>
+    <h1>Order Confirmed</h1>
+    <p>Your order has been successfully placed! Thank you for shopping with us.</p>
 
-        <!-- Order Summary Section -->
-        <% if (totalItems > 0) { %>
-            <div class="order-summary">
-                <h2>Your Order</h2>
-                <div class="cart-items">
-                  <% cartItems.forEach(item => { %>
-                    <div class="cart-item">
-                        <img src="/uploads/re-image/<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>">
-                        <div class="cart-item-details">
-                            <h5><%= item.product.productName %></h5>
-                            <p>Quantity: <%= item.quantity %></p>
-                            <p>Total: ₹<%= item.price %></p>
-                        </div>
-                    </div>
-                <% }) %>
-                
-                </div>
-
-                <!-- Display Cart Total (Total Amount) -->
-                <div class="order-total">
-                  <h3 style="color: rgb(11, 41, 67);">Total Amount: ₹<%= initialCartTotal %></h3>
-                                      <p style="color: rgb(9, 40, 66);">payment of: ₹<%= finalAmount %> via <%=paymentMethod%></p> <!-- Display the total amount here -->
-                </div>
+    <!-- Order Summary Section -->
+    <% if (totalItems > 0) { %>
+      <div class="order-summary">
+        <h2>Your Order</h2>
+        <div class="cart-items">
+          <% cartItems.forEach(item => { %>
+            <div class="cart-item">
+              <img src="/uploads/re-image/<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>">
+              <div class="cart-item-details">
+                <h5><%= item.product.productName %></h5>
+                <p>Quantity: <%= item.quantity %></p>
+                <p>Total: ₹<%= item.price %></p>
+              </div>
             </div>
-        <% } %>
-    </div>
-    <hr style="border-top: 1px solid #dee2e6; margin: 30px 0;">
+          <% }) %>
+        </div>
+        <div class="order-total">
+          <h3>Total Amount: ₹<%= initialCartTotal %></h3>
+          <p>Payment of: ₹<%= finalAmount %> via <%= paymentMethod %></p>
+        </div>
+      </div>
+    <% } %>
 
     <!-- Address Section -->
     <div class="address-section">
-        <h2>Delivery Address</h2>
-        <h3><%= address.name %></h3>
-        <p><%= address.street %>, <%= address.city %>, <%= address.pincode %></p>
-        <p><%= address.state %></p>
+      <h2>Delivery Address</h2>
+      <h3><%= address.name %></h3>
+      <p><%= address.landMark %>, <%= address.city %>, <%= address.pincode %></p>
+      <p><%= address.state %></p>
     </div>
-    <hr style="border-top: 1px solid #dee2e6; margin: 30px 0;">
 
     <!-- Payment Method Section -->
     <div class="payment-method">
-        <h2>Payment Method</h2>
-        <p><%= paymentMethod %></p>
+      <h2>Payment Method</h2>
+      <p><%= paymentMethod %></p>
     </div>
 
-    <!-- Confirmation Icon and Message -->
-    <div class="confirmation-icon">
-        <i class="fas fa-check-circle"></i>
-        <p>Your order has been placed successfully!</p>
-    </div>
-    <hr style="border-top: 1px solid #dee2e6; margin: 30px 0;">
-
-    <!-- Button to Go Back to Home -->
+    <!-- Home Button -->
     <a href="/" class="home-button">Go Back to Home</a>
-</div>
-
+  </div>
 </body>
-
-<!-- Include Footer -->
 <%- include("../../views/partials/user/footer") %>

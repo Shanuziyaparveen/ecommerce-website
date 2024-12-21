@@ -62,10 +62,10 @@ const addTowishList = async (req, res) => {
 
     // Respond with a success message
     res.status(200).json({ success: true, message: 'Product added to wishlist' });
-  } catch (err) {
-    console.error('Error adding to wishlist:', err);  // Log the error for debugging
-    res.status(500).json({ success: false, message: 'An error occurred while adding to wishlist' });
-  }
+  }   catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
+}
 };
 const getRemoveFromWishlist = async (req, res) => {
   if (req.session.user) {

@@ -137,6 +137,123 @@
         .db__counter-label strong {
             color: #333;
         }
+        .filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Spacing between elements */
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.filter-container label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+}
+
+.filter-container input[type="date"] {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    width: 200px;
+}
+
+.filter-container input[type="date"]:hover,
+.filter-container input[type="date"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.filter-container button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-container button:hover {
+    background-color: #0056b3;
+}
+
+.filter-container button:active {
+    background-color: #004085;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.summary-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.summary-container h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-container h3:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.summary-container h3 i {
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+.summary-container h3 span {
+    font-weight: bold;
+    color: #007bff;
+}
+.db__progress {
+    position: relative;
+    background-color: #f0f0f0;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.db__progress-fill {
+    background-color: #4caf50;
+    height: 100%;
+    width: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.5s ease-in-out;
+}
+
+
     </style>
 </head>
 
@@ -152,27 +269,36 @@
         <button id="generateReportButton">Generate Report</button>
     </div>
 
-    <!-- Summary section -->
-    <div class="summary-container">
-        <h3>Total Orders: <%= report.totalOrders %></h3>
-        <h3>Total Sales: ₹<%= report.totalSales.toFixed(2) %></h3>
-        <h3>Total Discounts: ₹<%= report.totalDiscount.toFixed(2) %></h3>
-    </div>
+  <!-- Summary section -->
+<div class="summary-container">
+    <h3>
+        <i class="fas fa-shopping-cart"></i> 
+        Total Orders: <span><%= report.totalOrders %></span>
+    </h3>
+    <h3>
+        <i class="fas fa-rupee-sign"></i> 
+        Total Sales: ₹<span><%= report.totalSales.toFixed(2) %></span>
+    </h3>
+    <h3>
+        <i class="fas fa-tags"></i> 
+        Total Discounts: ₹<span><%= report.totalDiscount.toFixed(2) %></span>
+    </h3>
+</div>
 
-    <!-- Dashboard statistics -->
-    <div class="db__container">
-        <div class="db__cell">
-            <h2 class="db__top-stat">Today’s Revenue</h2>
-            <div class="db__progress">
-                <div class="db__progress-fill" style="transform: translateX(15%);"></div>
-            </div>
-            <div class="db__counter">
-                <div class="db__counter-value" id="revenueValue">₹0</div>
-                <div class="db__counter-label">
-                    <strong id="revenueChange">+0%</strong><br><small>vs yesterday</small>
-                </div>
+<div class="db__container">
+    <div class="db__cell">
+        <h2 class="db__top-stat">Today’s Revenue</h2>
+        <div class="db__progress">
+            <div class="db__progress-fill" id="revenueProgress" style="transform: translateX(15%);"></div>
+        </div>
+        <div class="db__counter">
+            <div class="db__counter-value" id="revenueValue">₹0</div>
+            <div class="db__counter-label">
+                <strong id="revenueChange">+0%</strong><br><small>vs yesterday</small>
             </div>
         </div>
+    </div>
+</div>
         <div class="db__cell">
             <h2 class="db__top-stat">Today’s Orders</h2>
             <div class="db__progress">
@@ -277,20 +403,28 @@ const ctx = document.getElementById('paymentMethodChart').getContext('2d');
             }
         }
     });
-        // Fetch today's revenue data
-        fetch('/admin/revenue/today')
-            .then(response => response.json())
-            .then(data => {
-                const revenueValue = document.getElementById('revenueValue');
-                const revenueChange = document.getElementById('revenueChange');
+    fetch('/admin/revenue/today')
+        .then(response => response.json())
+        .then(data => {
+            const revenueValue = document.getElementById('revenueValue');
+            const revenueChange = document.getElementById('revenueChange');
+            const revenueProgress = document.getElementById('revenueProgress');
 
-                const totalRevenue = data.todaysRevenue.toFixed(2);
-                const revenueComparison = data.revenueComparison;
-                revenueValue.textContent = '₹' + totalRevenue;
+            const totalRevenue = parseFloat(data.todaysRevenue).toFixed(2);
+            const percentageChange = parseFloat(data.revenueChange);
+            const maxRevenue = 100000; // Example: Replace with your target revenue.
 
-                const percentageChange = ((revenueComparison / totalRevenue) * 100).toFixed(2);
-                revenueChange.textContent = (percentageChange > 0 ? '+' : '') + percentageChange + '%';
-            });
+            // Update text content
+            revenueValue.textContent = `₹${totalRevenue}`;
+            revenueChange.textContent = (percentageChange > 0 ? '+' : '') + percentageChange.toFixed(2) + '%';
+
+            // Update progress bar width (limit to 100%)
+            const progressPercentage = Math.min((totalRevenue / maxRevenue) * 100, 100);
+            revenueProgress.style.transform = `translateX(-${100 - progressPercentage}%)`;
+        })
+        .catch(error => {
+            console.error('Error fetching revenue data:', error);
+        });
 
         // Fetch today's orders data
         fetch('/admin/orders/today')

@@ -227,44 +227,37 @@ const totalSales = orders.reduce((sum, order) => sum + (order.finalAmount || 0),
 //       res.redirect("/pageerror");
 //     }
 //   };
-  const getTodaysRevenue = async (req, res) => {
+const getTodaysRevenue = async (req, res) => {
     const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
     const endOfDay = new Date(new Date().setHours(23, 59, 59, 999));
 
-    // Calculate start and end of yesterday
     const startOfYesterday = new Date(startOfDay);
     startOfYesterday.setDate(startOfYesterday.getDate() - 1);
     const endOfYesterday = new Date(endOfDay);
     endOfYesterday.setDate(endOfYesterday.getDate() - 1);
 
     try {
-        // Fetch today's orders excluding canceled ones
-        const todaysOrders = await Order.find({
-            createdOn: { $gte: startOfDay, $lte: endOfDay },
-            status: { $ne: 'Cancelled' }
-        });
+        // Fetch today's and yesterday's orders
+        const [todaysOrders, yesterdaysOrders] = await Promise.all([
+            Order.find({ createdOn: { $gte: startOfDay, $lte: endOfDay }, status: { $ne: 'Cancelled' } }),
+            Order.find({ createdOn: { $gte: startOfYesterday, $lte: endOfYesterday }, status: { $ne: 'Cancelled' } })
+        ]);
 
         const todaysRevenue = todaysOrders.reduce((sum, order) => sum + order.finalAmount, 0);
-
-        // Fetch yesterday's orders excluding canceled ones
-        const yesterdaysOrders = await Order.find({
-            createdOn: { $gte: startOfYesterday, $lte: endOfYesterday },
-            status: { $ne: 'Cancelled' }
-        });
-
         const yesterdaysRevenue = yesterdaysOrders.reduce((sum, order) => sum + order.finalAmount, 0);
 
-        // Optionally calculate the revenue change percentage
-        const revenueChange = ((todaysRevenue - yesterdaysRevenue) / (yesterdaysRevenue || 1)) * 100;
+        const revenueChange =
+            yesterdaysRevenue === 0
+                ? 0
+                : ((todaysRevenue - yesterdaysRevenue) / yesterdaysRevenue) * 100;
 
-        // Ensure correct currency format before sending the response
-        res.json({ 
-            todaysRevenue: todaysRevenue.toFixed(2), 
-            yesterdaysRevenue: yesterdaysRevenue.toFixed(2), 
-            revenueChange: revenueChange.toFixed(2) + "%" 
+        res.json({
+            todaysRevenue: todaysRevenue.toFixed(2),
+            yesterdaysRevenue: yesterdaysRevenue.toFixed(2),
+            revenueChange: revenueChange.toFixed(2)
         });
     } catch (error) {
-        console.error('Error fetching revenue data:', error.stack);
+        console.error('Error fetching revenue data:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };
@@ -289,93 +282,5 @@ const getTodaysOrders = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
-// const getAvgOrderValue = async (req, res) => {
-//   const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
-//   const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
-
-//   const startOfYesterday = new Date(new Date().setDate(new Date().getDate() - 1));
-//   const endOfYesterday = new Date(new Date(startOfYesterday).setHours(23, 59, 59, 999)); // Adjust to the last moment of yesterday
-
-//   try {
-//       console.log("Start of Today: ", startOfToday);
-//       console.log("End of Today: ", endOfToday);
-//       console.log("Start of Yesterday: ", startOfYesterday);
-//       console.log("End of Yesterday: ", endOfYesterday);
-
-//       // Calculate today's average order value
-//       const todayOrders = await Order.find({
-//           createdOn: { $gte: startOfToday, $lte: endOfToday },
-//       });
-//       console.log("Today's Orders: ", todayOrders); // Debugging
-
-//       const todayTotalRevenue = todayOrders.reduce((acc, order) => acc + order.finalAmount, 0);
-//       console.log("Today's Total Revenue: ", todayTotalRevenue); // Debugging
-
-//       const todayAvgOrderValue = todayOrders.length ? (todayTotalRevenue / todayOrders.length) : 0;
-//       console.log("Today's Average Order Value: ", todayAvgOrderValue); // Debugging
-
-//       // Calculate yesterday's average order value
-//       const yesterdayOrders = await Order.find({
-//           createdOn: { $gte: startOfYesterday, $lte: endOfYesterday }, // Fixed the range
-//       });
-//       console.log("Yesterday's Orders: ", yesterdayOrders); // Debugging
-
-//       const yesterdayTotalRevenue = yesterdayOrders.reduce((acc, order) => acc + order.finalAmount, 0);
-//       console.log("Yesterday's Total Revenue: ", yesterdayTotalRevenue); // Debugging
-
-//       const yesterdayAvgOrderValue = yesterdayOrders.length ? (yesterdayTotalRevenue / yesterdayOrders.length) : 0;
-//       console.log("Yesterday's Average Order Value: ", yesterdayAvgOrderValue); // Debugging
-
-//       // Send the data in the response
-//       res.json({ todayAvgOrderValue, yesterdayAvgOrderValue });
-//   } catch (error) {
-//       console.error('Error fetching average order value:', error);
-//       res.status(500).json({ message: 'Server Error' });
-//   }
-// };
-
-
-// const getsevendaysReport = async (req, res) => {
-//   try {
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0); // Set to start of the day
-//     const sevenDaysAgo = new Date();
-//     sevenDaysAgo.setDate(today.getDate() - 6);
-//     sevenDaysAgo.setHours(0, 0, 0, 0);
-
-//     const salesData = await Order.aggregate([
-//       {
-//         $match: {
-//           createdAt: { $gte: sevenDaysAgo, $lte: today },
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-//           totalSales: { $sum: "$finalAmount" },
-//         },
-//       },
-//       { $sort: { _id: 1 } },
-//     ]);
-
-//     // Generate dates for the past 7 days
-//     const dates = Array.from({ length: 7 }, (_, i) => {
-//       const date = new Date();
-//       date.setDate(today.getDate() - i);
-//       return date.toISOString().split("T")[0];
-//     }).reverse();
-
-//     // Fill missing dates with zero sales
-//     const formattedSalesData = dates.map(date => ({
-//       date,
-//       amount: salesData.find(sale => sale._id === date)?.totalSales || 0,
-//     }));
-
-//     res.json(formattedSalesData);
-//   } catch (err) {
-//     console.error("Error fetching sales data:", err);
-//     res.status(500).json({ error: "Failed to fetch sales data" });
-//   }
-// };
 
 module.exports ={getAdminSalesReport, getTodaysOrders,getTodaysRevenue}

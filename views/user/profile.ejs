@@ -125,6 +125,71 @@
 .breadcrumb a:hover::after {
  transform: scaleX(1);
 }
+/* Style for the pagination container */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Style for each pagination button */
+.pagination a, .pagination span {
+  padding: 8px 16px;
+  font-size: 16px;
+  color: #ffffff;
+  background-color: #007bff; /* Primary color */
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+/* Hover effect */
+.pagination a:hover {
+  background-color: #0056b3; /* Darker shade of primary color */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+/* Active page button */
+.pagination .btn-primary {
+  background-color: #0056b3; /* Active page has the darker primary color */
+  border-color: #0056b3;
+}
+
+/* Disabled button (no hover effect) */
+.pagination .disabled {
+  background-color: #e0e0e0;
+  color: #b0b0b0;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
+/* Style for the Previous and Next buttons */
+.pagination .btn-secondary {
+  background-color: #f1f1f1;
+  color: #333;
+  border-color: #ccc;
+}
+
+.pagination .btn-secondary:hover {
+  background-color: #ddd;
+  transform: translateY(-2px);
+}
+
+/* Mobile-friendly adjustments */
+@media (max-width: 600px) {
+  .pagination {
+    gap: 5px;
+  }
+  .pagination a, .pagination span {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+}
+
 </style>
 
 
@@ -299,6 +364,27 @@
                           <% }) %>
                         </tbody>
                       </table>
+                      
+                      <!-- Orders Pagination -->
+                      <div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                        <% if (currentPage > 1) { %>
+                          <a href="/userProfile?page=<%= currentPage - 1 %>" class="btn btn-secondary">Previous</a>
+                        <% } else { %>
+                          <span class="btn btn-secondary disabled">Previous</span>
+                        <% } %>
+              
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                          <a href="/userProfile?page=<%= i %>" class="btn <%= currentPage === i ? 'btn-primary' : 'btn-light' %>">
+                            <%= i %>
+                          </a>
+                        <% } %>
+              
+                        <% if (currentPage < totalPages) { %>
+                          <a href="/userProfile?page=<%= currentPage + 1 %>" class="btn btn-secondary">Next</a>
+                        <% } else { %>
+                          <span class="btn btn-secondary disabled">Next</span>
+                        <% } %>
+                      </div>
                     </div>
                   <% } else { %>
                     <div class="col-lg-12">
@@ -314,6 +400,7 @@
                   <% } %>
                 </div>
               </div>
+              
               
               <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
                 <div class="card">
@@ -340,8 +427,7 @@
                 </div>
               </div>
               
-
-              <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="orders-tab">
+              <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="wallet-history-tab">
                 <div class="card">
                   <div class="card-header">
                     <h5 class="mb-0">Wallet History</h5>
@@ -360,11 +446,12 @@
                           <% if (wallet.transactions && wallet.transactions.length > 0) { %>
                             <% wallet.transactions
                               .sort((a, b) => new Date(b.date) - new Date(a.date))
+                              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                               .forEach(transaction => { %>
                                 <tr>
                                   <td><%= new Date(transaction.date).toLocaleDateString() %></td>
                                   <td><%= transaction.type %></td>
-                                  <td><%= transaction.amount.toFixed(2) %></td>
+                                  <td>₹<%= transaction.amount.toFixed(2) %></td>
                                 </tr>
                             <% }) %>
                           <% } else { %>
@@ -374,11 +461,32 @@
                           <% } %>
                         </tbody>
                       </table>
-                      
+              
+                      <!-- Pagination Controls -->
+                      <div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                        <% if (currentPage > 1) { %>
+                          <a href="/userProfile?page=<%= currentPage - 1 %>&tab=wallet-history" class="btn btn-secondary">Previous</a>
+                        <% } else { %>
+                          <span class="btn btn-secondary disabled">Previous</span>
+                        <% } %>
+              
+                        <% for (let i = 1; i <= totalPagesTransactions; i++) { %>
+                          <a href="/userProfile?page=<%= i %>&tab=wallet-history" class="btn <%= currentPage === i ? 'btn-primary' : 'btn-light' %>">
+                            <%= i %>
+                          </a>
+                        <% } %>
+              
+                        <% if (currentPage < totalPagesTransactions) { %>
+                          <a href="/userProfile?page=<%= currentPage + 1 %>&tab=wallet-history" class="btn btn-secondary">Next</a>
+                        <% } else { %>
+                          <span class="btn btn-secondary disabled">Next</span>
+                        <% } %>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+              
               
               <div class="tab-pane fade" id="referal" role="tabpanel" aria-labelledby="track-orders-tab">
                 <div class="card">
@@ -399,28 +507,7 @@
      </div>
    </div>
  </section>
-<div class="pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-  <!-- Previous Button -->
-  <% if (currentPage > 1) { %>
-    <a href="/userProfile?page=<%= currentPage - 1 %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #333; background-color: #f8f9fa;">Previous</a>
-  <% } else { %>
-    <span style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #ccc; background-color: #f8f9fa;">Previous</span>
-  <% } %>
 
-  <!-- Page Number Links -->
-  <% for (let i = 1; i <= totalPages; i++) { %>
-    <a href="/userProfile?page=<%= i %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid <%= currentPage === i ? '#007bff' : '#ccc' %>; border-radius: 4px; color: <%= currentPage === i ? '#fff' : '#333' %>; background-color: <%= currentPage === i ? '#007bff' : 'transparent' %>;">
-      <%= i %>
-    </a>
-  <% } %>
-
-  <!-- Next Button -->
-  <% if (currentPage < totalPages) { %>
-    <a href="/userProfile?page=<%= currentPage + 1 %>" style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #333; background-color: #f8f9fa;">Next</a>
-  <% } else { %>
-    <span style="padding: 8px 12px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; color: #ccc; background-color: #f8f9fa;">Next</span>
-  <% } %>
-</div>
 
 <%- include("../../views/partials/user/footer") %>
 

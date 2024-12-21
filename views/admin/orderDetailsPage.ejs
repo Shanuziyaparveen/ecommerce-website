@@ -144,8 +144,8 @@
           </form>
         </div>
           <!-- Display the product status -->
-          <span id="productStatusDisplay" style="color: #888;">
-            <%= item.productStatus %>
+          <span id="productStatusDisplay" style="color: #49d46a;">
+         Status:   <%= item.productStatus %>
           </span>
           
         </div>
@@ -187,7 +187,7 @@ Wallet Used:
           <input type="hidden" name="orderId" value="<%= order._id %>">
           <label for="status">Update Status:</label>
           <select name="status" class="form-select">
-            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+            <option value="Placed" <%= order.status === 'Placed' ? 'selected' : '' %>>Placed</option>
             <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
             <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
             <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>

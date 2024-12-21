@@ -176,6 +176,7 @@
     <div class="row">
       <% if (orders && orders.length > 0) { %>
         <% orders.forEach((order) => { %>
+          <% if (order.status !== 'Payment Pending') { %>
           <div class="card">
             <div class="card-header">
               Order ID: <%= order.orderId %>
@@ -189,6 +190,7 @@
               <a href="/admin/orderDetails/<%= order._id %>" class="btn">View Details</a>
             </div>
           </div>
+          <% } %>
         <% }) %>
       <% } else { %>
         <div class="card">

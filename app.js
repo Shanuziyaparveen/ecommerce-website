@@ -12,12 +12,14 @@ db();
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
+
 // Import session-related middleware
 const userMiddleware = require('./middlewares/session/userMiddleware');
 const cartMiddleware = require('./middlewares/session/cartMiddleware');
 
 // // Logging middleware first
 // app.use(logger('dev'));
+
 app.use(cookieParser());
 app.use(session({
     resave: false,
@@ -31,22 +33,20 @@ app.use(session({
     }
 }));
 
-
 // Parsing incoming requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(methodOverride('_method')); // Looks for a `_method` parameter in POST requests
 
-
-  // Flash middleware
+// Flash middleware
 app.use(flash());
 
 // Pass flash messages to all views
 app.use((req, res, next) => {
-  res.locals.success = req.flash('success');
-  res.locals.error = req.flash('error');
-  next();
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
 });
 
 // Disable caching
@@ -80,13 +80,13 @@ app.use(errorHandler);
 
 // Centralized Error Handler
 app.use((err, req, res, next) => {
-  console.error(`[${new Date().toISOString()}] ${err.stack}`); // Log error details
-  res.status(err.status || 500).render('error', { 
-      errorMessage: err.message || 'Internal Server Error' 
-  });
+    console.error(`[${new Date().toISOString()}] ${err.stack}`); // Log error details
+    res.status(err.status || 500).render('error', { 
+        errorMessage: err.message || 'Internal Server Error' 
+    });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT} http://localhost:${PORT}/`)); 
+app.listen(PORT, () => console.log(`Server running on port ${PORT} http://localhost:${PORT}/`));
 
 module.exports = app;

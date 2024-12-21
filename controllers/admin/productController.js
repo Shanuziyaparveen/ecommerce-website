@@ -39,17 +39,17 @@ const addProducts=async (req, res) => {
                     images.push(req.files[i].filename);
                 }
             }
-            const categoryId=await Category.findOne({name:products.Category});
+            const categoryId=await Category.findOne({name:products.category});
         if(!categoryId){
-            return res.status(400).join("invalid category name")
+            return res.render('admin-error').json({ message: "Invalid category name" });
+
         }
         const newProduct=new Product({
             productName: products.productName,
             description: products.description,
             regularPrice: products.regularPrice,
             salePrice: products.salePrice,
-            category: categoryId._id,
-            brand: products.brand,
+            category: categoryId.name, // Save category name instead of category ID            brand: products.brand,
             
             CreatedOn: new Date(),
             quantity: products.quantity,
@@ -140,79 +140,59 @@ const getAllProducts = async (req, res) => {
         }
 
         // Find the product by its ID
-        const findProduct = await Product.findOne({ _id: productId });
-        console.log("Found Product:", findProduct);
-
-        // If product is not found
+        const findProduct = await Product.findById(productId);
         if (!findProduct) {
             console.log("Product not found for ID:", productId);
             return res.status(404).json({ status: false, message: "Product not found" });
         }
 
-        // Ensure product regularPrice and salePrice are available and valid
+        // Ensure product has regularPrice and salePrice
         if (!findProduct.regularPrice || !findProduct.salePrice) {
             return res.status(400).json({ status: false, message: "Product does not have regularPrice or salePrice." });
         }
 
-        // Find the category by its ID (not by name)
-        const findCategory = await Category.findOne({ _id: category });
-        console.log("Found Category:", findCategory);
-
-        // If category is not found
+        // Find the category by its name (update the field if different)
+        const findCategory = await Category.findOne({ name: category }); // Change 'name' to your actual field name
         if (!findCategory) {
-            console.log("Category not found for ID:", category);
+            console.log("Category not found for name:", category);
             return res.status(404).json({ status: false, message: "Category not found" });
         }
 
-        // Set default category offer to 0 if it's undefined
+        // Set default category offer to 0 if undefined
         if (!findCategory.categoryOffer) {
             findCategory.categoryOffer = 0;
         }
 
-        // Compare the category offer with the product offer
+        // Compare category offer with the new product offer
         if (findCategory.categoryOffer > parsedPercentage) {
             console.log("Category Offer is Higher:", findCategory.categoryOffer, "vs", parsedPercentage);
             return res.json({ status: false, message: "This product category already has a higher category offer" });
         }
 
-        // Calculate the new sale price after applying the product offer
+        // Calculate the discount and update the sale price
         const discountAmount = Math.floor(findProduct.regularPrice * (parsedPercentage / 100));
-        findProduct.salePrice = findProduct.regularPrice- discountAmount;
+        findProduct.salePrice = findProduct.regularPrice - discountAmount;
+        findProduct.productOffer = parsedPercentage;
+
         console.log("Discount Amount:", discountAmount);
         console.log("Updated Sale Price:", findProduct.salePrice);
 
-        // Set the product offer
-        findProduct.productOffer = parsedPercentage;
-        console.log("Product Offer Set to:", findProduct.productOffer);
-
         // Save the updated product
-        try {
-            await findProduct.save();
-            console.log("Product Saved Successfully");
-        } catch (error) {
-            console.error("Error saving product:", error);
-            return res.status(500).json({ status: false, message: "Error saving product" });
-        }
+        await findProduct.save();
+        console.log("Product Saved Successfully");
 
-        // Reset category offer after applying product offer
+        // Reset category offer to 0
         findCategory.categoryOffer = 0;
-        console.log("Reset Category Offer");
 
         // Save the updated category
-        try {
-            await findCategory.save();
-            console.log("Category Saved Successfully");
-        } catch (error) {
-            console.error("Error saving category:", error);
-            return res.status(500).json({ status: false, message: "Error saving category" });
-        }
+        await findCategory.save();
+        console.log("Category Saved Successfully");
 
-        // Send a success response
+        // Send success response
         res.json({ status: true, message: "Product offer added successfully" });
 
     } catch (error) {
         console.error("Error in adding product offer:", error);
-        // Handle unexpected errors
         if (!res.headersSent) {
             res.status(500).json({ status: false, message: "Internal server error" });
         }
@@ -243,9 +223,8 @@ const removeProductOffer = async (req, res) => {
 
         return res.json({ status: true, message: "Product offer removed successfully" });
     } catch (error) {
-        console.error(error); // log the error for debugging purposes
-        return res.status(500).json({ status: false, message: "Internal server error" });
-    }
+        res.redirect("/pageerror");
+      }
 };
 
 
@@ -319,6 +298,11 @@ const editProduct = async (req, res) => {
                 images.push(req.files[i].filename);
             }
         }
+            // Find category by ID (since data.category is the category ID)
+        const category = await Category.findById(data.category);
+        if (!category) {
+            return res.status(400).json({ error: "Invalid category ID" });
+        }
 
         // Prepare update fields
         const updateFields = {
@@ -326,7 +310,7 @@ const editProduct = async (req, res) => {
             description: data.description,
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
-            category: data.category,
+            category: category.name,
             brand: data.brand,
             quantity: data.quantity,
             size: data.size,
@@ -337,9 +321,11 @@ const editProduct = async (req, res) => {
         if (images.length > 0) {
             updateFields.$push = { productImage: { $each: images } };
         }
+        
 
         // Update the product
         await Product.findByIdAndUpdate(id, updateFields, { new: true });
+
         res.redirect('/admin/products');
     } catch (error) {
         console.error("Error updating product:", error);
@@ -381,9 +367,8 @@ const deleteSingleImage = async (req, res) => {
         }
 
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ status: false, message: "An error occurred while deleting the image." });
-    }
+        res.redirect("/pageerror");
+      }
 };
 
 module.exports = {

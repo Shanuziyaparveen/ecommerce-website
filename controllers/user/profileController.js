@@ -42,8 +42,9 @@ const sendVerificationEmail=async (email,otp)=>{
         const info=await transporter.sendMail(mailOptions);
         console.log("email sent", info.messageId)
         return true;
-    }catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    } catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 
@@ -58,8 +59,9 @@ const securePassword= async (password)=>{
 const getForgotPassPage=async (req,res)=>{
     try {
         res.render("forgot-password")
-    }catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    } catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 const forgotEmailValid=async (req, res)=>{
@@ -82,8 +84,9 @@ try {
 }else{
     res.render("forgot-password",{message: "user with this email doesnt exist"})
 }
-}catch (error) {
-    next(error); // Pass the error to the errorHandler middleware
+}  catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 
 
@@ -99,16 +102,18 @@ const verifyForgotPassOtp= async(req, res)=>{
         }else{
             res.json({success:false,message:"OTP not matching"})
         }
-    }catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    }  catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 const getResetPassPage= async (req, res) => {
     try {
         res.render('reset-password')
         
-    } catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    }   catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 
@@ -124,8 +129,9 @@ const resendOtp=async (req, res)=>{
             res.status(200).json({success:true, message:"resend otp successfully"});
             
         }
-    }catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    }  catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 const postNewPassword= async (req, res) => {
@@ -142,25 +148,27 @@ const postNewPassword= async (req, res) => {
         res.render("reset-password",{message: "Passwords do not match"})
 
     } 
-}catch (error) {
-    next(error); // Pass the error to the errorHandler middleware
+}  catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 }
-const userProfile = async (req, res) => {
+const userProfile = async (req, res, next) => {
     try {
       const userId = req.session.user;
       const page = parseInt(req.query.page) || 1; // Get current page (default to 1 if not provided)
   
-     
-      
-      // Fetch user data including wallet transactions
+      // Fetch user data including wallet and transactions
       const userData = await User.findById(userId).populate('transactions.orderId');
+  
+      if (!userData) {
+        return res.status(404).send('User not found');
+      }
   
       // Fetch the user's address
       const addressData = await Address.findOne({ userId });
   
       // Pagination setup for orders
-      
       const limit = 10; // Number of orders per page
       const skip = (page - 1) * limit; // Number of orders to skip
   
@@ -174,6 +182,10 @@ const userProfile = async (req, res) => {
       const totalOrders = await Order.countDocuments({ userId });
       const totalPages = Math.ceil(totalOrders / limit);
   
+      // Fetch the total number of transactions to calculate wallet pagination
+      const totalTransactions = userData.transactions.length;
+      const totalPagesTransactions = Math.ceil(totalTransactions / limit);
+  
       // Render the profile page with user, wallet, address, and order details
       res.render("profile", {
         user: userData,
@@ -182,12 +194,18 @@ const userProfile = async (req, res) => {
         currentPage: page,
         totalPages,
         wallet: {
-          balance: userData.wallet,
-          transactions: userData.transactions, // Pass wallet transactions to EJS
+          balance: userData.wallet, // User's wallet balance
+          transactions: userData.transactions, // Wallet transactions
         },
+        itemsPerPage: limit, // Pass itemsPerPage to the view
+        totalPagesTransactions, // Pass totalPagesTransactions to the view
       });
-    }catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    } catch (error) {
+      // Handle errors and pass them to the error handler middleware
+      next({
+        status: error.status || 500,
+        message: error.message || 'Unexpected error occurred.',
+      });
     }
   };
   
@@ -224,8 +242,9 @@ const changeEmail = async (req, res) => {
           message: "User with this email does not exist",
         });
       }
-    } catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    }   catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
   };
   
@@ -242,8 +261,9 @@ const changeEmail = async (req, res) => {
           userData: req.session.userData,
         });
       }
-    }catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    }  catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
   };
   const updateEmail=async (req, res) => {
@@ -262,8 +282,9 @@ try {
 
 try {
     res.render("change-password")
-}catch (error) {
-    next(error); // Pass the error to the errorHandler middleware
+}  catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
   }
 
@@ -292,8 +313,9 @@ try {
             message: "User with this email does not exist"
         })
     }
-    } catch (error) {
-        next(error); // Pass the error to the errorHandler middleware
+    }  catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 
@@ -305,8 +327,9 @@ try {
     }else{
         res.json({success:false,message:"OTP does not match"})
     }
-} catch (error) {
-    next(error); // Pass the error to the errorHandler middleware
+}  catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 
 
@@ -315,8 +338,9 @@ const addAddress=async (req, res) => {
 try {
     const user=req.session.user;
     res.render("add-address",{user:user})
-}catch (error) {
-    next(error); // Pass the error to the errorHandler middleware
+}  catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 
 
@@ -343,9 +367,9 @@ const postAddAddress = async (req, res) => {
       }
       
       res.redirect("/userProfile");
-    } catch (error) {
-      console.error("Error adding address:", error);
-      res.redirect("/pageNotFound");
+    }  catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
   };
   
@@ -363,10 +387,10 @@ const postAddAddress = async (req, res) => {
           if(!addressData){
               return res.redirect("/pageNotFound")
           }res.render("edit-address",{address:addressData,user:user})
-      } catch (error) {
-          console.error("error in edit address:",error)
-          res.redirect("/pageNotFound")
-      }
+      }   catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
+    }
   }
   
   const postEditAddress=async (req, res) => {
@@ -395,10 +419,10 @@ const postAddAddress = async (req, res) => {
       }}
   )
   res.redirect("/userProfile")
-  } catch (error) {
-      console.error("error in edit address",error)
-      res.redirect("/pageNotFound")
-  }
+  }   catch (error) {
+    // Forward the error with a status if it exists
+    next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
+}
   
   
   
@@ -424,9 +448,9 @@ const deleteAddress=async (req,res)=>{
       }
     )
     res.redirect("/userProfile")
-    } catch (error) {
-        console.error("error in delete address",error);
-        res.redirect("/pageNotFound")
+    }   catch (error) {
+        // Forward the error with a status if it exists
+        next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
 

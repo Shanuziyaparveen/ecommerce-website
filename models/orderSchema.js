@@ -7,6 +7,9 @@ const orderSchema = new Schema({
     type: String,
     default: () => uuidv4(),
     unique: true
+  },
+  razorpayOrderId: {  // New field for Razorpay Order ID
+    type: String, 
   }, 
    userId: {
     type: Schema.Types.ObjectId,
@@ -63,7 +66,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
+    enum: ['Placed','Pending','Payment Successful','Payment Pending','Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
   },
   createdOn: {
     type: Date,
@@ -94,7 +97,8 @@ const orderSchema = new Schema({
     type: String,
     required: true,
     enum: ['Razorpay', 'Debit Card', 'PayPal', 'COD'],
-  }, wallet: {
+  },
+  wallet: {
     used: {
       type: Number,
       default: 0, // Amount of wallet balance used for the current order

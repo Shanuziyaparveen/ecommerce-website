@@ -6,10 +6,11 @@
   <title>Order Details</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Include SweetAlert2 CSS and JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.24/jspdf.plugin.autotable.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     body {
   background-color: #1f1f33;
@@ -92,6 +93,10 @@
     margin-right: 15px; /* Adds spacing after separator */
     margin-left: 15px; /* Adds spacing before separator */
 }
+.text-right {
+      margin-top: 20px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
@@ -119,87 +124,100 @@
     </div>
 </div>
 
+<div class="container">
+  <h3 class="text-center">Order Details</h3>
+  <hr>
+  <div class="text-right">
+    <% if (order.status === 'Delivered') { %>
+    <button id="downloadInvoice" class="btn btn-primary" onclick="downloadInvoice()">Download Invoice</button>
+    <% } %>
+  </div>
+  <h5 id="orderId">Order ID: <%= order.orderId %></h5>
+  <p><strong>Status:</strong> <span class="badge badge-info" id="orderStatus"><%= order.status %></span></p>
+  <% if (order.status === 'Payment Pending' || order.status==='Payment Processed') { %>
+    <button 
+      class="btn btn-warning btn-sm" 
+      id="retryPaymentButton" 
+      style="display: inline-block; margin-left: 10px;" 
+      onclick="retryPayment('<%= order._id %>')"> <!-- Ensure the correct ID is passed -->
+      Retry Payment
+    </button>
+  <% } %>
+  <hr>
   
-  <div class="container">
-    <h3 class="text-center">Order Details</h3>
-    <hr>
-
-
-    <h5>Order ID: <%= order.orderId %></h5>
-    <p><strong>Status:</strong> <span class="badge badge-info"><%= order.status %></span></p>
-    <hr>
-
-    <!-- Timeline for Order Status -->
-    <h5>Order Progress</h5>
-    <ul class="timeline">
+  <!-- Timeline for Order Status -->
+  <h5>Order Progress</h5>
+  <ul class="timeline" id="orderTimeline">
+    <li>
+      <span id="orderedDate">Ordered: <%= new Date(order.dates.ordered).toLocaleDateString() %></span>
+    </li>
+    <% if (order.dates.shipped) { %>
       <li>
-        <span>Ordered: <%= new Date(order.dates.ordered).toLocaleDateString() %></span>
+        <span id="shippedDate">Shipped: <%= new Date(order.dates.shipped).toLocaleDateString() %></span>
       </li>
-      <% if (order.dates.shipped) { %>
-        <li>
-          <span>Shipped: <%= new Date(order.dates.shipped).toLocaleDateString() %></span>
-        </li>
-      <% } %>
-      <% if (order.dates.delivered) { %>
-        <li>
-          <span>Delivered: <%= new Date(order.dates.delivered).toLocaleDateString() %></span>
-        </li>
-      <% } %>
+    <% } %>
+    <% if (order.dates.delivered) { %>
       <li>
-        <span>Payment Method: <%= order.paymentMethod %></span>
+        <span id="deliveredDate">Delivered: <%= new Date(order.dates.delivered).toLocaleDateString() %></span>
       </li>
-    </ul>
-    <hr>
+    <% } %>
+    <li>
+      <span id="paymentMethod">Payment Method: <%= order.paymentMethod %></span>
+    </li>
+  </ul>
+  <hr>
 
-    <!-- Address Section -->
-   <!-- Address Section -->
-<h5>Delivery Address</h5>
-<p>
-  <strong>Name:</strong> <%= address.name %><br>
-  
-  <strong>City:</strong> <%= address.city %><br>
-  <strong>State:</strong> <%= address.state %><br>
-  <strong>Pincode:</strong> <%= address.pincode %><br>
-  <strong>Phone:</strong> <%= address.phone %>
-</p>
+  <!-- Address Section -->
+  <h5>Delivery Address</h5>
+  <p id="deliveryAddress">
+    <strong>Name:</strong> <span id="addressName"><%= address.name %></span><br>
+    <strong>City:</strong> <span id="addressCity"><%= address.city %></span><br>
+    <strong>State:</strong> <span id="addressState"><%= address.state %></span><br>
+    <strong>Pincode:</strong> <span id="addressPincode"><%= address.pincode %></span><br>
+    <strong>Phone:</strong> <span id="addressPhone"><%= address.phone %></span>
+  </p>
 
-    <hr>
+  <hr>
 
-    <!-- Ordered Items Section -->
-    <h5>Ordered Items</h5>
-    <% order.orderedItems.forEach((item) => { %>
-      <div class="card mb-3">
-        <div class="card-body d-flex justify-content-between">
-          <img 
+  <!-- Ordered Items Section -->
+  <h5>Ordered Items</h5>
+  <% order.orderedItems.forEach((item, index) => { %>
+    <div class="card mb-3" id="orderedItem_<%= index %>">
+      <div class="card-body d-flex justify-content-between">
+        <img 
           src="/uploads/re-image/<%= item.product.productImage[0] %>" 
           alt="<%= item.name %>" 
           style="width: 100px; height: auto; object-fit: cover;">
         
-          <div>
-           <a href="/" > <p><strong>Product:</strong> <%= item.product.productName %></p></a>
-            <p><strong>Quantity:</strong> <%= item.quantity %></p>
-          </div>
-          <div>
-            <p><strong>Price:</strong> 
-              <!-- Regular price with strikethrough -->
-              <span style="text-decoration: line-through; color: #888;">₹<%= item.product.regularPrice %></span> 
-              <!-- Sale price -->
-              <span style="color: #ff7f50; font-weight: bold;">₹<%= item.price %></span>
-            </p>
+        <div>
+          <a href="/" > 
+            <p><strong id="productName_<%= index %>">Product:</strong> <%= item.product.productName %></p>
+          </a>
+          <p><strong id="quantity_<%= index %>">Quantity:</strong> <%= item.quantity %></p>
+        </div>
+        <div>
+          <p><strong id="price_<%= index %>">Price:</strong> 
+            <!-- Regular price with strikethrough -->
+            <span style="text-decoration: line-through; color: #888;" id="regularPrice_<%= index %>">₹<%= item.product.regularPrice %></span> 
+            <!-- Sale price -->
+            <span style="color: #ff7f50; font-weight: bold;" id="salePrice_<%= index %>">₹<%= item.price %></span>
+          </p>
+
           <!-- Display product status -->
-          <% if (item.productStatus === 'Cancelled' || order.status === 'Cancelled' || order.status === 'Shipped' || order.status === 'Return Request' || order.status === 'Returned') { %>
-            <p style="color: red; font-weight: bold;">Status: <%= item.productStatus %></p>
-            <button class="btn btn-secondary action-btn" disabled>
+          <% if (item.productStatus === 'Cancelled' || order.status === 'Cancelled' || order.status === 'Shipped' || order.status === 'Return Request' || order.status === 'Returned'||order.status === 'Payment Pending' ) { %>
+            <p style="color: red; font-weight: bold;" id="itemStatus_<%= index %>">Status: <%= item.productStatus %></p>
+            <button class="btn btn-secondary action-btn" id="actionBtn_<%= index %>" disabled>
               <%= item.productStatus === 'Return Request' ? 'Return Requested' : 'Cancelled/Non-Cancellable' %>
             </button>
           <% } else if (order.status === 'Delivered') { %>
             <% if (item.productStatus === 'Return Request') { %>
-              <p style="color: orange; font-weight: bold;">Status: Return Requested</p>
-              <button class="btn btn-secondary action-btn" disabled>Return Requested</button>
+              <p style="color: orange; font-weight: bold;" id="itemStatus_<%= index %>">Status: Return Requested</p>
+              <button class="btn btn-secondary action-btn" id="actionBtn_<%= index %>" disabled>Return Requested</button>
             <% } else { %>
-              <p style="color: green; font-weight: bold;">Status: <%= order.status %></p>
+              <p style="color: green; font-weight: bold;" id="itemStatus_<%= index %>">Status: <%= order.status %></p>
               <button 
                 class="btn btn-warning return-btn" 
+                id="returnBtn_<%= index %>" 
                 onclick="returnProduct('<%= item.product._id %>', '<%= order._id %>')">
                 Return Item
               </button>
@@ -207,43 +225,42 @@
           <% } else { %>
             <button 
               class="btn btn-danger cancel-btn" 
+              id="cancelBtn_<%= index %>" 
               onclick="cancelProduct('<%= item.product._id %>', '<%= order._id %>')">
               Cancel Item
             </button>
           <% } %>
-          
-          </div>
         </div>
       </div>
-    <% }) %>
-    <hr>
+    </div>
+  <% }) %>
+  <hr>
    
   <!-- Subtotal -->
-  <p><strong>Subtotal:</strong> ₹<%= order.totalPrice %></p>
+  <p id="subtotal"><strong>Subtotal:</strong> ₹<%= order.totalPrice %></p>
 
   <!-- Tax Calculation (10%) -->
   <% const tax = (order.totalPrice || 0) * 0.10; %>
-  <p><strong>Tax (10%):</strong> ₹<%= tax.toFixed(2) %></p>
-  <p><strong>Total Amount (Including Tax):</strong> ₹<%= (order.totalPrice + tax ).toFixed(2) %></p>
+  <p id="tax"><strong>Tax (10%):</strong> ₹<%= tax.toFixed(2) %></p>
+  <p id="totalAmount"><strong>Total Amount (Including Tax):</strong> ₹<%= (order.totalPrice + tax ).toFixed(2) %></p>
+  
   <!-- Discount -->
-  <p><strong>Discount:</strong> ₹<%= discount %></p>
+  <p id="discount"><strong>Discount:</strong> ₹<%= discount %></p>
 
   <!-- Wallet Amount (if any) -->
   <% if (walletAmount > 0) { %>
-    <p><strong>Wallet Applied:</strong> ₹<%= walletAmount %></p>
+    <p id="walletApplied"><strong>Wallet Applied:</strong> ₹<%= walletAmount %></p>
   <% } %>
 
   <!-- Final Amount -->
+  <p id="amountAfterDiscount"><strong>Amount after discount:</strong> ₹<%= (order.finalAmount ).toFixed(2) %></p>
 
-  <!-- Total Amount (with Tax) -->
- 
-  <p><strong>Amount after discount:</strong> ₹<%= (order.finalAmount ).toFixed(2) %></p>
   <!-- Coupon Details (if any) -->
   <% if (order.coupon && order.coupon.applied) { %>
-    <p><strong>Coupon Discount:</strong> ₹<%= order.coupon.discount %></p>
+    <p id="couponDiscount"><strong>Coupon Discount:</strong> ₹<%= order.coupon.discount %></p>
   <% } %>
 
-   
+
 <!-- Action Buttons
 <% if (error) { %>
   <div class="alert alert-danger" role="alert">
@@ -273,7 +290,7 @@
   <% } else if (allReturned) { %>
     <!-- Show "Order Returned" if all items have been returned -->
     <button class="btn btn-secondary disabled-btn" disabled>Order Returned</button>
-  <% } else if (order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped') { %>
+  <% } else if (order.status === 'Placed' || order.status === 'Processing' || order.status === 'Shipped'||  order.status === 'Payment Successful' ||  order.status === 'Payment Pending' || order.status==='Payment Processed') { %>
     <!-- Allow cancelling the entire order -->
     <a href="/cancelOrder?id=<%= order._id %>" class="btn btn-danger">Cancel Order</a>
   <% } else if (order.status === 'Delivered' && allReturnable) { %>
@@ -286,8 +303,12 @@
 </div>
 
 
-  </div>
+</div>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.24/jspdf.plugin.autotable.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
  function cancelProduct(productId, orderId) {
   // Use SweetAlert2 for the confirmation dialog
@@ -483,6 +504,190 @@ function returnProduct(productId, orderId) {
         });
     }
   });
+}
+function downloadInvoice() { 
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(20);
+  doc.text('Order Invoice', 20, 20);
+
+  // Order ID and Status
+  doc.setFontSize(14);
+  doc.text(`Order ID: <%= order.orderId %>`, 20, 30);
+  
+  // Add the timeline of order progress
+  let y = 50; // Starting position for timeline
+  const timeline = [
+    `Ordered: <%= new Date(order.dates.ordered).toLocaleDateString() %>`,
+    `<% if (order.dates.shipped) { %>Shipped: <%= new Date(order.dates.shipped).toLocaleDateString() %><% } %>`,
+    `<% if (order.dates.delivered) { %>Delivered: <%= new Date(order.dates.delivered).toLocaleDateString() %><% } %>`,
+    `Payment Method: <%= order.paymentMethod %>`
+  ];
+
+  timeline.forEach(line => {
+    doc.text(line, 20, y);
+    y += 8;
+  });
+
+  // Address Details in Table
+  doc.setFontSize(14);
+  doc.text('Delivery Address:', 20, y);
+  y += 8;
+
+  doc.autoTable({
+    startY: y,
+    head: [['Field', 'Details']],
+    body: [
+      ['Name', '<%= address.name %>'],
+      ['City', '<%= address.city %>'],
+      ['State', '<%= address.state %>'],
+      ['Pincode', '<%= address.pincode %>'],
+      ['Phone', '<%= address.phone %>'],
+    ],
+    theme: 'grid',
+    margin: { left: 20, top: 50 },
+    styles: { cellPadding: 2, fontSize: 12 },
+    columnStyles: {
+      0: { cellWidth: 'auto', halign: 'left' },
+      1: { cellWidth: 'auto', halign: 'left' }
+    }
+  });
+
+  // Ordered Items Table
+  y = doc.lastAutoTable.finalY + 10; // Position after the address table
+  doc.text('Ordered Items:', 20, y);
+  y += 8;
+
+  doc.autoTable({
+    startY: y,
+    head: [['Product', 'Quantity', 'Price']],
+    body: [
+      <% order.orderedItems.forEach((item) => { %>
+        ['<%= item.product.productName %>', '<%= item.quantity %>', 'Rs.<%= item.price %>'],
+      <% }) %>
+    ],
+    theme: 'grid',
+    margin: { left: 20 },
+    styles: { cellPadding: 2, fontSize: 12 },
+    columnStyles: {
+      0: { cellWidth: 'auto', halign: 'left' },
+      1: { cellWidth: 'auto', halign: 'center' },
+      2: { cellWidth: 'auto', halign: 'right' }
+    }
+  });
+
+  // Pricing Information Table
+  y = doc.lastAutoTable.finalY + 10; // Position after the ordered items table
+  doc.text('Pricing Details:', 20, y);
+  y += 8;
+
+  doc.autoTable({
+    startY: y,
+    head: [['Description', 'Amount']],
+    body: [
+      ['Subtotal', 'Rs:<%= order.totalPrice %>'],
+      ['Tax (10%)', 'Rs:<%= tax.toFixed(2) %>'],
+      ['Total Amount (Including Tax)', 'Rs:<%= (order.totalPrice + tax).toFixed(2) %>'],
+      <% if (order.coupon && order.coupon.applied) { %>
+        ['Coupon Discount', 'Rs:<%= order.coupon.discount %>'],
+      <% } %>
+      <% if (walletAmount > 0) { %>
+        ['Wallet Applied', 'Rs:<%= walletAmount %>'],
+      <% } %>
+      ['Amount after discount', 'Rs:<%= (order.finalAmount ).toFixed(2) %>'],
+     
+    ],
+    theme: 'grid',
+    margin: { left: 20 },
+    styles: { cellPadding: 2, fontSize: 12 },
+    columnStyles: {
+      0: { cellWidth: 'auto', halign: 'left' },
+      1: { cellWidth: 'auto', halign: 'right' }
+    }
+  });
+
+  // Save the PDF
+  doc.save('order_invoice.pdf');
+}
+function retryPayment(orderId) {
+  console.log("Retry Payment initiated for Order ID:", orderId); // Debugging log
+  fetch('/payment/retry', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ orderId }), // Ensure orderId is passed correctly
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Retry Payment response received:", data); // Log the server response
+
+      if (data.success) {
+        // Initialize Razorpay payment
+        const options = {
+          key: data.key_id,
+          amount: data.amount * 100, // Razorpay expects the amount in paise
+          currency: 'INR',
+          order_id: data.order_id,
+          handler: function(response) {
+            // Handle successful payment
+            Swal.fire({
+              title: 'Payment Succeeded',
+              text: 'Your payment retry was successful!',
+              icon: 'success',
+              confirmButtonText: 'OK',
+            }).then(() => {
+              location.reload();
+            });
+          },
+          prefill: {
+            contact: data.contact,
+            name: data.name,
+            email: data.email,
+          },
+          theme: {
+            color: '#ff7a00',
+          },
+        };
+
+        const razorpayObject = new Razorpay(options);
+
+        // Handle payment failures
+        razorpayObject.on('payment.failed', function(response) {
+          console.error('Razorpay payment failed:', response.error);
+          Swal.fire({
+            title: 'Payment Failed',
+            text: 'Retry payment failed. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+          }).then(() => {
+            window.location.href = "/payment-failed"; // Redirect to payment failed page
+          });
+        });
+
+        // Open Razorpay checkout window
+        razorpayObject.open();
+      } else {
+        // Handle server failure response
+        Swal.fire({
+          title: 'Error',
+          text: data.msg || 'Unable to retry payment. Please try again later.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'Something went wrong. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    });
 }
 
 </script>

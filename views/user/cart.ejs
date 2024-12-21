@@ -1,4 +1,10 @@
 <%- include("../../views/partials/user/header") %>
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
 <style>
     /* General Styles */
     body {
@@ -210,6 +216,54 @@
         border-radius: 5px;
         cursor: pointer;
     }
+    .quantity-feedback {
+    font-size: 0.9rem; /* Smaller font for feedback */
+    color:#5a286b;   /* Red color for warnings */
+    background: #eecef5;/* Light red background */
+    padding: 6px 10px; /* Padding for feedback box */
+    border-radius: 4px; /* Rounded corners for feedback */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    text-align: center; /* Center text inside feedback */
+    max-width: 80%; /* Restrict feedback width */
+    margin-top: 8px; /* Space above feedback message */
+    display: none; /* Default state is hidden */
+}
+
+/* Show the feedback if it has content */
+.quantity-feedback:not(:empty) {
+    display: block; /* Display feedback only when not empty */
+    animation: fadeIn 0.5s ease-in-out; /* Smooth fade-in animation */
+}
+
+
+/* Animation keyframes for smooth fade-in */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px); /* Start slightly above */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); /* End at normal position */
+    }
+}
+
+/* Optional: Make the feedback message disappear after some time */
+.quantity-feedback.disappear {
+    animation: fadeOut 0.5s ease-in-out 3s forwards; /* Disappear after 3s */
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
 </style>
 
 <body>
@@ -217,7 +271,7 @@
         <div class="cart-header">
             <h2>Your Shopping Cart</h2>
         </div>
-        <% let disableCheckout = false; %> 
+        <% let disableCheckout = false; %>  
         <% if (totalItems > 0) { %>
             <div class="cart-items">
                 <% cartItems.forEach(item => { %>
@@ -227,86 +281,61 @@
                             <h5><%= item.name %></h5>
                             <p class="price">
                                 <span class="regular-price">₹<%= item.regularPrice %></span>
-                                <span class="highlighted-price">₹<%= item.price %></span>
-                              </p>
-                              
-                            <div class="quantity-controls">
+                                <span class="highlighted-price">₹<%= item.salePrice %></span>
+                            </p>
+                            <div class="quantity-controls" data-product-id="<%= item.id %>">
                                 <% if (item.stock === 0) { %>
-                                    <!-- Case: Product is out of stock -->
                                     <button class="increment-btn" disabled>Out of Stock</button>
-                                    <% disableCheckout = true; %>
-                                <% } else if (item.quantity > item.stock) { %>
-                                    <!-- Case: Stock is limited and matches the quantity in the cart -->
-                                    <button class="increment-btn" disabled>Stock Limit Reached</button>
-                                    <% disableCheckout = true; %>
-                                <% } else if (item.quantity < 5 && item.quantity < item.stock) { %>
-                                    <form action="/cart/increment" method="POST">
-                                        <input type="hidden" name="productId" value="<%= item.id %>" />
-                                        <button type="submit" class="increment-btn">+</button>
-                                    </form>
-                                <% } else { %>
-                                    <button class="increment-btn" disabled>Max Quantity</button>
-                                <% } %>
-                                <span><%= item.quantity %></span>
-                                <% if (item.quantity > 1) { %>
-                                    <form action="/cart/decrement" method="POST">
-                                        <input type="hidden" name="productId" value="<%= item.id %>" />
-                                        <button type="submit" class="decrement-btn">-</button>
-                                    </form>
-                                <% } else { %>
                                     <button class="decrement-btn" disabled>Min Quantity</button>
+                                    <span class="quantity-feedback">Product is out of stock.</span>
+                                    <% disableCheckout = true; %> <!-- Set disableCheckout to true if the item is out of stock -->
+                                <% } else { %>
+                                    <button class="increment-btn" data-product-id="<%= item.id %>" 
+                                        onclick="incrementQuantity('<%= item.id %>')" 
+                                        <% if (item.quantity >= item.stock || item.quantity >= 5) { %> disabled <% } %>>+</button>
+                                    <span id="item-quantity-<%= item.id %>"><%= item.quantity %></span>
+                                    <button class="decrement-btn" data-product-id="<%= item.id %>" 
+                                        onclick="decrementQuantity('<%= item.id %>')" 
+                                        <% if (item.quantity <= 1) { %> disabled <% } %>>-</button>
+                                    <span class="quantity-feedback">
+                                        <% if (item.quantity > item.stock) { %>
+                                            Stock limit reached.
+                                            <% disableCheckout = true; %> <!-- Set disableCheckout to true if stock limit is reached -->
+                                        <% } else if (item.quantity >= 5) { %>
+                                            Max quantity reached.
+                                        <% } else if (item.quantity <= 1) { %>
+                                            Min quantity is one.
+                                        <% } else { %>
+                                            <!-- Clear feedback for normal state -->
+                                        <% } %>
+                                    </span>
                                 <% } %>
                             </div>
                         </div>
                         <div class="cart-item-actions">
-                            <p>Total: ₹<%= item.totalPrice %></p>
+                            <p id="item-total-price-<%= item.id %>">Total: ₹<%= item.totalPrice %></p>
                             <button class="remove-item" onclick="removeFromCart('<%= item.id %>')">Remove</button>
                         </div>
                     </div>
                 <% }) %>
             </div>
-            <div class="coupon-section">
-                <input type="text" id="couponCode" class="coupon-input" placeholder="Enter Coupon Code">
-                <input type="hidden" id="totalAmount" value="<%= cartTotal %>">
-                <button onclick="applyCoupon()" class="btn-primary">Apply Coupon</button>
-            </div>
-            
-
-<!-- Cart Summary -->
-<h4>Cart Summary</h4>
-<p>Total Items: <%= totalItems %></p>
-<p>Subtotal: ₹<%= cartSubtotal %></p>
-<p>Tax: ₹<%= cartTax %></p>
-<p>Discount: <span id="discount">0</span></p>
-<p>Total: ₹<span id="updatedAmount"><%= cartTotal %></span></p>
-
-
-<!-- Wallet Balance Section -->
-<div class="wallet-balance">
-    <p class="wallet-balance-text">Available Wallet Balance: ₹<span id="wallet-balance-display"><%= walletBalance %></span></p>
-    <form class="wallet-form" id="wallet-form">
-        <!-- Apply Wallet Button -->
-        <button type="button" id="apply-wallet-button" class="wallet-button" <%= walletBalance > 0 ? '' : 'disabled' %>>Apply Wallet</button>
-    </form>
-    <div class="remaining-amount" id="remaining-amount" style="display:none;">
-        <p>Remaining Amount to Pay: ₹<span id="remaining-amount-display"><%= remainingAmountToPay %></span></p>
-    </div>
-</div>
-
-
-
-
-
-
-        <% if (disableCheckout) { %>
-            <p style="color: red; font-weight: bold;">Some items are out of stock or the quantity exceeds available stock. Please adjust your cart.</p>
-        <% } %>
-
-        <!-- Checkout button: Disabled if any item is out of stock or quantity exceeds stock -->
-        <button class="checkout-btn" onclick="checkout()" <% if (disableCheckout) { %> disabled <% } %>>Proceed to Checkout</button>
-    </div>
-            
-
+        
+            <!-- Cart Summary -->
+            <h4>Cart Summary</h4>
+            <p>Total Items: <span id="totalItems"><%= totalItems %></span></p>
+            <p>Subtotal: <span id="cartSubtotal"><%= cartSubtotal %></span></p>
+            <p>Tax: <span id="cartTax"><%= cartTax %></span></p>
+            <p>Discount: <span id="discount">0</span></p>
+            <p>Total: <span id="updatedAmount"><%= cartTotal %></span></p>
+        
+            <% if (disableCheckout) { %>
+                <p style="color: red; font-weight: bold;">Some items are out of stock or the quantity exceeds available stock. Please adjust your cart.</p>
+            <% } %>
+        
+            <!-- Checkout button: Disabled if any item is out of stock or quantity exceeds stock -->
+            <button class="checkout-btn" onclick="checkout()" <% if (disableCheckout) { %> disabled <% } %>>Proceed to Checkout</button>
+        </div>
+        
         <% } else { %>
             <div class="empty-cart-message"
                 style="text-align: center; padding: 40px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
@@ -315,7 +344,9 @@
                 <a href="/getAllProducts" style="color: #4B0082; text-decoration: none; font-size: 16px;">Go to Shop</a>
             </div>
         <% } %>
-    </div>
+        
+<br>
+<br>
 
     <%- include("../../views/partials/user/footer") %>
 </body>
@@ -448,5 +479,97 @@ function applyCoupon() {
         });
     });
 }
+function incrementQuantity(productId) {
+    $.ajax({
+        type: 'POST',
+        url: '/cart/update',
+        data: JSON.stringify({ productId, action: 'increment' }),
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.success) {
+                // Centralized UI update
+                updateCartUI(productId, response.updatedQuantity, response);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.errorMessage || 'Failed to update cart.',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Try Again'
+                });
+            }
+        },
+        error: function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Error updating cart.',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Try Again'
+            });
+        }
+    });
+}
 
+function decrementQuantity(productId) {
+    $.ajax({
+        type: 'POST',
+        url: '/cart/update',
+        data: JSON.stringify({ productId, action: 'decrement' }),
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.success) {
+                // Centralized UI update
+                updateCartUI(productId, response.updatedQuantity, response);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: response.errorMessage || 'Failed to update cart.',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Try Again'
+                });
+            }
+        },
+        error: function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Error updating cart.',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Try Again'
+            });
+        }
+    });
+}
+function updateCartUI(productId, updatedQuantity, response) {
+    const cartItem = $(`.quantity-controls[data-product-id="${productId}"]`);
+
+    // Update quantity display
+    cartItem.find(`#item-quantity-${productId}`).text(updatedQuantity);
+
+    // Update feedback messages and buttons
+    const feedback = cartItem.find('.quantity-feedback');
+    if (response.stock === 0) {
+        feedback.text('Product is out of stock.');
+    } else if (updatedQuantity >= response.stock) {
+        feedback.text('Stock limit reached.');
+    } else if (updatedQuantity >= 5) {
+        feedback.text('Max quantity reached.');
+    } else if (updatedQuantity <= 1) {
+        feedback.text('Min quantity reached.');
+    } else {
+        feedback.text('');
+    }
+
+    // Enable/Disable buttons
+    cartItem.find('.increment-btn').prop('disabled', updatedQuantity >= response.stock || updatedQuantity >= 5);
+    cartItem.find('.decrement-btn').prop('disabled', updatedQuantity <= 1);
+
+    // Update cart summary
+    $('#totalItems').text(response.totalItems);
+    $('#cartSubtotal').text(`₹${response.cartSubtotal}`);
+    $('#cartTax').text(`₹${response.cartTax}`);
+    $('#updatedAmount').text(`₹${response.cartTotal}`);
+}
     </script>

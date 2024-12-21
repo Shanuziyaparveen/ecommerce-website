@@ -59,15 +59,15 @@
             
                 <td><%=data[i].quantity%></td>
                 <td>
-                <%if(data[i].isBlocked===false){%>
-                    <button class="btn btn-danger" style="width: 80px;">
-                        <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
-                    </button>
-                    <%}else{%>
-                    <button class="btn btn-success" style="width: 80px;">
-                        <a href="/admin/unblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
-                    </button>
-            <%}%>
+                    <% if(data[i].isBlocked === false) { %>
+                        <button class="btn btn-danger" style="width: 80px;" onclick="confirmBlock('/admin/blockProduct?id=<%=data[i]._id%>')">
+                            Block
+                        </button>
+                    <% } else { %>
+                        <button class="btn btn-success" style="width: 80px;" onclick="confirmBlock('/admin/unblockProduct?id=<%=data[i]._id%>')">
+                            Unblock
+                        </button>
+                    <% } %>
                 </td>
                 <td>
                     <button class="btn btn-info" style="width: 80px;">
@@ -104,6 +104,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <script>
+
+function confirmBlock(url) {
+        // Display SweetAlert confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to change the status of this product?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, proceed!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If confirmed, redirect to the URL
+                window.location.href = url;
+            }
+        });
+    }
 async function addOffer(productId, category) {
     console.log("Product ID:", productId, "Category:", category); // Debugging
 

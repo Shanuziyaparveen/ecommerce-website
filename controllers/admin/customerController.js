@@ -49,16 +49,31 @@ const customerInfo = async (req, res) => {
         res.status(500).send("Server error");
     }
 };
-
-const customerBlocked =async (req,res) => {
+const customerBlocked = async (req, res) => {
     try {
-        let id=req.query.id;
-        await User.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect("/admin/users")
+        let id = req.query.id;
+
+        // Update the user's status to blocked
+        await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+
+        // If the blocked user is the logged-in user, log them out
+        if (req.user && req.user._id.toString() === id) {
+            req.logout((err) => {
+                if (err) {
+                    return next(err);
+                }
+                res.redirect('/login'); // Redirect to login page after logout
+            });
+        } else {
+            res.redirect("/admin/users"); // Admin panel redirect after blocking another user
+        }
+
     } catch (error) {
-        res.redirect("/pageerror")
+        console.error(error);
+        res.redirect("/pageerror");
     }
-}
+};
+
 const customerunBlocked = async (req, res) => {
     try {
         let id=req.query.id;

@@ -14,79 +14,76 @@ const multer=require("multer");
 const storage=require("../helpers/multer");
 const uploads=multer({storage:storage});
 
+// Page Error Route
+router.get("/pageerror", adminController.pageerror);
 
+// Login and Logout Routes
+router.get("/login", adminController.loadLogin);
+router.post("/login", adminController.login);
+router.get("/logout", adminController.logout);
 
-router.get("/pageerror",adminController.pageerror);
+// Dashboard Route
+router.get("/", adminAuth, adminController.loadDashboard);
 
-router.get("/login",adminController.loadLogin);
-router.post("/login",adminController.login)
-router.get("/",adminAuth,adminController.loadDashboard)
-router.get("/logout",adminController.logout)
-router.get("/users",adminAuth,customerController.customerInfo)
-router.get("/blockCustomer",adminAuth,customerController.customerBlocked);
-router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked);
-router.get("/category",adminAuth,categoryController.categoryInfo)
-router.post("/addCategory",adminAuth,categoryController.addCategory);
-router.post("/addCategoryOffer",adminAuth,categoryController.addCategoryOffer);
+// Customer Management Routes
+router.get("/users", adminAuth, customerController.customerInfo);
+router.get("/blockCustomer", adminAuth, customerController.customerBlocked);
+router.get("/unblockCustomer", adminAuth, customerController.customerunBlocked);
 
-router.post("/removeCategoryOffer",adminAuth,categoryController.removeCategoryOffers)
-router.get("/listCategory",adminAuth,categoryController.getListCategory)
-router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory);
-router.get("/editCategory",adminAuth,categoryController.getEditCategory)
-router.post("/editCategory/:id",adminAuth,categoryController.editCategory);
-router.get("/brands",adminAuth,brandController.getBrandPage)
-router.post("/addBrand",adminAuth,uploads.single("image"),brandController.addBrand);
-router.get("/blockBrand",adminAuth,brandController.blockBrand)
-router.get("/unBlockBrand",adminAuth,brandController.unBlockBrand)
+// Category Management Routes
+router.get("/category", adminAuth, categoryController.categoryInfo);
+router.post("/addCategory", adminAuth, categoryController.addCategory);
+router.post("/addCategoryOffer", adminAuth, categoryController.addCategoryOffer);
+router.post("/removeCategoryOffer", adminAuth, categoryController.removeCategoryOffers);
+router.get("/listCategory", adminAuth, categoryController.getListCategory);
+router.get("/unlistCategory", adminAuth, categoryController.getUnlistCategory);
+router.get("/editCategory", adminAuth, categoryController.getEditCategory);
+router.post("/editCategory/:id", adminAuth, categoryController.editCategory);
+
+// Brand Management Routes
+router.get("/brands", adminAuth, brandController.getBrandPage);
+router.post("/addBrand", adminAuth, uploads.single("image"), brandController.addBrand);
+router.get("/blockBrand", adminAuth, brandController.blockBrand);
+router.get("/unBlockBrand", adminAuth, brandController.unBlockBrand);
 router.get("/editBrand/:id", adminAuth, brandController.editBrand);
-router.post("/editBrand/:id", adminAuth,uploads.single('image'), brandController.updateBrand);
+router.post("/editBrand/:id", adminAuth, uploads.single("image"), brandController.updateBrand);
 
-router.get("/addProducts",adminAuth,productController.getProductAddPage)
-router.post("/addProducts",adminAuth,uploads.array("images",4),productController.addProducts);
-router.get("/products",adminAuth,productController.getAllProducts);
-router.post("/addProductOffer",adminAuth,productController.addProductOffer)
-router.post("/removeProductOffer",adminAuth,productController.removeProductOffer)
-router.get("/blockProduct",adminAuth,productController.blockProduct);
+// Product Management Routes
+router.get("/addProducts", adminAuth, productController.getProductAddPage);
+router.post("/addProducts", adminAuth, uploads.array("images", 4), productController.addProducts);
+router.get("/products", adminAuth, productController.getAllProducts);
+router.post("/addProductOffer", adminAuth, productController.addProductOffer);
+router.post("/removeProductOffer", adminAuth, productController.removeProductOffer);
+router.get("/blockProduct", adminAuth, productController.blockProduct);
+router.get("/unblockProduct", adminAuth, productController.unblockProduct);
+router.get("/editProduct", adminAuth, productController.getEditProduct);
+router.post("/editProduct/:id", adminAuth, uploads.array("images", 4), productController.editProduct);
+router.post("/deleteImage", adminAuth, productController.deleteSingleImage);
 
-router.get("/unblockProduct",adminAuth,productController.unblockProduct);
-router.get("/editProduct",adminAuth,productController.getEditProduct);
-router.post("/editProduct/:id",adminAuth,uploads.array("images",4),productController.editProduct);
-router.post("/deleteImage",adminAuth,productController.deleteSingleImage);
+// Banner Management Routes
+router.get("/banner", adminAuth, bannerController.getBannerPage);
+router.get("/addBanner", adminAuth, bannerController.getAddBannerPage);
+router.post("/addBanner", adminAuth, uploads.single("images"), bannerController.addBanner);
+router.get("/deleteBanner", adminAuth, bannerController.deleteBanner);
 
+// Order Management Routes
+router.get('/orderList', adminController.getOrderList); // Route to get the order list
+router.post('/updateOrderStatus', adminController.updateOrderStatus); // Route to update the order status
+router.put('/updateProductStatus', adminController.updateProductStatus); // Route to update the product status
+router.get('/orderDetails/:orderId', orderController.getOrderDetails); // Route to get order details
 
-// banner management 
-router.get("/banner",adminAuth,bannerController.getBannerPage);
-router.get("/addBanner",adminAuth,bannerController.getAddBannerPage)
-router.post("/addBanner",adminAuth,uploads.single("images"),bannerController.addBanner)
-router.get("/deleteBanner",adminAuth,bannerController.deleteBanner);
+// Sales Management Routes
+router.get('/sales', adminsalesController.getAdminSalesReport); // Route to get sales report
+router.get('/revenue/today', adminsalesController.getTodaysRevenue); // Route to get today's revenue
+router.get('/orders/today', adminsalesController.getTodaysOrders); // Route to get today's orders
 
-
-
-// Route to get the order list
-router.get('/orderList', adminController.getOrderList);
-
-// Route to update the order status
-router.post('/updateOrderStatus', adminController.updateOrderStatus);
-router.put('/updateProductStatus', adminController.updateProductStatus);
-
-router.get("/orderDetails/:orderId", orderController.getOrderDetails);
-//sales management
-router.get('/sales', adminsalesController.getAdminSalesReport)
-
-
-router.get('/revenue/today',adminsalesController.getTodaysRevenue);
-
-router.get('/orders/today',adminsalesController.getTodaysOrders);
-
-//coupon management
-
-
-router.get('/add-coupon', couponController.getaddcoupon)
-router.post('/add-coupon', couponController.addCoupon)
-router.get('/coupon', couponController.getCoupon)
-router.get("/delete-coupon/:id", couponController.deleteCoupon)
-router.get("/edit-coupon/:id", couponController.getEditCoupon)
-router.post("/edit-coupon", couponController.editCoupon)
+// Coupon Management Routes
+router.get('/add-coupon', couponController.getaddcoupon); // Route to display add coupon page
+router.post('/add-coupon', couponController.addCoupon); // Route to add a new coupon
+router.get('/coupon', couponController.getCoupon); // Route to get coupon list
+router.get('/delete-coupon/:id', couponController.deleteCoupon); // Route to delete a coupon
+router.get('/edit-coupon/:id', couponController.getEditCoupon); // Route to display edit coupon page
+router.post('/edit-coupon', couponController.editCoupon); // Route to update coupon details
 
 
 

@@ -1,10 +1,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
- 
   body {
-    background-color: #1c1832;
-    color: #e9e9f4;
+    background-color: #f5f7fb;
+    color: #333;
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
@@ -12,123 +11,147 @@
   }
 
   header, footer {
-    background-color: #2a2441;
-    color: #d5c8f3;
+    background-color: #23262b;
+    color: #fff;
     padding: 15px;
     text-align: center;
-    font-size: 14px;
-    border-top: 3px solid #423974;
-    border-bottom: 3px solid #423974;
+    font-size: 16px;
+    border-top: 3px solid #ff7a00;
+    border-bottom: 3px solid #ff7a00;
   }
 
   header a, footer a {
-    color: #c4b4ed;
+    color: #ff7a00;
     text-decoration: none;
-    margin: 0 8px;
+    margin: 0 12px;
     transition: color 0.3s ease;
   }
 
   header a:hover, footer a:hover {
-    color: #9c82e0;
+    color: #ffcc66;
   }
 
   .container {
-    max-width: 750px;
+    max-width: 800px;
     margin: 50px auto;
     padding: 40px;
-    background-color: #292143;
+    background-color: #fff;
     border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
 
   h1 {
     margin-bottom: 30px;
-    color: #e2d4f7;
-    font-size: 28px;
+    color: #23262b;
+    font-size: 32px;
+    font-weight: 600;
   }
 
   .payment-methods {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
     margin-top: 20px;
   }
 
   .payment-option {
     display: flex;
     align-items: center;
-    background-color: #3a2e5f;
-    padding: 15px 20px;
+    background-color: #f4f4f9;
+    padding: 20px;
     border-radius: 10px;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
 
   .payment-option input[type="radio"] {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     margin-right: 12px;
     cursor: pointer;
   }
 
   .payment-option label {
-    color: #ded9f8;
-    font-size: 16px;
+    color: #23262b;
+    font-size: 18px;
     cursor: pointer;
   }
 
   .payment-option:hover {
-    transform: scale(1.02);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    transform: scale(1.03);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   }
 
   .confirm-payment-button {
-    margin-top: 30px;
-    padding: 14px 30px;
-    background-color: #6e4bd6;
+    margin-top: 40px;
+    padding: 16px 40px;
+    background-color: #2f0e2f;
     color: #fff;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
 
   .confirm-payment-button:hover {
-    background-color: #5a39b0;
+    background-color: #2f0e2f;
     transform: scale(1.05);
   }
 
   .breadcrumb {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 16px;
     margin-bottom: 40px;
   }
 
   .breadcrumb a {
-    color: #c4b4ed;
+    color: #2f0e2f;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 600;
     transition: color 0.3s ease;
   }
 
   .breadcrumb a:hover {
-    color: #9f87d8;
+    color: #2f0e2f;
   }
 
   .breadcrumb span {
-    color: #a893cf;
+    color: #b1b1b1;
   }
 
-  form {
-    margin-top: 20px;
+  .cod-message {
+    display: none;
+    color: #2f0e2f;
+    font-size: 14px;
+    margin-top: 5px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .cod-message.show {
+    display: block;
+    opacity: 1;
+  }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 768px) {
+    .container {
+      padding: 20px;
+    }
+
+    .payment-option {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 </style>
-
 
 <body>
   <div class="container">
@@ -142,173 +165,196 @@
       </div>
     </div>
    
-    <!-- Payment Selection Form -->
-<h1>Select Payment Method</h1>
-<form class="pay-form" action="/process-payment" method="POST">
-  <div class="payment-methods">
-    <!-- Payment Methods -->
-    <div class="payment-option">
-      <input type="radio" id="Razorpay" name="paymentMethod" value="Razorpay">
-      <label for="Razorpay">Razorpay</label>
-    </div>
-    <div class="payment-option">
-      <input type="radio" id="DebitCard" name="paymentMethod" value="Debit Card">
-      <label for="DebitCard">Debit Card</label>
-    </div>
-    <div class="payment-option">
-      <input type="radio" id="UPI" name="paymentMethod" value="UPI">
-      <label for="UPI">UPI</label>
-    </div>
-    <div class="payment-option">
-      <input type="radio" id="NetBanking" name="paymentMethod" value="Net Banking">
-      <label for="NetBanking">Net Banking</label>
-    </div>
-    <div class="payment-option">
-      <input type="radio" id="COD" name="paymentMethod" value="COD">
-      <label for="COD">COD</label>
-    </div>
+    <h1>Select Payment Method</h1>
+    <form class="pay-form" action="/process-payment" method="POST">
+      <div class="payment-methods">
+        <div class="payment-option">
+          <input type="radio" id="Razorpay" name="paymentMethod" value="Razorpay">
+          <label for="Razorpay">Razorpay</label>
+        </div>
+        <div class="payment-option">
+          <input type="radio" id="DebitCard" name="paymentMethod" value="Debit Card">
+          <label for="DebitCard">Debit Card</label>
+        </div>
+        <div class="payment-option">
+          <input type="radio" id="UPI" name="paymentMethod" value="UPI">
+          <label for="UPI">UPI</label>
+        </div>
+        <div class="payment-option">
+          <input type="radio" id="COD" name="paymentMethod" value="COD" <%= discountedAmount > 1000 ? 'disabled' : '' %> onclick="checkCOD()">
+          <label for="COD">COD</label>
+          <div class="cod-message" id="codMessage">
+            Orders above ₹1000 can't be confirmed through COD.
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="confirm-payment-button">Confirm and Proceed</button>
+    </form>
   </div>
-  <button type="submit" class="confirm-payment-button">Confirm and Proceed</button>
-</form>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  $(document).ready(function() {
-    $('.pay-form').submit(function(e) {
-      e.preventDefault();
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+ $(document).ready(function() { 
+  $('.pay-form').submit(function(e) {
+    e.preventDefault();
 
-      var formData = $(this).serialize(); // Serialize the form data to send in AJAX
+    var formData = $(this).serialize();
+    var paymentMethod = $('input[name="paymentMethod"]:checked').val();
 
-      // Get the selected payment method
-      var paymentMethod = $('input[name="paymentMethod"]:checked').val();
-
-      // Check if a payment method is selected
-      if (!paymentMethod) {
-        Swal.fire({
-          title: 'Error',
-          text: 'Please select a payment method.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-        return;  // Exit if no payment method is selected
-      }
-
-      // Check if the payment method is COD
-      if (paymentMethod === "COD") {
-        // Handle COD (Cash On Delivery) payment
-       // Assuming formData includes necessary data like paymentMethod, user details, cart, etc.
-$.ajax({
-  url: "/process-payment",  // Server endpoint for COD processing
-  type: "POST",
-  data: formData,  // Send form data including payment method
-  success: function(res) {
-    console.log("Response from Server:", res);
-
-    if (res.success) {
+    if (!paymentMethod) {
       Swal.fire({
-        title: 'Order Confirmed',
-        text: 'Your order will be shipped and payment will be collected on delivery.',
-        icon: 'success',
+        title: 'Error',
+        text: 'Please select a payment method.',
+        icon: 'error',
         confirmButtonText: 'OK'
-      }).then(function() {
-        window.location.href = "/confirm-order";  // Redirect to the order confirmation page
       });
+      return;
+    }
+
+    if (paymentMethod === "COD") {
+      // Handle Cash on Delivery (COD)
+      $.ajax({
+        url: "/process-payment",
+        type: "POST",
+        data: formData,
+        success: function(res) {
+          if (res.success) {
+            Swal.fire({
+              title: 'Order Confirmed',
+              text: 'Your order will be shipped and payment will be collected on delivery.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then(function() {
+              window.location.href = "/confirm-order";
+            });
+          } else {
+            Swal.fire({
+              title: 'Error',
+              text: res.msg,
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+          }
+        },
+        error: function(err) {
+          Swal.fire({
+            title: 'Error',
+            text: 'Something went wrong. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      });
+    } else {
+      $.ajax({
+  url: "/process-payment",
+  type: "POST",
+  data: formData,
+  success: function(res) {
+    if (res.success) {
+      var options = {
+        "key": res.key_id, // Razorpay public key
+        "amount": res.amount * 100, // Razorpay expects amount in paise
+        "currency": "INR",
+        "order_id": res.order_id, // Razorpay order ID
+        "handler": function(response) {
+          // When payment is successful, validate it on the backend
+          $.ajax({
+            url: "/payment-success", // Endpoint to validate payment
+            type: "POST",
+            data: {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature
+            },
+            success: function(res) {
+              if (res.success) {
+                Swal.fire({
+                  title: 'Payment Succeeded',
+                  text: 'Your payment was successful!',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                }).then(function() {
+                  window.location.href = "/confirm-order"; // Redirect to confirmation page
+                });
+              } else {
+                Swal.fire({
+                  title: 'Error',
+                  text: res.msg || 'Payment validation failed.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                }).then(function() {
+                  window.location.href = "/payment-failed"; // Redirect to failure page
+                });
+              }
+            },
+            error: function(err) {
+              console.error("Error validating payment:", err);
+              Swal.fire({
+                title: 'Error',
+                text: 'An error occurred while validating your payment. Please try again or contact support.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+              }).then(function() {
+                window.location.href = "/payment-failed"; // Redirect to failure page
+              });
+            }
+          });
+        },
+        "prefill": {
+          "contact": res.contact,
+          "name": res.name,
+          "email": res.email
+        },
+        "theme": {
+          "color": "#ff7a00" // Theme color for the Razorpay modal
+        }
+      };
+
+      var razorpayObject = new Razorpay(options);
+      razorpayObject.open();
     } else {
       Swal.fire({
         title: 'Error',
-        text: res.msg,  // Show error message from the server
+        text: res.msg || 'Unable to initiate payment. Please try again.',
         icon: 'error',
         confirmButtonText: 'OK'
       });
     }
   },
   error: function(err) {
-    console.error("Error during COD payment:", err);
     Swal.fire({
       title: 'Error',
-      text: 'Something went wrong with the payment processing. Please try again.',
+      text: 'Something went wrong. Please try again.',
       icon: 'error',
       confirmButtonText: 'OK'
     });
   }
 });
 
-      } else {
-        // Handle Razorpay payment
-        $.ajax({
-          url: "/process-payment",  // Server endpoint for Razorpay order creation
-          type: "POST",
-          data: formData,
-          success: function(res) {
-            console.log("Response from Server:", res);  // Log the entire response to inspect its structure
-
-            if (res.success) {
-              // Proceed with Razorpay payment initiation
-              var options = {
-                "key": res.key_id,  // Razorpay key ID from the server
-                "amount": res.amount * 100,  // Convert amount to paise (Razorpay expects it in paise)
-                "currency": "INR",
-                "order_id": res.order_id,
-                "handler": function (response) {
-                  Swal.fire({
-                    title: 'Payment Succeeded',
-                    text: 'Your payment was successful!',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  }).then(function() {
-                    window.location.href = "/confirm-order";  // Redirect to the order success page
-                  });
-                },
-                "prefill": {
-                  "contact": res.contact,  // User's contact (phone number)
-                  "name": res.name,        // User's name
-                  "email": res.email       // User's email
-                },
-                "notes": {
-                  "description": res.description
-                },
-                "theme": {
-                  "color": "#2300a3"
-                }
-              };
-
-              var razorpayObject = new Razorpay(options);
-
-              // Handle payment failure
-              razorpayObject.on('payment.failed', function(response) {
-                Swal.fire({
-                  title: 'Payment Failed',
-                  text: 'There was an issue with your payment. Please try again.',
-                  icon: 'error',
-                  confirmButtonText: 'OK'
-                });
-              });
-
-              // Open the Razorpay payment gateway
-              razorpayObject.open();
-            } else {
-              Swal.fire({
-                title: 'Error',
-                text: res.msg,  // Show error message from the server
-                icon: 'error',
-                confirmButtonText: 'OK'
-              });
-            }
-          },
-          error: function(err) {
-            console.error("Error during Razorpay payment:", err);
-            Swal.fire({
-              title: 'Error',
-              text: 'Something went wrong with the payment processing. Please try again.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
-        });
-      }
-    });
+    }
   });
-</script>
+});
 
 
+
+    const frontendDiscountedAmount = <%= discountedAmount %>;
+
+    function checkCOD() {
+      const codRadio = document.getElementById('COD');
+      const codMessage = document.getElementById('codMessage');
+      if (frontendDiscountedAmount > 1000 && codRadio.checked) {
+        codMessage.classList.add('show');
+      } else {
+        codMessage.classList.remove('show');
+      }
+    }
+
+    window.onload = function() {
+      checkCOD();
+    };
+  </script>
+
+</body>
