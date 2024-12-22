@@ -509,7 +509,7 @@ ol li img {
 <script>
    const monthlyData = <%- JSON.stringify(monthlyData) %>;
     const yearlyData = <%- JSON.stringify(yearlyData) %>;
-    const statuses = ["Delivered", "Pending", "Returned"]; // Add all possible statuses here
+    const statuses = ["Delivered", "Placed", "Returned"]; // Add all possible statuses here
     let currentData = monthlyData;
 
     const ctx = document.getElementById('chartCanvas').getContext('2d');

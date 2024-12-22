@@ -246,7 +246,6 @@ await Cart.findOneAndDelete({ userId });
  req.session.couponApplied = false;
  req.session.couponCode = null;
  req.session.couponDiscount = 0;
- await Cart.findOneAndDelete({ userId });
 
  
 
@@ -583,7 +582,7 @@ const returnOrder = async (req, res) => {
     user.wallet += refundAmount;
     user.transactions.push({
       amount: refundAmount,
-      type: 'Order Return',
+      type: 'Refund',
       orderId,
       status: 'Pending',
     });

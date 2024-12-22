@@ -1,7 +1,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-  body {
+ 
+   body {
     background-color: #f5f7fb;
     color: #333;
     font-family: 'Poppins', sans-serif;
@@ -314,6 +315,23 @@
       };
 
       var razorpayObject = new Razorpay(options);
+      // Razorpay payment initiation script
+razorpayObject.on('payment.failed', function(response) {
+  // Log the payment failure details for debugging
+  console.error("Razorpay payment failed:", response.error);
+
+  // Display a SweetAlert2 dialog for the payment failure
+  Swal.fire({
+    title: "Payment Failed",
+    text: "Your payment could not be processed. Please try again.",
+    icon: "error",
+    confirmButtonText: "OK",
+  }).then(() => {
+    // Redirect to the payment-failed route upon user confirmation
+    window.location.href = "/payment-failed";
+  });
+});
+
       razorpayObject.open();
     } else {
       Swal.fire({

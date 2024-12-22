@@ -73,11 +73,14 @@
             color: #333;
             margin: 0 5px;
             font-weight: 500;
-            transition: color 0.3s ease;
+                       color: #fc0c7f;
         }
     
-        .breadcrumb a:hover {
-            color: #70116f;
+        /* Navbar Right Section */
+        .navbar-right {
+            display: flex;
+            gap: 15px;
+              color: #70116f;
         }
     
         /* Navbar Right Section */
@@ -176,10 +179,7 @@
             bottom: 20px;
             right: 20px;
             background-color: #70116f;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 50%;
+          border-radius: 50%;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -255,8 +255,8 @@
                         <h4><%= product.productName %></h4>
                         <span>Rs. <del><%= product.regularPrice %></del> <b>Rs. <%= product.salePrice %></b></span>
                         <div class="action-buttons mt-3">
-                            <button class="btn btn-primary">Add to Cart</button>
-                            <button class="btn btn-danger small-btn" onclick="removeFromWishlist(event, '<%= product._id %>')">
+                              <button class="btn btn-primary" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                          <button class="btn btn-danger small-btn" onclick="removeFromWishlist(event, '<%= product._id %>')">
                                 Remove from Wishlist
                             </button>
                         </div>
@@ -273,6 +273,44 @@
 
     <!-- JavaScript -->
     <script>
+        
+
+        function addToCart(productId) {
+  $.ajax({
+    type: 'POST',
+    url: '/addToCart',
+    contentType: 'application/json',
+    data: JSON.stringify({ productId: productId }),
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          title: 'Product added to cart!',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1500
+        });
+        // Optionally, update cart view on the page
+        updateCartView(response.cart);
+      } else {
+        Swal.fire({
+          title: response.message,
+          icon: 'error',
+          confirmButtonText: 'Okay'
+        });
+      }
+    },
+    error: function(error) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Could not add product to cart. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'Okay'
+      });
+    }
+  });
+}
+
+
         function removeFromWishlist(event, productId) {
             event.preventDefault();
             fetch(`/deleteProduct/${productId}`, {
