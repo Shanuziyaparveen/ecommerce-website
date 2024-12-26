@@ -27,11 +27,11 @@ const login = async (req, res) => {
                 return res.redirect("/admin");
             } else {
                 // Redirect to login page if password doesn't match
-                return res.redirect("/admin/login");
+                return res.redirect("/login");
             }
         } else {
             // Redirect if no admin found
-            return res.redirect("/admin/login");
+            return res.redirect("/login");
         }
     } catch (error) {
         console.log('login error', error);
