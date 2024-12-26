@@ -65,15 +65,15 @@ const pageNotFound = async (req, res,next) => {
         next(error);
     }
 };
-const loadSignup = async (req, res, next) => {
-    try {
-        res.render("signup");
-    } catch (error) {
-        console.log(next)
+
+const loadSignup=async(req,res,next)=>{
+    try{
+        res.render("signup")
+    }  catch (error) {
         // Forward the error with a status if it exists
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
-};
+}
 const loadShopping=async(req,res,next)=>{
     try{
         res.render("shop")
@@ -161,7 +161,7 @@ const securePassword=async(password)=>{
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
-const verifyOtp=async (req,res)=>{
+const verifyOtp=async (req,res, next)=>{
     try {
         const {otp}=req.body;
         console.log(otp);

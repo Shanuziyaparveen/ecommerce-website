@@ -75,7 +75,10 @@ const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter.js');
 app.use('/', userRouter);  // User routes
 app.use('/admin', adminRouter);  // Admin routes
-// Centralized Error Handler (Use this one)
+
+app.use(errorHandler);
+
+// Centralized Error Handler
 app.use((err, req, res, next) => {
     console.error(`[${new Date().toISOString()}] ${err.stack}`); // Log error details
     res.status(err.status || 500).render('error', { 
