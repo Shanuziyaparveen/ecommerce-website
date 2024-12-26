@@ -69,6 +69,7 @@ const loadSignup = async (req, res, next) => {
     try {
         res.render("signup");
     } catch (error) {
+        console.log(next)
         // Forward the error with a status if it exists
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
@@ -111,7 +112,7 @@ async function sendVerificationEmail(email,otp){
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
-const signup = async(req,res)=>{
+const signup = async(req,res,next)=>{
     try{
 const{name, phone ,email,password,cPassword ,referralCode }=req.body;
 if(password!==cPassword){
