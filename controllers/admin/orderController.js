@@ -19,7 +19,7 @@ const getOrderDetails = async (req, res) => {
      const discount = order.discount || (order.coupon && order.coupon.discount) || 0;
      const walletAmount = order.wallet.used || 0;
     // Render the order details page and pass the variables to EJS
-    res.render('OrderDetailsPage', {
+    res.render('orderDetailsPage', {
       order,
       discount,
       walletAmount
