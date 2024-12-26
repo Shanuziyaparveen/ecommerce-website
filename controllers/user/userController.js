@@ -112,7 +112,7 @@ async function sendVerificationEmail(email,otp){
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
-const signup = async(req,res,next)=>{
+const signup = async(req,res,next )=>{
     try{
 const{name, phone ,email,password,cPassword ,referralCode }=req.body;
 if(password!==cPassword){
@@ -161,7 +161,7 @@ const securePassword=async(password)=>{
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
-const verifyOtp=async (req,res, next)=>{
+const verifyOtp=async (req,res,next )=>{
     try {
         const {otp}=req.body;
         console.log(otp);
