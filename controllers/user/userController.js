@@ -65,15 +65,14 @@ const pageNotFound = async (req, res,next) => {
         next(error);
     }
 };
-
-const loadSignup=async(req,res,next)=>{
-    try{
-        res.render("signup")
-    }  catch (error) {
+const loadSignup = async (req, res, next) => {
+    try {
+        res.render("signup");
+    } catch (error) {
         // Forward the error with a status if it exists
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
-}
+};
 const loadShopping=async(req,res,next)=>{
     try{
         res.render("shop")
