@@ -76,35 +76,45 @@
     }
 
     .btn {
-        border-radius: 8px;
-        padding: 10px 12px;
-        width: 48%;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.2s ease;
-    }
+    background-color: #5a2d82; /* Deep purple background */
+    color: white; /* White text */
+    border: 1px solid #4b2370; /* Slightly darker purple border */
+    border-radius: 8px;
+    padding: 10px 12px;
+    width: 48%;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #4b2370; /* Darker purple on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
+}
+
 
     .btn.add-to-cart-btn {
-        background-color: #007bff;
+        background-color: #4b2370;
         color: white;
     }
 
     .btn.add-to-cart-btn:hover {
-        background-color: #0056b3;
+        background-color: #4b2370;
     }
 
     .btn.add-to-wishlist-btn {
-        background-color: white;
-        color: #ff6b6b;
-        border: 1px solid #ff6b6b;
-    }
+    background-color: #5a2d82; /* Deep purple background */
+    color: white; /* White text */
+    border: 1px solid #4b2370; /* Slightly darker purple border */
+}
 
-    .btn.add-to-wishlist-btn:hover {
-        background-color: #ff6b6b;
-        color: white;
-    }
+.btn.add-to-wishlist-btn:hover {
+    background-color: #4b2370; /* Darker purple on hover */
+    color: white; /* Keep text white */
+}
+
 
     .out-of-stock {
         font-size: 0.95rem;
@@ -113,6 +123,54 @@
         text-align: center;
         margin-top: 10px;
     }
+    .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 6px; /* Smaller gap between buttons */
+}
+
+.pagination-btn {
+    font-size: 12px; /* Smaller font for compact buttons */
+    padding: 6px 10px; /* Reduced padding for very small buttons */
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background-color: #512da8; /* Deep Purple */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    max-width: 40px; /* Smaller minimum width */
+    height: 30px; /* Reduced height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-btn:hover {
+    background-color: #311b92; /* Darker Purple on Hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+.pagination-btn.active {
+    background-color: #311b92;
+    font-weight: bold;
+    cursor: default;
+}
+
+.pagination-btn.disabled {
+    background-color: #bdbdbd; /* Light Gray for Disabled */
+    cursor: not-allowed;
+}
+
+.prev-next {
+    font-size: 12px;
+    padding: 6px 12px; /* Slightly larger padding for navigation buttons */
+    font-weight: bold;
+}
+
 </style>
 
 <div class="container product-list">
@@ -151,6 +209,33 @@
             </div>
         <% }) %>
     </div>
+<br>
+<br>
+<div class="pagination">
+    <!-- Previous Button -->
+    <% if (hasPrevPage) { %>
+        <a href="?page=<%= prevPage %>&limit=<%= limit %>" class="btn btn-primary pagination-btn">Prev</a>
+    <% } else { %>
+        <button class="btn btn-secondary pagination-btn" disabled>Prev</button>
+    <% } %>
+
+    <!-- Page Numbers -->
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+            <button class="btn btn-primary pagination-btn active" disabled><%= i %></button>
+        <% } else { %>
+            <a href="?page=<%= i %>&limit=<%= limit %>" class="btn btn-outline-primary pagination-btn"><%= i %></a>
+        <% } %>
+    <% } %>
+
+    <!-- Next Button -->
+    <% if (hasNextPage) { %>
+        <a href="?page=<%= nextPage %>&limit=<%= limit %>" class="btn btn-primary pagination-btn">Next</a>
+    <% } else { %>
+        <button class="btn btn-secondary pagination-btn" disabled>Next</button>
+    <% } %>
+</div>
+
 </div>
 
 <%- include("../../views/partials/user/footer") %>

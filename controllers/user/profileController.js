@@ -56,7 +56,7 @@ const securePassword= async (password)=>{
         next(error); // Pass the error to the errorHandler middleware
     }
 }
-const getForgotPassPage=async (req,res)=>{
+const getForgotPassPage=async (req,res,next)=>{
     try {
         res.render("forgot-password")
     } catch (error) {
@@ -278,7 +278,7 @@ try {
 
   }
 
-  const changePassword = async(req,res) => {
+  const changePassword = async(req,res,next) => {
 
 try {
     res.render("change-password")
@@ -373,7 +373,7 @@ const postAddAddress = async (req, res) => {
     }
   };
   
-  const editAddress=async (req,res)=>{
+  const editAddress=async (req,res,next)=>{
       try {
           const addressId=req.query.id;
           const user=req.session.user;
@@ -429,7 +429,7 @@ const postAddAddress = async (req, res) => {
   }
   
   
-const deleteAddress=async (req,res)=>{
+const deleteAddress=async (req,res,next)=>{
     try {
         const addressId=req.query.id;
         const findAddress=await Address.findOne({"address._id":addressId})

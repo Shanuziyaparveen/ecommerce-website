@@ -65,9 +65,34 @@
     .error-message {
       color: red;
     }
+        /* Navbar Styles */
+.navbar {
+background-color: #6a4793;
+color: #fff;
+padding: 10px 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.navbar a {
+color: #fff;
+text-decoration: none;
+margin: 0 10px;
+font-weight: bold;
+}
+
+.navbar a:hover {
+text-decoration: underline;
+}
   </style>
 </head>
 <body>
+  <div class="navbar">
+    <a href="/admin/">Admin Home</a>
+    <a href="/logout">Logout</a>
+  </div>
+
   <section class="content-main">
     <div class="content-header">
       <div>
@@ -88,23 +113,25 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-3">
-            <form method="post" action="/admin/addCategory" onsubmit="return handleFormSubmit(event)">
-              <div class="mb-4">
-                <label for="product_name" class="form-label">Name</label>
-                <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" required/>
-                <div id="name-error" class="error-message"></div>
-              </div>
+          
+<!-- Your Form -->
+<form method="post" action="/admin/addCategory" onsubmit="handleFormSubmit(event)">
+  <div class="mb-4">
+    <label for="product_name" class="form-label">Name</label>
+    <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" required/>
+    <div id="name-error" class="error-message" style="color: red; display: none;"></div> <!-- Error Message -->
+  </div>
 
-              <div class="mb-4">
-                <label class="form-label">Description</label>
-                <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId" required></textarea>
-                <div id="description-error" class="error-message"></div>
-              </div>
+  <div class="mb-4">
+    <label class="form-label">Description</label>
+    <textarea placeholder="Type here" name="description" class="form-control" id="descriptionId" required></textarea>
+    <div id="description-error" class="error-message" style="color: red; display: none;"></div> <!-- Error Message -->
+  </div>
 
-              <div class="d-grid">
-                <button class="btn btn-primary" type="submit">Create category</button>
-              </div>
-            </form>
+  <div class="d-grid">
+    <button class="btn btn-primary" type="submit">Create category</button>
+  </div>
+</form>
           </div>
 
           <div class="col-md-8 ml-10">
@@ -322,7 +349,7 @@
           title: 'Oops!',
           text: error.message === "Category already exists" ? 
                 "Category already exists" : 
-                "An error occurred while adding the category"
+                "please enter a non existing category!"
         });
       });
     }

@@ -85,65 +85,87 @@
    <div class="otp-container">
        <h3>Email Verification</h3>
        <form action="/verify-email-otp" method="post">
-           <div class="form-group">
-               <label for="otp">Enter OTP:</label>
-               <input type="text" id="otp" name="otp" class="otp-input" required>
-           </div>
-           <button type="submit" class="btn btn-primary">Verify OTP</button>
-           <div class="otp-timer">
-               <span id="otpTimer">OTP Expires in: 1:00</span>
-           </div>
-           <button type="button" onclick="resendOTP()" class="resend-btn">Resend OTP</button>
-           <% if (locals.message && message.length > 0) { %>
-               <div class="alert alert-danger mt-3">
-                   <%= message %>
-               </div>
-           <% } %>
-       </form>
-    
-   </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script>
- function startOTPTimer(durationInSeconds) {
-   let timer = durationInSeconds;
-   const timerElement = document.getElementById('otpTimer');
-   const countdown = setInterval(function () {
-     const minutes = Math.floor(timer / 60);
-     const seconds = timer % 60;
-
-
-     timerElement.textContent = `OTP Expires in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-
-     if (--timer < 0) {
-       clearInterval(countdown);
-       timerElement.textContent = 'OTP Expired';
-     }
-   }, 1000);
- }
-
-
- function resendOTP() {
-   $.ajax({
-     type: 'POST',
-     url: '/resend-otp',
-     success: function (response) {
-       if (response.success) {
-         startOTPTimer(60);
-       } else {
-         alert('Failed to resend OTP. Please try again.');
-       }
-     },
-     error: function () {
-       alert('Error occurred while resending OTP. Please try again.');
-     }
-   });
- }
- startOTPTimer(60);
-</script>
-
-
-<%- include("../../views/partials/user/footer") %>
-
-
+        <div class="form-group">
+          <label for="otp">Enter OTP:</label>
+          <input type="text" id="otp" name="otp" class="otp-input form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Verify OTP</button>
+        
+        <div class="otp-timer mt-3">
+          <span id="otpTimer">OTP Expires in: 1:00</span>
+        </div>
+        
+        <button type="button" id="resendOtpButton" class="btn btn-secondary mt-3" onclick="resendOTP()" disabled>
+          Resend OTP
+        </button>
+      
+        <% if (locals.message && message.length > 0) { %>
+          <div class="alert alert-danger mt-3">
+            <%= message %>
+          </div>
+        <% } %>
+      </form>
+      
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+      <script>
+        function startOTPTimer(durationInSeconds) {
+          let timer = durationInSeconds;
+          const timerElement = document.getElementById('otpTimer');
+          const resendButton = document.getElementById('resendOtpButton');
+      
+          // Disable the resend button at the start of the timer
+          resendButton.disabled = true;
+      
+          const countdown = setInterval(() => {
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+      
+            timerElement.textContent = `OTP Expires in: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      
+            if (--timer < 0) {
+              clearInterval(countdown);
+              timerElement.textContent = 'OTP Expired';
+      
+              // Enable the resend button once the timer expires
+              resendButton.disabled = false;
+            }
+          }, 1000);
+        }
+      
+        function resendOTP() {
+          $.ajax({
+            type: 'POST',
+            url: '/resend-otp',
+            success: function (response) {
+              if (response.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP resend success",
+                    showConfirmButton: false,
+                    
+                });
+                // Restart the timer on successful OTP resend
+                startOTPTimer(60);
+              } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred while resending the OTP, please try again",
+                });
+              }
+            },
+            error: function () {
+              Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred while resending the OTP, please try again",
+                });
+            }
+          });
+        }
+      
+        // Start the OTP timer when the page loads
+        startOTPTimer(60);
+      </script>
+      

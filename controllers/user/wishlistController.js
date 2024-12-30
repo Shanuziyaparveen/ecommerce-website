@@ -3,7 +3,7 @@ const Address = require("../../models/addressSchema");
 const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Order = require("../../models/orderSchema");
-const getwishList = async (req, res) => {
+const getwishList = async (req, res) => { 
   try {
     // Get user ID from session
     const userId = req.session.user;
@@ -14,16 +14,34 @@ const getwishList = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Fetch the products that are in the user's wishlist
-    const wishlistProducts = await Product.find({ _id: { $in: user.wishlist } }).lean();
+    // Pagination setup
+    const page = parseInt(req.query.page) || 1;  // Get the current page from query string, default to 1
+    const limit = 10;  // Set number of products per page
+    const skip = (page - 1) * limit;  // Calculate the number of products to skip based on the current page
+
+    // Fetch the products that are in the user's wishlist (with pagination)
+    const wishlistProducts = await Product.find({ _id: { $in: user.wishlist } })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Get the total number of products in the wishlist for pagination
+    const totalProducts = await Product.countDocuments({ _id: { $in: user.wishlist } });
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalProducts / limit);
 
     // Adding 'isInWishlist' flag to each product
     wishlistProducts.forEach(product => {
       product.isInWishlist = true; // This flag is set to true for all wishlist products
     });
 
-    // Render wishlist page with fetched products
-    res.render("wishlist", { products: wishlistProducts });
+    // Render wishlist page with fetched products and pagination info
+    res.render("wishlist", {
+      products: wishlistProducts,
+      currentPage: page,
+      totalPages: totalPages,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'An error occurred while fetching the wishlist' });

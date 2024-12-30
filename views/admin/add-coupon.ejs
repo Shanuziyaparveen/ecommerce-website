@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <%- include("../../views/partials/admin/header") %>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Coupon</title>
@@ -32,9 +34,35 @@
       font-size: 0.875rem;
       display: none; /* Initially hidden */
     }
+        /* Navbar Styles */
+        .navbar {
+      background-color: #6a4793;
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 10px;
+      font-weight: bold;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
   </style>
 </head>
 <body>
+  <div class="navbar">
+    <a href="/admin/">Admin Home</a>
+    <a href="/logout">Logout</a>
+  </div>
+
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">

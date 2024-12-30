@@ -13,7 +13,7 @@ require('dotenv').config();
   key_id: process.env.RAZORPAY_ID_KEY,   // Razorpay key ID from .env file
   key_secret: process.env.RAZORPAY_SECRET_KEY  // Razorpay key secret from .env file
 });
-const getPaymentPage = async (req, res) => { 
+const getPaymentPage = async (req,res,next) => { 
   try {
     // Check if applyWallet is true and remainingAmountToPay is 0, then skip payment page rendering
     console.log("Checking applyWallet and remainingAmountToPay...");
@@ -94,7 +94,7 @@ const getPaymentPage = async (req, res) => {
 
 
 
-const processPayment = async (req, res) => {
+const processPayment = async (req,res,next) => {
   try {
     const { paymentMethod } = req.body;
     const userId = req.session.user;
@@ -283,7 +283,7 @@ await Cart.findOneAndDelete({ userId });
   }
 };
 
-const handleFailedPayment = async (req, res) => {
+const handleFailedPayment = async (req,res,next) => {
   const orderId = req.session.orderId; // Get the order ID from session
 
   if (!orderId) {
@@ -323,7 +323,7 @@ const handleFailedPayment = async (req, res) => {
 };
 
 
-const confirmOrder = async (req, res) => { 
+const confirmOrder = async (req,res,next) => { 
   try {
     console.log("Confirming order process started...");
 
@@ -413,7 +413,7 @@ const confirmOrder = async (req, res) => {
 }
 };
 
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req,res,next) => {
   try {
     const orderId = req.query.id; // Get the order ID from the query parameters
     const userId = req.session.user; // Assuming the user ID is stored in the session
@@ -466,7 +466,7 @@ const cancelOrder = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
-const viewOrder = async (req, res) => {
+const viewOrder = async (req,res,next) => {
   try {
     const { id } = req.params;
 
@@ -499,7 +499,7 @@ const viewOrder = async (req, res) => {
   }
 };
 
-const cancelSpecificItem = async (req, res) => {
+const cancelSpecificItem = async (req,res,next) => {
   const productId = req.params.id;
   const orderId = req.query.orderId;
   try {
@@ -550,7 +550,7 @@ const cancelSpecificItem = async (req, res) => {
   }
 };
 
-const returnOrder = async (req, res) => {
+const returnOrder = async (req,res,next) => {
   try {
     const { orderId, reason } = req.body;
 
@@ -593,7 +593,7 @@ const returnOrder = async (req, res) => {
     console.error('Error while submitting return request:', err);
     res.status(500).json({ success: false, message: 'An error occurred while processing the return request.' });
   }
-};const couponApply = (req, res) => {
+};const couponApply = (req,res,next) => {
   const { couponCode, totalAmount } = req.body;
   const userId = req.session.user?._id;  // Ensure user ID is correctly fetched from session
 
@@ -650,7 +650,7 @@ req.session.remainingAmountToPay=remainingAmountToPay;
       res.status(500).json({ success: false, message: "Error processing the coupon" });
     });
 };
-const getconfirmOrder = async (req, res) => {
+const getconfirmOrder = async (req,res,next) => {
   try {
     const userId = req.session.user;
     if (!userId) {
@@ -704,7 +704,7 @@ console.log('Initial Cart Total:', totalAmount);
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const confirmCheckout = async (req, res) => {
+const confirmCheckout = async (req,res,next) => {
   try {
       const userId = req.session.user;
       const selectedAddress = req.session.selectedAddress;
@@ -790,7 +790,7 @@ req.session.remainingAmountToPay = remainingAmountToPay;
 }
 };
 
-const returnSingleProduct = async (req, res) => {
+const returnSingleProduct = async (req,res,next) => {
   const { productId } = req.params; // Extract product ID from URL params
   const { orderId } = req.query; // Extract order ID from query parameters
   const { reason } = req.body; // Extract reason from the request body
@@ -873,7 +873,7 @@ const returnSingleProduct = async (req, res) => {
   }
 };
 
-const retryPayment=async (req, res) => {
+const retryPayment=async (req,res,next) => {
   const { orderId } = req.body;
 
   if (!orderId) {
@@ -921,7 +921,7 @@ req.session.orderId=orderId;
     return res.redirect("/payment-failed");
   }
 };
-const postSuccess = async (req, res) => {
+const postSuccess = async (req,res,next) => {
   const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
   try {

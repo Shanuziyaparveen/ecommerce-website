@@ -21,7 +21,7 @@ const mongoose = require('mongoose');
 
 
 
-const addToCart = async (req, res) => {
+const addToCart = async (req,res,next) => {
   const user = req.session.user;
   const { productId } = req.body;
 
@@ -90,7 +90,7 @@ const addToCart = async (req, res) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const getCartPage = async (req, res) => {
+const getCartPage = async (req,res,next) => {
   try {
     const user = req.session.user;
     if (!user || !user._id) {
@@ -212,7 +212,7 @@ const getCartPage = async (req, res) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const updateCart = async (req, res, next) => {
+const updateCart = async (req,res,next) => {
   try {
       const { productId, action } = req.body;
       const userId = req.session.user._id;
@@ -267,7 +267,7 @@ const updateCart = async (req, res, next) => {
 };
 
 
-const removeFromCart = async (req, res) => {
+const removeFromCart = async (req,res,next) => {
   const { productId } = req.body;
   const userId = req.session.user._id;  // Assuming user is logged in and user ID is available
 
@@ -301,7 +301,7 @@ const removeFromCart = async (req, res) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const getCheckout = async (req, res) => {
+const getCheckout = async (req,res,next) => {
   try {
     const user = req.session.user;
     
@@ -321,7 +321,7 @@ const getCheckout = async (req, res) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const selectAddress = async (req, res) => {
+const selectAddress = async (req,res,next) => {
   console.log("selectAddress function called");
   try {
     const { selectedAddress } = req.body;
@@ -367,7 +367,7 @@ const selectAddress = async (req, res) => {
 };
 
 
-const saveAddress = async (req, res) => {
+const saveAddress = async (req,res,next) => {
   try {
       const { name, addressType, city, state, pincode, phone, altPhone } = req.body;
 
@@ -397,7 +397,7 @@ const saveAddress = async (req, res) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const productDetails = async (req, res) => {
+const productDetails = async (req,res,next) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
@@ -432,25 +432,36 @@ const productDetails = async (req, res) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const getAllProducts = async (req, res) => {
+const getAllProducts = async (req, res, next) => {
   try {
-      // Fetch all products, including products with quantity <= 0
-      const products = await Product.find({ 
+      // Get pagination parameters from query
+      const page = parseInt(req.query.page, 10) || 1; // Current page (default: 1)
+      const limit = parseInt(req.query.limit, 8) || 8; // Items per page (default: 10)
+      const skip = (page - 1) * limit; // Number of items to skip
+
+      // Fetch products with pagination and filtering
+      const products = await Product.find({
           isBlocked: false
       })
-      .populate('category') // Populate category if needed
-      .exec();
-// Get the user ID from session to check the wishlist
-const userId = req.session.user; // Assuming the user ID is stored in session
+          .populate('category') // Populate category if needed
+          .skip(skip) // Skip items for pagination
+          .limit(limit) // Limit items per page
+          .exec();
 
-// Fetch the user document to access the wishlist
-const user = await User.findOne({ _id: userId });
-let wishlist = [];
-if (user) {
-  wishlist = user.wishlist; // Get the user's wishlist
-}
+      // Fetch total count of products for pagination
+      const totalProducts = await Product.countDocuments({ isBlocked: false });
 
-      // Generate image paths for each product
+      // Get the user ID from session to check the wishlist
+      const userId = req.session.user; // Assuming the user ID is stored in session
+
+      // Fetch the user document to access the wishlist
+      const user = await User.findOne({ _id: userId });
+      let wishlist = [];
+      if (user) {
+          wishlist = user.wishlist; // Get the user's wishlist
+      }
+
+      // Generate image paths and additional fields for each product
       products.forEach(product => {
           if (Array.isArray(product.productImage)) {
               product.imagePath = path.join('/uploads', 'product-images', product.productImage[0] || 'default-thumbnail.jpg');
@@ -462,20 +473,29 @@ if (user) {
           product.outOfStock = product.quantity <= 0;
           product.isInWishlist = wishlist.includes(product._id.toString()); // Compare IDs as strings
       });
-      
-      
 
-      // Render the product list page with fetched products
+      // Calculate pagination metadata
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      // Render the product list page with fetched products and pagination info
       res.render('product-list', {
-          products
+          products,
+          currentPage: page,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+          nextPage: page + 1,
+          prevPage: page - 1,
+          limit, 
       });
-  }  catch (error) {
+  } catch (error) {
       // Forward the error with a status if it exists
       next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
   }
 };
 
-const getProductDetails = async (req, res) => {
+
+const getProductDetails = async (req,res,next) => {
   try {
       const productId = req.params.id;
 
@@ -517,7 +537,7 @@ const getProductDetails = async (req, res) => {
       next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
   }
 };
-const loadShoppingPage = async (req, res) => {
+const loadShoppingPage = async (req,res,next) => {
   try {
       // Get user session data
       const user = req.session.user;
@@ -591,7 +611,7 @@ const loadShoppingPage = async (req, res) => {
   }
 };
 
-const filterProduct = async (req, res) => {
+const filterProduct = async (req,res,next) => {
   try {
       const user = req.session.user;
       const brand = req.query.brand;
@@ -676,7 +696,7 @@ const filterProduct = async (req, res) => {
 };
 
 
-const filterByPrice = async (req, res) => {
+const filterByPrice = async (req,res,next) => {
   try {
       const user = req.session.user;
       const userData = await User.findOne({ _id: user });
@@ -751,7 +771,7 @@ const currentProduct = findProducts.slice(startIndex, endIndex);
       next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
   }
 };
-const searchProducts = async (req, res) => {
+const searchProducts = async (req,res,next) => {
   try {
       const user = req.session.user;
       const userData = await User.findOne({ _id: user });
@@ -831,7 +851,7 @@ const searchProducts = async (req, res) => {
 };
 
 
-const getCategorySort = async (req, res) => {
+const getCategorySort = async (req,res,next) => {
   try {
       const sortOption = req.query.sort || 'popularity';
       let sortCriteria = {};
@@ -917,7 +937,7 @@ const getCategorySort = async (req, res) => {
   }
 };
 
-const filterSort = async (req, res) => {
+const filterSort = async (req,res,next) => {
   try {
       console.log("Starting filterSort function");
 

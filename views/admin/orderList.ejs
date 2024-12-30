@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <%- include("../../views/partials/admin/header") %>
 
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,39 +10,88 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #fcf9ff; /* Light background */
-      color: #391147; /* Darker text for contrast */
+      background-color: #f7f8fa;
+      color: #333;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
+
+    /* Navbar Styles */
+    .navbar {
+      background-color: #6a4793;
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #d4b5f3; /* Light purple */
-      font-size: 36px;
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 10px;
       font-weight: bold;
     }
 
-    .d-flex {
-      display: flex;
-      justify-content: flex-end;
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
       margin-bottom: 20px;
+      color: #6a4793;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .order-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #6a4793;
+    }
+
+    .card-body p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .card-body p strong {
+      color: #333;
     }
 
     .btn {
-      background-color: #6a4793; /* Purple button */
-      color: #ffffff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      text-decoration: none;
       display: inline-block;
+      background-color: #6a4793;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 5px;
       font-weight: bold;
       transition: background-color 0.3s ease;
     }
@@ -49,131 +100,69 @@
       background-color: #5a3a7a;
     }
 
-    /* Order Cards */
-    .card {
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-    }
-
-    .card-header {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #3b2b57;
-      text-align: center;
-    }
-
-    .card-body p {
-      margin: 10px 0;
-      font-size: 16px;
-      color: #555;
-    }
-
-    .order-info p {
-      color: #555;
-      margin: 8px 0;
-    }
-
-    .order-info strong {
-      color: #391147; /* Darker purple for emphasis */
-    }
-
-    /* If no orders found */
     .no-orders {
-      background-color: #fff;
-      color: #391147;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      font-size: 18px;
       text-align: center;
+      font-size: 16px;
+      color: #666;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    /* Responsive Design */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pagination a {
+      margin: 0 5px;
+      padding: 8px 12px;
+      background-color: #6a4793;
+      color: #fff;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .pagination a:hover {
+      background-color: #5a3a7a;
+    }
+
+    .pagination a.disabled, .pagination a.active {
+      background-color: #ccc;
+      color: #666;
+      pointer-events: none;
+    }
+
     @media (max-width: 768px) {
-      h1 {
-        font-size: 28px;
-      }
-
-      .container {
-        padding: 15px;
-      }
-
-      .card-body {
-        font-size: 14px;
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       .order-list {
         grid-template-columns: 1fr;
       }
+
+      h1 {
+        font-size: 22px;
+      }
     }
-    .pagination {
-  display: flex; /* Flexbox for horizontal alignment */
-  justify-content: center; /* Center the pagination container */
-  margin-top: 20px;
-  padding: 0;
-  list-style: none;
-}
-
-.pagination ul {
-  display: flex; /* Make the list items align horizontally */
-  gap: 5px; /* Space between pagination buttons */
-  padding: 0;
-  margin: 0;
-}
-
-.pagination li {
-  list-style: none; /* Remove bullet points */
-}
-
-.pagination a {
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  background-color: #6a4793; /* Purple color */
-  color: #ffffff;
-  font-weight: bold;
-  transition: background-color 0.3s ease, cursor 0.3s ease;
-}
-
-.pagination a:hover {
-  background-color: #5a3a7a; /* Darker purple */
-}
-
-.pagination a.active {
-  background-color: #ccc; /* Light grey for active page */
-  color: #555; /* Darker text for contrast */
-  cursor: not-allowed; /* Disabled cursor */
-}
-
-.pagination a.active:hover {
-  background-color: #ccc; /* Prevent hover effect for active */
-}
-
-.pagination a.disabled {
-  background-color: #ddd; /* Disabled state */
-  color: #aaa;
-  cursor: not-allowed;
-}
-
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="d-flex justify-content-end mt-3">
-      <a href="/admin/" class="btn btn-sm btn-danger">Back to home</a>
-    </div>
+  <div class="navbar">
+    <a href="/admin/">Admin Home</a>
+    <a href="/logout">Logout</a>
+  </div>
 
+  <div class="container">
     <h1>Admin Order List</h1>
-    <div class="row">
+
+    <div class="order-list">
       <% if (orders && orders.length > 0) { %>
         <% orders.forEach((order) => { %>
           <% if (order.status !== 'Payment Pending') { %>
@@ -182,9 +171,8 @@
               Order ID: <%= order.orderId %>
             </div>
             <div class="card-body">
-              <!-- Display first product name -->
               <p><strong>First Product:</strong> <%= order.orderedItems[0]?.product?.productName || 'Unnamed Product' %></p>
-              <p><strong>and </strong> <%= order.orderedItems.length %> others</p>
+              <p><strong>and</strong> <%= order.orderedItems.length %> others</p>
               <p><strong>Order Total:</strong> ₹<%= order.finalAmount %></p>
               <p><strong>Status:</strong> <%= order.displayStatus %></p>
               <a href="/admin/orderDetails/<%= order._id %>" class="btn">View Details</a>
@@ -193,55 +181,31 @@
           <% } %>
         <% }) %>
       <% } else { %>
-        <div class="card">
-          <div class="card-header">
-            No Orders Found
-          </div>
-          <div class="card-body">
-            <p>There are no orders to display.</p>
-          </div>
+        <div class="no-orders">
+          <p>No orders to display.</p>
         </div>
       <% } %>
-      
     </div>
 
     <div class="pagination">
       <% if (totalPages > 1) { %>
-        <ul>
-          <% if (currentPage > 1) { %>
-            <li>
-              <a href="?page=<%= currentPage - 1 %>">Previous</a>
-            </li>
-          <% } else { %>
-            <li>
-              <a class="disabled">Previous</a>
-            </li>
-          <% } %>
-    
-          <% for (let i = 1; i <= totalPages; i++) { %>
-            <li>
-              <a 
-                href="?page=<%= i %>" 
-                class="<%= currentPage === i ? 'active' : '' %>">
-                <%= i %>
-              </a>
-            </li>
-          <% } %>
-    
-          <% if (currentPage < totalPages) { %>
-            <li>
-              <a href="?page=<%= currentPage + 1 %>">Next</a>
-            </li>
-          <% } else { %>
-            <li>
-              <a class="disabled">Next</a>
-            </li>
-          <% } %>
-        </ul>
+        <% if (currentPage > 1) { %>
+          <a href="?page=<%= currentPage - 1 %>">Previous</a>
+        <% } else { %>
+          <a class="disabled">Previous</a>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+          <a href="?page=<%= currentPage + 1 %>">Next</a>
+        <% } else { %>
+          <a class="disabled">Next</a>
+        <% } %>
       <% } %>
     </div>
-    
   </div>
-  
 </body>
 </html>

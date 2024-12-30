@@ -50,10 +50,36 @@
     .swal2-cancel:hover {
       background-color: #0066cc !important;
     }
+      /* Navbar Styles */
+.navbar {
+background-color: #6a4793;
+color: #fff;
+padding: 10px 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.navbar a {
+color: #fff;
+text-decoration: none;
+margin: 0 10px;
+font-weight: bold;
+}
+
+.navbar a:hover {
+text-decoration: underline;
+}
   </style>
   </head>  
 
 <body>
+
+  <div class="navbar">
+    <a href="/admin/">Admin Home</a>
+    <a href="/logout">Logout</a>
+  </div>
+
 <div class="content-header row">
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="content-title card-title">Customers</h2>

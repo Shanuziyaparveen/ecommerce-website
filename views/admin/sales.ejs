@@ -252,12 +252,36 @@
     transform: translateX(-100%);
     transition: transform 0.5s ease-in-out;
 }
+    /* Navbar Styles */
+    .navbar {
+background-color: #6a4793;
+color: #fff;
+padding: 10px 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
 
+.navbar a {
+color: #fff;
+text-decoration: none;
+margin: 0 10px;
+font-weight: bold;
+}
+
+.navbar a:hover {
+text-decoration: underline;
+}
 
     </style>
 </head>
 
 <body>
+    <div class="navbar">
+        <a href="/admin/">Admin Home</a>
+        <a href="/logout">Logout</a>
+      </div>
+    
     <h1>Sales Report</h1>
 
     <!-- Filter section -->

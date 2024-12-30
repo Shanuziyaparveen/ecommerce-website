@@ -21,12 +21,16 @@ const loadHomepage = async (req, res,next ) => {
             endDate: {$gte: new Date(today)},
         })
         const user = req.session.user; // This should be an object now
+        let wishlist = [];
+if (user) {
+  wishlist = user.wishlist; // Get the user's wishlist
+}
         // console.log("Session user:", user); // Log the entire user object
         const categories=await Category.find({isListed: true})
         let productData = await Product.find({isBlocked: false,
-            category:{$in:categories.map(category=>category._id)}, quantity:{$gt:0}})
-            productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn))
-           productData = productData.slice(0,4);
+             quantity:{$gt:0}})
+            productData.sort((a,b)=>new Date(a.createdOn)-new Date(b.createdOn))
+           productData = productData.slice(0,7);
         
     
            if (user) {
@@ -112,46 +116,65 @@ async function sendVerificationEmail(email,otp){
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
-const signup = async(req,res,next )=>{
-    try{
-const{name, phone ,email,password,cPassword ,referralCode }=req.body;
-if(password!==cPassword){
-    return res.render("signup",{message:"Password do not match"});
+const signup = async (req, res, next) => {
+    try {
+        const { name, phone, email, password, cPassword, referralCode } = req.body;
 
-}
-const findUser= await User.findOne({email})
-if(findUser){
-    return res.render("signup",{message:"User with this email already exists"});
+        // Check if all required fields are provided
+        if (!name || !phone || !email || !password || !cPassword) {
+            return res.render("signup", { message: "All fields are required" });
+        }
 
-}
-const newReferralCode = generateReferralCode();
+        // Check if passwords match
+        if (password !== cPassword) {
+            return res.render("signup", { message: "Passwords do not match" });
+        }
 
-// Check if a referral code was provided and if it is valid
-let referredBy = null;
-if (referralCode) {
-    const referringUser = await User.findOne({ referralCode: referralCode });
-    if (referringUser) {
-        referredBy = referringUser.referralCode; // Store the referral code of the user who referred them
-    } else {
-        return res.render("signup", { message: "Invalid referral code" });
-    }
-}
-const otp=generateOtp();
-const emailSend = await sendVerificationEmail(email,otp);
-if(!emailSend){
-    return res.json("email-error")
-}
+        // Check if a user already exists with the given email
+        const findUser = await User.findOne({ email });
+        if (findUser) {
+            return res.render("signup", { message: "User with this email already exists" });
+        }
 
-req.session.userOtp = otp;
-req.session.userData={name,phone,email,password, referralCode: newReferralCode, referredBy};
-res.render("verify-otp");
-console.log("OTP sent",otp);
+        const newReferralCode = generateReferralCode();
 
-    }   catch (error) {
+        // Check if a referral code was provided and if it is valid
+        let referredBy = null;
+        if (referralCode) {
+            const referringUser = await User.findOne({ referralCode: referralCode });
+            if (referringUser) {
+                referredBy = referringUser.referralCode; // Store the referral code of the user who referred them
+            } else {
+                return res.render("signup", { message: "Invalid referral code" });
+            }
+        }
+
+        // Generate OTP and send verification email
+        const otp = generateOtp();
+        const emailSend = await sendVerificationEmail(email, otp);
+        if (!emailSend) {
+            return res.render("signup", { message: "Failed to send verification email. Please try again." });
+        }
+
+        // Store OTP and user data in session
+        req.session.userOtp = otp;
+        req.session.userData = {
+            name,
+            phone,
+            email,
+            password,
+            referralCode: newReferralCode,
+            referredBy,
+        };
+
+        res.render("verify-otp");
+        console.log("OTP sent", otp);
+    } catch (error) {
         // Forward the error with a status if it exists
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
-}
+};
+
 const securePassword=async(password)=>{
     try {
         const passwordHash=await bcrypt.hash(password,10)
@@ -241,7 +264,7 @@ await saveUserData.save();
     }
 }
 
-const resendOtp=async(req,res)=>{
+const resendOtp=async(req,res,next)=>{
     try {
         const {email}=req.session.userData;
         if(!email){
@@ -263,7 +286,7 @@ const resendOtp=async(req,res)=>{
         next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
     }
 }
-const loadLogin = async (req,res)=>{
+const loadLogin = async (req,res,next)=>{
     try {
         if(!req.session.user){
             return res.render("login",{loggedin:false})
@@ -312,7 +335,7 @@ req.session.user = {
     }
 }
 
-const logout=  async(req,res)=>{
+const logout=  async(req,res,next)=>{
     try {
         req.session.destroy((err)=>{
             if(err){

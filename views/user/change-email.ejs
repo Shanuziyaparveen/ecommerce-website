@@ -6,17 +6,16 @@
            <form method="post" action="/change-email" onsubmit="return validateLoginForm()">
                <div class="mb-3">
                    <input class="form-control" name="email" placeholder="Email" type="text" id="email">
-                   <div class="error-message" id="email-error"></div>
+                   <div class="error-message text-danger" id="email-error"></div> <!-- Ensure it's styled to show errors -->
                </div>
                <div class="mb-4">
                    <button type="submit" class="btn btn-primary w-100">Verify</button>
                </div>
            </form>
-         
-         
        </div>
    </div>
 </section>
+
 <script>
    function validateLoginForm() {
        const emailInput = document.getElementById('email');
@@ -24,6 +23,9 @@
        const emailValue = emailInput.value.trim();
        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
+       // Clear previous error messages
+       emailError.textContent = '';
+       emailInput.classList.remove('is-invalid'); 
 
        if (emailValue === '') {
            emailError.textContent = 'Please enter your email.';
@@ -34,13 +36,9 @@
            emailInput.classList.add('is-invalid');
            return false;
        } else {
-           emailError.textContent = '';
-           emailInput.classList.remove('is-invalid');
            return true;
        }
    }
 </script>
+
 <%- include("../../views/partials/user/footer") %>
-
-
-

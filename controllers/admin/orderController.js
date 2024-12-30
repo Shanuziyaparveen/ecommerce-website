@@ -6,10 +6,12 @@ const getOrderDetails = async (req, res) => {
   try {
     const orderId = req.params.orderId;
 
-    // Fetch order details and populate the product data
-    const order = await Order.findById(orderId)
-      .populate('orderedItems.product')
-      .exec();
+   // Fetch order details and populate the product data and user data
+const order = await Order.findById(orderId)
+.populate('orderedItems.product') // Populate the product field in orderedItems
+.populate('userId') // Populate the user field
+.exec();
+
 
     if (!order) {
       return res.render('page-404'); // Custom 404 page if order not found

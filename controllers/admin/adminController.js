@@ -11,7 +11,7 @@ const pageerror= async(req,res)=>{
 
 const loadLogin=(req,res)=>{
     if(req.session.admin){
-        return res.redirect("/admin/dashboard")
+        return res.redirect("/admin")
     }
     res.render("admin-login",{message:null})
 }
@@ -242,7 +242,7 @@ const logout=async(req,res)=>{
 // }
 const getOrderList = async (req, res) => {
   try {
-    const perPage = 10; // Number of orders per page
+    const perPage = 9; // Number of orders per page
     const page = parseInt(req.query.page) || 1; // Current page, default to 1
 
     // Fetch paginated orders with total count

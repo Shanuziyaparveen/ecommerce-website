@@ -24,57 +24,163 @@
    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
    
    <style>
-       .header__nav__option .sign-in-link {
-   font-size: 16px;
-   color: #333;
-   margin-right: 15px;
-   text-decoration: none;
-   font-weight: 600;
-}
-.header__nav__option .sign-in-link:hover {
-   color: #ff7f50;
-}
+   
+   body {
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+   }
+
+   .header {
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+      position: sticky;
+      top: 0;
+      z-index: 500;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+   }
+
+   .header__logo img {
+      max-width: 120px;
+   }
+
+   .header__menu ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+   }
+
+   .header__menu ul li {
+      margin: 0 15px;
+   }
+
+   .header__menu ul li a {
+      text-decoration: none;
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+   }
+
+   .header__menu ul li a:hover,
+   .header__menu ul li.active a {
+      color: #ff7f50;
+   }
+
+   .header__nav__option {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+   }
+
+   .header__nav__option a img {
+      width: 20px;
+      margin: 0 10px;
+      transition: transform 0.3s ease;
+   }
+
+   .header__nav__option a img:hover {
+      transform: scale(1.2);
+   }
+
+   .sign-in-link {
+      font-size: 16px;
+      color: #333;
+      text-decoration: none;
+      font-weight: 600;
+      margin-right: 15px;
+      transition: color 0.3s ease;
+      width: 140px;
+   }
+
+   .sign-in-link:hover {
+      color: #ff7f50;
+   }
+
+   .dropdown {
+      position: relative;
+      display: inline-block;
+   }
+
+   .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      right: 0;
+      border-radius: 5px;
+      overflow: hidden;
+   }
+
+   .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+   }
+
+   .dropdown-content a:hover {
+      background-color: #f1f1f1;
+   }
+
+   .dropdown:hover .dropdown-content {
+      display: block;
+   }
+
+   /* Shop List Design */
+   .shop-item {
+      display: flex;
+      flex-direction: column;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+   }
+
+   .shop-item:hover {
+      transform: scale(1.05);
+   }
+
+   .shop-item img {
+      width: 100%;
+      object-fit: cover;
+   }
+
+   .shop-item-details {
+      padding: 15px;
+   }
+
+   .shop-item-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+   }
+
+   .shop-item-price {
+      font-size: 16px;
+      color: #ff7f50;
+      font-weight: bold;
+   }
+</style>
 
 
-.dropdown {
-   position:relative;
-   display:inline-block;
-}
-.dropdown-content {
-   display: none;
-   position:absolute;
-   background-color: white;
-   min-width: 160px;
-   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-   z-index:1000;
-   right:0;
-}
-
-
-.dropdown-content a {
-   color: black;
-   padding: 12px 16px;
-   text-decoration: none;
-   display: block;
-   width: 100%;
-
-
-}
-.dropdown-content a:hover{
-   background-color: #f1f1f1;
-}
-.dropdown:hover .dropdown-content{
-   display: block;
-}
-.header {
-   position: relative;
-   z-index: 500;
-}
 
 
 
-
-   </style>
 </head>
 <body>
    <header class="header">
