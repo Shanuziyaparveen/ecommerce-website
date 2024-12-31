@@ -35,7 +35,7 @@ const login = async (req, res) => {
         }
     } catch (error) {
         console.log('login error', error);
-        return res.redirect("/pageerror");
+        return res.redirect("/admin/pageerror");
     }
 };
 const loadDashboard = async (req, res) => {
@@ -212,7 +212,7 @@ const loadDashboard = async (req, res) => {
             });
         } catch (error) {
             console.error("Error fetching dashboard data:", error);
-            return res.redirect("/pageerror");
+            return res.redirect("/admin/pageerror");
         }
     } else {
         return res.redirect("/admin/login");
@@ -229,7 +229,7 @@ const logout=async(req,res)=>{
         })
     }catch(error){
         console.log('logout error',error);
-       response.redirect("/pageerror")
+       response.redirect("/admin/pageerror")
     }
 }
 // const getProductDetail =async  (req, res, next) => {

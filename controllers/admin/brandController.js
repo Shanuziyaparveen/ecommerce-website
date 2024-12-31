@@ -18,7 +18,7 @@ totalPages:totalPages,
 totalBrands:totalBrands
         })
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 const addBrand= async (req, res) => {
@@ -36,7 +36,7 @@ const addBrand= async (req, res) => {
             res.redirect('/admin/brands')
         }
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -46,7 +46,7 @@ const blockBrand = async (req, res) => {
         await Brand.updateOne({_id:id},{$set:{isBlocked:true}})
         res.redirect("/admin/brands")
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -57,26 +57,26 @@ try {
     res.redirect("/admin/brands")
     
 } catch (error) {
-    res.redirect("/pageerror")
+    res.redirect("/admin/pageerror")
 }
 }
 const editBrand = async (req, res) => {
     try {
       const { id } = req.params; // Use the id parameter from the route
       if (!id) {
-        return res.status(400).redirect("/pageerror"); // If no id, redirect
+        return res.status(400).redirect("/admin/pageerror"); // If no id, redirect
       }
   
       const brand = await Brand.findById(id); // Fetch the brand by id
       if (!brand) {
-        return res.status(404).redirect("/pageerror"); // If no brand found, redirect
+        return res.status(404).redirect("/admin/pageerror"); // If no brand found, redirect
       }
   
       // Render the edit page with the brand details
       res.render("editBrand", { brand });
     } catch (error) {
       console.error(error);
-      res.redirect("/pageerror");
+      res.redirect("/admin/pageerror");
     }
   };
   
@@ -94,7 +94,7 @@ const editBrand = async (req, res) => {
       await Brand.findByIdAndUpdate(id, updateData);
       res.redirect("/admin/brands"); // Redirect to the brand list page after update
     } catch (error) {
-      res.redirect("/pageerror");
+      res.redirect("/admin/pageerror");
     }
   };
   

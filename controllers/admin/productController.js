@@ -18,7 +18,7 @@ const sharp=require('sharp');
     });
 
 }catch(error) {
-    res.redirect('/pageerror')
+    res.redirect('/admin/pageerror')
 }
 }
 
@@ -116,7 +116,7 @@ const getAllProducts = async (req, res) => {
         res.render("page-404");
       }
     } catch (error) {
-      res.redirect("/pageerror");
+      res.redirect("/admin/pageerror");
     }
   };
   const addProductOffer = async (req, res) => {
@@ -223,7 +223,7 @@ const removeProductOffer = async (req, res) => {
 
         return res.json({ status: true, message: "Product offer removed successfully" });
     } catch (error) {
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
       }
 };
 
@@ -235,7 +235,7 @@ const blockProduct=async (req, res) => {
         res.redirect("/admin/products")
     } catch (error) {
 
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 }
 
@@ -246,7 +246,7 @@ const unblockProduct=async (req, res) => {
         res.redirect("/admin/products")
     } catch (error) {
 
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 }
 
@@ -260,7 +260,7 @@ const getEditProduct = async (req, res) => {
             ,cat:category,
             brand:brand});
     } catch (error) {
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 }
 const editProduct = async (req, res) => {
@@ -329,7 +329,7 @@ const editProduct = async (req, res) => {
         res.redirect('/admin/products');
     } catch (error) {
         console.error("Error updating product:", error);
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
     }
 };
 
@@ -367,7 +367,7 @@ const deleteSingleImage = async (req, res) => {
         }
 
     } catch (error) {
-        res.redirect("/pageerror");
+        res.redirect("/admin/pageerror");
       }
 };
 

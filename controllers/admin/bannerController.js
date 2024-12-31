@@ -8,7 +8,7 @@ const getBannerPage=async (req,res)=>{
         const findBanner=await Banner.find({});
         res.render("banner",{data:findBanner})
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -16,7 +16,7 @@ const getAddBannerPage=async (req,res)=>{
 try {
     res.render("addBanner")
 } catch (error) {
-    res.redirect("/pageerror")
+    res.redirect("/admin/pageerror")
 }
 
 
@@ -39,7 +39,7 @@ const addBanner=async (req,res)=>{
         
         res.redirect("/admin/banner")
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -49,7 +49,7 @@ try {
     await Banner.deleteOne({_id:id}).then((data) => console.log(data))
     res.redirect("/admin/banner")
 } catch (error) {
-    res.redirect("/pageerror")
+    res.redirect("/admin/pageerror")
 }
 
 }

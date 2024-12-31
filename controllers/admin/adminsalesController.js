@@ -224,7 +224,7 @@ const totalSales = orders.reduce((sum, order) => sum + (order.finalAmount || 0),
 //       });
 //     } catch (error) {
 //       console.error("Error fetching sales report:", error);
-//       res.redirect("/pageerror");
+//       res.redirect("/admin/pageerror");
 //     }
 //   };
 const getTodaysRevenue = async (req, res) => {
