@@ -103,11 +103,17 @@ text-decoration: underline;
     <header class="card-header text-center mb-20">
       <form action="/admin/category/" method="get" class="d-inline">
         <div class="input-group input-group-sm border border-1 border-grey rounded-pill" style="width: 500px; margin-left: 230px">
-          <input type="text" class="form-control border-0 rounded-pill mt-3" placeholder="Search categories" name="search"/>
+          <input
+            type="text"
+            class="form-control border-0 rounded-pill mt-3"
+            placeholder="Search categories"
+            name="search"
+            value="<%= search || '' %>"/> <!-- Retain the search value -->
           <button class="btn" type="submit">Search</button>
         </div>
       </form>
     </header>
+    
 
     <div class="card">
       <div class="card-body">

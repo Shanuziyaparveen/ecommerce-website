@@ -505,7 +505,11 @@ const getProductDetails = async (req,res,next) => {
       if (!product) {
           return res.status(404).send('Product not found');
       }
-
+      
+ // Redirect to the home page if the product is blocked
+ if (product.isBlocked) {
+  return res.redirect('/'); // Redirect to the home page
+}
       // Ensure product.images is always an array, fallback to an empty array if it's not
       product.images = Array.isArray(product.productImage) ? product.productImage : [product.productImage];
 

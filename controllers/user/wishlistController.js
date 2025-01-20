@@ -11,13 +11,13 @@ const getwishList = async (req, res) => {
     // Find the user and get the wishlist
     const user = await User.findOne({ _id: userId }, { wishlist: 1 });
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.redirect('/login');
     }
 
     // Pagination setup
-    const page = parseInt(req.query.page) || 1;  // Get the current page from query string, default to 1
-    const limit = 10;  // Set number of products per page
-    const skip = (page - 1) * limit;  // Calculate the number of products to skip based on the current page
+    const page = parseInt(req.query.page) || 1; 
+    const limit = 10;  
+    const skip = (page - 1) * limit;  
 
     // Fetch the products that are in the user's wishlist (with pagination)
     const wishlistProducts = await Product.find({ _id: { $in: user.wishlist } })

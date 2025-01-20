@@ -85,6 +85,6 @@ router.get('/delete-coupon/:id', couponController.deleteCoupon); // Route to del
 router.get('/edit-coupon/:id', couponController.getEditCoupon); // Route to display edit coupon page
 router.post('/edit-coupon', couponController.editCoupon); // Route to update coupon details
 
-
+router.get('/products/:id',productController.productDetail);
 
 module.exports=router

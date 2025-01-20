@@ -333,9 +333,9 @@ ul li:before {
       <div class="breadcrumb">
         <a href="/" rel="nofollow">Home</a>
         <span>&gt;</span>
-        <a href="/wishlist" rel="nofollow">Wishlist</a>
+        <a href="/getAllProducts" rel="nofollow">Shop</a>
         <span>&gt;</span>
-        <a href="/cart" rel="nofollow">Cart</a>
+        <a href="/product/<%= product._id %>" rel="nofollow" disabled><%= product.productName %></a>
       </div>
     </div>
 

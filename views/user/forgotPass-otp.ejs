@@ -67,14 +67,13 @@
          <input type="text" id="otp" name="otp" class="form-control" required>
        </div>
        <div class="form-group">
-         <button type="submit" class="btn btn-primary">Verify OTP</button>
-       </div>
+        <button type="submit" class="btn btn-primary" id="verifyOtpButton" disabled>Verify OTP</button>       </div>
      </form>
      <div class="form-group otp-timer-wrapper">
        <div class="otp-timer" id="otpTimer"></div>
      </div>
      <div class="form-group">
-       <button type="button" class="btn btn-link resend-button" onclick="resendOtp()">Resend OTP</button>
+       <button type="button" id="resendButton" class="btn btn-link resend-button" onclick="resendOtp()"  disabled>Resend OTP</button>
      </div>
      <%if(locals.message && message.length>0){%>
        <div class="alert alert-danger mt-3">
@@ -107,6 +106,11 @@ function updateTimerColor(percentage) {
 
 function startOtpTimer() {
 const timerElement=document.getElementById('otpTimer');
+const resendButton = document.getElementById('resendButton');
+const verifyOtpButton = document.getElementById('verifyOtpButton');
+resendButton.disabled = true; // Disabled button when timer starts\
+verifyOtpButton.disabled = false; // Enable "Verify OTP" button when timer starts
+
 otpTimerInterval=setInterval(() => {
     const minutes= Math.floor(timer/60);
     const seconds=timer%60;
@@ -116,6 +120,8 @@ otpTimerInterval=setInterval(() => {
         clearInterval(otpTimerInterval);
         timerElement.textContent='Expired';
         timerElement.style.backgroundColor='red';
+        resendButton.disabled = false; // Enable button when timer expires
+        verifyOtpButton.disabled = true; // Disable "Verify OTP" button when timer expires
     }
 },1000);
 

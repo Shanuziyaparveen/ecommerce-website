@@ -252,7 +252,7 @@ await saveUserData.save();
                     console.error("Error destroying session:", err);
                     return res.status(500).json({ success: false, message: "Error completing signup. Please try again." });
                 }
-                res.json({ success: true, redirectUrl: "/" }); // Redirect to login
+                res.json({ success: true, redirectUrl: "/login" }); // Redirect to login
             });
         }else{
             res.status(400).json({success:false,message:"Invalid OTP,please try again"})

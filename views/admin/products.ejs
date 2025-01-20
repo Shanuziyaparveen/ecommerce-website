@@ -60,7 +60,12 @@ text-decoration: underline;
         <tbody>
             <% for (let i = data.length - 1; i >= 0; i--) { %>
                 <tr>
-                    <td><%= data[i].productName %></td>
+                  
+                            <td>
+                              <a href="/admin/products/<%= data[i]._id %>" class="product-link">
+                                <%= data[i].productName %>
+                              </a></td>
+                      
                     <td><%= data[i].brand ? data[i].brand : 'No Brand' %></td>
                     <td><%= data[i].category ? data[i].category : 'No Category' %></td>
                     <td><%= data[i].salePrice %></td>

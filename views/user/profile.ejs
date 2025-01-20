@@ -415,11 +415,9 @@
                             <label for="walletAmount" class="h4">Current Balance</label>
                             <div class="h3">₹<%= wallet.balance %></div>
                           </div>
-                          <div class="form-group">
-                            <label for="addAmount" class="h4">Add Amount</label>
-                            <input type="number" id="addAmount" name="amount" class="form-control" placeholder="Enter amount" required min="1">
-                          </div>
-                          <button type="submit" class="btn btn-success">Add Money</button>
+                         <br>
+                         <br>
+                         <br>
                         </form>
                       </div>
                     </div>
@@ -495,7 +493,7 @@
                     </div>
                     <div class="card-body">
                         <h6 class="mb-3">Refer your friends and earn rewards!</h6>
-                        <p>Share this link: 
+                        <p>Share this code: 
                             <strong><%= user.referralCode %></strong>
                         </p>
                         <p>Earned: ₹<%= user.rewards %></p> <!-- Display the rewards earned -->

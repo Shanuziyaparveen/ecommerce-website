@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+    <%- include("../../views/partials/admin/header") %>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Coupon</title>
@@ -16,7 +18,7 @@
         }
   /* Navbar Styling */
   .navbar {
-            background-color: #D19C97;
+            background-color: #380e40;
         }
 
         .navbar .navbar-nav .nav-link,
@@ -25,17 +27,17 @@
         }
 
         .navbar .form-control {
-            border: 2px solid #D19C97;
+            border: 2px solid #380e40;
         }
 
         .navbar .btn-primary {
-            background-color: #D19C97;
-            border-color: #D19C97;
+            background-color: #380e40;
+            border-color: #380e40;
         }
 
         .navbar .btn-primary:hover {
-            background-color: #B77B6D;
-            border-color: #B77B6D;
+            background-color: #380e40;
+            border-color: #380e40;
         }
 
         /* Table Styling */
@@ -54,7 +56,7 @@
         }
 
         .table thead th {
-            background-color: #D19C97;
+            background-color: #380e40;
             color: white;
         }
 
@@ -77,17 +79,17 @@
         }
 
         .modal .modal-header {
-            background-color: #D19C97;
+            background-color: #380e40;
             color: white;
         }
 
         .modal .btn-primary {
-            background-color: #D19C97;
-            border-color: #D19C97;
+            background-color: #3c104d;
+            border-color: #380e40;
         }
 
         .modal .btn-primary:hover {
-            background-color: #B77B6D;
+            background-color: #380e40;
         }
 
         /* Responsive Design */
@@ -194,11 +196,6 @@
                     <div class="text-danger small error-message" id="error-expdate"></div>
                 </div>
             
-                <div class="form-outline">
-                    <input type="text" value="<%= coupon.status %>" class="form-control form-control-lg" name="status" required>
-                    <label for="status" class="form-label">Status</label>
-                    <div class="text-danger small error-message" id="error-status"></div>
-                </div>
             
                 <div class="pt-1 mb-4">
                     <button class="btn btn-custom btn-lg btn-block" type="submit">Update</button>

@@ -4,31 +4,49 @@ const Product = require("../../models/productSchema")
 
 const { renderAdminErrorPage } = require("../../utils/errorHandler");
 const categoryInfo = async (req, res) => {
-    try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = 4;
-      const skip = (page - 1) * limit;
-  
-      // Retrieve categories that have non-empty names and descriptions
-      const categoryData = await Category.find({ name: { $ne: null }, description: { $ne: null } })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
-  
-      // Calculate total number of valid categories
-      const totalCategories = await Category.countDocuments({ name: { $ne: null }, description: { $ne: null } });
-      const totalPages = Math.ceil(totalCategories / limit);
-  
-      res.render("category", {
-        cat: categoryData,
-        currentPage: page,
-        totalPages: totalPages,
-        totalCategories: totalCategories
-      });
-    } catch (error) {
-      console.error(error);
-      renderAdminErrorPage(res, "Failed to load categories.");    }
-  };
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+    const skip = (page - 1) * limit;
+
+    // Extract search query
+    const search = req.query.search || "";
+
+    // Build the filter criteria
+    const filter = {
+      name: { $ne: null },
+      description: { $ne: null },
+      ...(search && {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+        ],
+      }),
+    };
+
+    // Retrieve categories based on filter
+    const categoryData = await Category.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Calculate total number of valid categories
+    const totalCategories = await Category.countDocuments(filter);
+    const totalPages = Math.ceil(totalCategories / limit);
+
+    res.render("category", {
+      cat: categoryData,
+      currentPage: page,
+      totalPages: totalPages,
+      totalCategories: totalCategories,
+      search, // Pass the search term to the view
+    });
+  } catch (error) {
+    console.error(error);
+    renderAdminErrorPage(res, "Failed to load categories.");
+  }
+};
+
   const addCategory = async (req, res) => {
     const { name, description } = req.body;
   

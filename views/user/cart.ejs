@@ -300,13 +300,13 @@
                                     <span class="quantity-feedback">
                                         <% if (item.quantity > item.stock) { %>
                                             Stock limit reached.
-                                            <% disableCheckout = true; %> <!-- Set disableCheckout to true if stock limit is reached -->
+                                            <% disableCheckout = true; %> 
                                         <% } else if (item.quantity >= 5) { %>
                                             Max quantity reached.
                                         <% } else if (item.quantity <= 1) { %>
                                             Min quantity is one.
                                         <% } else { %>
-                                            <!-- Clear feedback for normal state -->
+                                          
                                         <% } %>
                                     </span>
                                 <% } %>

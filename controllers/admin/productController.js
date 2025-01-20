@@ -119,6 +119,28 @@ const getAllProducts = async (req, res) => {
       res.redirect("/admin/pageerror");
     }
   };
+  const productDetail = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        console.log('Requested Product ID:', productId);
+
+        const product = await Product.findById(productId);
+        console.log('Fetched Product:', product);
+
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        const totalOffer = product.productOffer || 0;
+
+        res.render('product-detailed', { product, totalOffer });
+    } catch (error) {
+        console.error('Error fetching product details:', error);
+        res.status(500).send('Failed to load product details');
+    }
+};
+
+  
   const addProductOffer = async (req, res) => {
     try {
         const { productId, category, percentage } = req.body;
@@ -372,5 +394,5 @@ const deleteSingleImage = async (req, res) => {
 };
 
 module.exports = {
-    getProductAddPage,addProducts,getAllProducts,addProductOffer,removeProductOffer,blockProduct,unblockProduct,getEditProduct,editProduct,deleteSingleImage
+    getProductAddPage,addProducts,productDetail,getAllProducts,addProductOffer,removeProductOffer,blockProduct,unblockProduct,getEditProduct,editProduct,deleteSingleImage
 }
