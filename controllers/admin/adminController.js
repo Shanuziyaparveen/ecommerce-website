@@ -20,24 +20,36 @@ const login = async (req, res) => {
         const { email, password } = req.body;
         const admin = await User.findOne({ email, isAdmin: true });
 
-        if (admin) {
-            const passwordMatch = await bcrypt.compare(password, admin.password);
-            if (passwordMatch) {
-                req.session.admin = true;
-                return res.redirect("/admin");
-            } else {
-                // Redirect to login page if password doesn't match
-                return res.redirect("/admin/login");
-            }
-        } else {
-            // Redirect if no admin found
-            return res.redirect("/admin/login");
+        if (!admin) {
+            return res.render("admin/login", { message: "Admin not found" });
         }
+
+        if (admin.isBlocked) {
+            return res.render("admin/login", { message: "Admin is blocked by Super Admin" });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, admin.password);
+        if (!passwordMatch) {
+            return res.render("admin/login", { message: "Incorrect password" });
+        }
+
+        // Store admin details in session (similar to user login)
+        req.session.admin = {
+            _id: admin._id,
+            name: admin.name, 
+            email: admin.email 
+        };
+
+      
+        res.locals.admin = admin;
+
+        return res.redirect("/admin");
     } catch (error) {
-        console.log('login error', error);
+        console.log('Login error:', error);
         return res.redirect("/admin/pageerror");
     }
 };
+
 const loadDashboard = async (req, res) => {
     if (req.session.admin) {
         try {
@@ -122,8 +134,9 @@ const loadDashboard = async (req, res) => {
               { $sort: { "_id": 1 } }
           ]);
           
-          // Prepare data for frontend
-          const months = Array.from({ length: 12 }, (_, i) => i + 1); // January to December
+          // Rearrange months to start from November
+          const months = [11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
           const monthlyData = months.map(month => {
               const monthData = monthlyOrdersData.find(item => item._id === month);
               return {
@@ -136,7 +149,7 @@ const loadDashboard = async (req, res) => {
               year: item._id,
               statuses: item.statuses
           }));
-          // If no data, set default empty values (for new website)
+          
           if (yearlyData.length === 0) {
               yearlyData.push({ year: new Date().getFullYear(), sales: 0 });
           }

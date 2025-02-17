@@ -537,14 +537,16 @@ ol li img {
     currentData = filter === 'yearly' ? yearlyData : monthlyData;
 
     if (filter === 'monthly') {
-        // Array of month names
+        // Reordered month names to start from November
         const monthNames = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
+            'November', 'December', 'January', 'February', 'March', 'April',
+            'May', 'June', 'July', 'August', 'September', 'October'
         ];
 
-        // Update labels to display month names
-        salesChart.data.labels = currentData.map(item => monthNames[item.month - 1]);
+        // Update labels to display month names starting from November
+        salesChart.data.labels = currentData
+            .map(item => monthNames[(item.month + 1) % 12]); 
+
     } else if (filter === 'yearly') {
         // Update labels for yearly data
         salesChart.data.labels = currentData.map(item => item.year);

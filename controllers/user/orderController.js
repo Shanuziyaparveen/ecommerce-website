@@ -771,7 +771,8 @@ let couponDiscount= req.session.couponDiscount;
     console.log('Wallet Used:', req.session.walletUsed);
     console.log('Wallet Remaining:', req.session.walletRemaining);
     console.log('Remaining Amount to Pay:', remainingAmountToPay);
-    
+      // Fetch active coupons
+      const coupons = await Coupon.find({ status: 'active' });
 req.session.remainingAmountToPay = remainingAmountToPay;
       res.render('confirmCheckout', {
           selectedAddress,
@@ -783,17 +784,18 @@ req.session.remainingAmountToPay = remainingAmountToPay;
           discountedAmount,
           walletBalance,
           remainingAmountToPay,
+          coupons
       });
   }  catch (error) {
-    // Forward the error with a status if it exists
+  
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
 
 const returnSingleProduct = async (req,res,next) => {
-  const { productId } = req.params; // Extract product ID from URL params
-  const { orderId } = req.query; // Extract order ID from query parameters
-  const { reason } = req.body; // Extract reason from the request body
+  const { productId } = req.params; 
+  const { orderId } = req.query; 
+  const { reason } = req.body; 
 
   try {
     // Log inputs for debugging
@@ -948,7 +950,7 @@ const postSuccess = async (req,res,next) => {
         paymentDetails: { razorpayPaymentId, razorpaySignature },
       },
       { new: true }
-    );
+    ).populate('orderedItems.product');
 
     if (!updatedOrder) {
       console.warn('Order not found for Razorpay Order ID:', razorpayOrderId);
@@ -956,6 +958,15 @@ const postSuccess = async (req,res,next) => {
     }
 
     console.log('Order successfully updated:', updatedOrder);
+     // Reduce product quantity based on ordered items
+     for (const item of updatedOrder.orderedItems) {
+      const product = item.product;
+      if (product) {
+        product.quantity -= item.quantity;
+        await product.save();
+      }
+    }
+
     return res.status(200).json({ success: true, msg: 'Payment Successful', order: updatedOrder });
 
   } catch (error) {

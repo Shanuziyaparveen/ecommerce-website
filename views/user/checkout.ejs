@@ -179,31 +179,49 @@
         font-size: 1rem;
         color: #666;
     }
+    .form-group {
+        margin-bottom: 15px;
+        position: relative;
+    }
 
+    input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
+    }
 </style>
 
 <h1>Checkout</h1>
-
 <!-- Address Selection Form -->
-<form method="POST" action="/checkout/select-address" id="address-selection-form">
-    <div class="address-section">
-        <% savedAddresses.forEach(function(address, index) { %>
-            <div class="address-card">
-                <input type="radio" name="selectedAddress" value="<%= address._id %>" id="address-<%= index %>" onclick="enablePaymentButton()">
-                <label for="address-<%= index %>">
-                    <p><strong><%= address.name %></strong></p>
-                    <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
-                    <p>Phone: <%= address.phone %></p>
-                    <% if (address.altPhone) { %>
-                        <p>Alternate Phone: <%= address.altPhone %></p>
-                    <% } %>
-                </label>
-                <button type="button" onclick="editAddress('<%= address._id %>')">Edit</button>
-            </div>
-        <% }); %>
-        <button type="submit" class="toggle-button">Confirm Address</button>
-    </div>
-</form>
+<% if (savedAddresses.length > 0) { %>
+    <form method="POST" action="/checkout/select-address" id="address-selection-form">
+        <div class="address-section">
+            <% savedAddresses.forEach(function(address, index) { %>
+                <div class="address-card">
+                    <input type="radio" name="selectedAddress" value="<%= address._id %>" id="address-<%= index %>" onclick="enableConfirmButton()">
+                    <label for="address-<%= index %>">
+                        <p><strong><%= address.name %></strong></p>
+                        <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+                        <p>Phone: <%= address.phone %></p>
+                        <% if (address.altPhone) { %>
+                            <p>Alternate Phone: <%= address.altPhone %></p>
+                        <% } %>
+                    </label>
+                </div>
+            <% }); %>
+            <button type="submit" class="toggle-button" id="confirm-button" disabled>Confirm Address</button>
+        </div>
+       
+    </form>
+<% } %>
 
 <!-- Display Selected Address -->
 <% if (selectedAddress) { %>
@@ -218,6 +236,11 @@
             <% } %>
         </p>
     </div>
+<% }  else { %>
+    <div id="selected-address-display" style="display:none;">
+        <h3>Selected Address</h3>
+        <p id="selected-address-details"></p>
+    </div>
 <% } %>
 
 <!-- Add New Address Button -->
@@ -226,33 +249,81 @@
 <!-- New Address Form -->
 <div class="address-form-section" id="address-form-section">
     <h2>Add New Address</h2>
-    <form method="POST" action="/checkout/save-address" id="address-form">
-        <input type="text" name="name" placeholder="Full Name" required>
-        <input type="text" name="addressType" placeholder="Address Type (e.g., Home, Office)" required>
-        <input type="text" name="city" placeholder="City" required>
-        <input type="text" name="state" placeholder="State" required>
-        <input type="text" name="pincode" placeholder="Pincode" required>
-        <input type="text" name="phone" placeholder="Phone" required pattern="^[0-9]{10}$" title="Please enter a valid 10-digit phone number">
-        <input type="text" name="altPhone" placeholder="Alternate Phone (Optional)" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit phone number">
+    <form method="POST" action="/checkout/save-address" id="address-form" onsubmit="return validateAddressForm()">
+        
+        <div class="form-group">
+            <input type="text" name="name" id="name" placeholder="Full Name" required>
+            <p class="error-message" id="name-error"></p>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="addressType" id="addressType" placeholder="Address Type (e.g., Home, Office)" required>
+            <p class="error-message" id="addressType-error"></p>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="city" id="city" placeholder="City" required>
+            <p class="error-message" id="city-error"></p>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="state" id="state" placeholder="State" required>
+            <p class="error-message" id="state-error"></p>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="pincode" id="pincode" placeholder="Pincode" required>
+            <p class="error-message" id="pincode-error"></p>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="phone" id="phone" placeholder="Phone" required pattern="^[0-9]{10}$" title="Please enter a valid 10-digit phone number">
+            <p class="error-message" id="phone-error"></p>
+        </div>
+
+        <div class="form-group">
+            <input type="text" name="altPhone" id="altPhone" placeholder="Alternate Phone (Optional)" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit phone number">
+            <p class="error-message" id="altPhone-error"></p>
+        </div>
+
         <button type="submit">Save Address</button>
     </form>
 </div>
+
 
 <!-- Proceed to Payment Button -->
 <button type="button" id="payment-button" class="payment-button" onclick="proceedToConfirmation()">Proceed to Confirmation</button>
 
 <script>
-    function selectAddress(id, name, city, state, pincode, phone, altPhone) {
-        document.getElementById("selected-address-display").style.display = "block";
-        document.getElementById("selected-address-details").innerText = `
-            Address: ${name}\n
-            ${city}, ${state} - ${pincode}\n
-            Phone: ${phone}\n
-            Alternate Phone: ${altPhone ? altPhone : 'N/A'}`;
-        
-        document.getElementById("payment-button").disabled = false;
+   function selectAddress(name, city, state, pincode, phone, altPhone) {
+        const addressDisplay = document.getElementById("selected-address-display");
+        const addressDetails = document.getElementById("selected-address-details");
+        const paymentButton = document.getElementById("payment-button");
+
+        // Show selected address details
+        addressDisplay.style.display = "block";
+        addressDetails.innerHTML = `
+            <strong>${name}</strong><br>
+            ${city}, ${state} - ${pincode}<br>
+            Phone: ${phone}<br>
+            ${altPhone ? `Alternate Phone: ${altPhone}<br>` : ''}
+        `;
+
+        // Enable the Proceed to Confirmation button
+        paymentButton.disabled = false;
     }
 
+    // Disable button on page load if no address is selected
+    window.onload = function() {
+        const selectedAddressDisplay = document.getElementById("selected-address-display");
+        const paymentButton = document.getElementById("payment-button");
+
+        if (selectedAddressDisplay.style.display === "none" || selectedAddressDisplay.innerText.trim() === "") {
+            paymentButton.disabled = true;
+        } else {
+            paymentButton.disabled = false;
+        }
+    };
     function enablePaymentButton() {
         document.getElementById("payment-button").disabled = false;
     }
@@ -264,6 +335,106 @@
 
     function proceedToConfirmation() {
         window.location.href = "/confirm-checkout";
+    }
+    function validateAddressForm() {
+        let isValid = true; // To track overall form validation
+
+        let name = document.getElementById("name").value.trim();
+        let addressType = document.getElementById("addressType").value.trim();
+        let city = document.getElementById("city").value.trim();
+        let state = document.getElementById("state").value.trim();
+        let pincode = document.getElementById("pincode").value.trim();
+        let phone = document.getElementById("phone").value.trim();
+        let altPhone = document.getElementById("altPhone").value.trim();
+
+        // Regular expressions
+        let lettersOnlyPattern = /^[A-Za-z\s]+$/; // Only letters and spaces allowed
+        let pincodePattern = /^[0-9]{6}$/; // Exactly 6 digits
+        let phonePattern = /^[0-9]{10}$/; // Exactly 10 digits
+
+        // Clear previous error messages
+        document.querySelectorAll(".error-message").forEach(el => {
+            el.style.display = "none";
+            el.innerText = "";
+        });
+
+        // Validate Name
+        if (!name) {
+            document.getElementById("name-error").innerText = "Full Name is required!";
+            document.getElementById("name-error").style.display = "block";
+            isValid = false;
+        } else if (!lettersOnlyPattern.test(name)) {
+            document.getElementById("name-error").innerText = "Full Name should only contain letters!";
+            document.getElementById("name-error").style.display = "block";
+            isValid = false;
+        }
+
+        // Validate Address Type
+        if (!addressType) {
+            document.getElementById("addressType-error").innerText = "Address Type is required!";
+            document.getElementById("addressType-error").style.display = "block";
+            isValid = false;
+        } else if (!lettersOnlyPattern.test(addressType)) {
+            document.getElementById("addressType-error").innerText = "Address Type should only contain letters!";
+            document.getElementById("addressType-error").style.display = "block";
+            isValid = false;
+        }
+
+        // Validate City
+        if (!city) {
+            document.getElementById("city-error").innerText = "City is required!";
+            document.getElementById("city-error").style.display = "block";
+            isValid = false;
+        } else if (!lettersOnlyPattern.test(city)) {
+            document.getElementById("city-error").innerText = "City should only contain letters!";
+            document.getElementById("city-error").style.display = "block";
+            isValid = false;
+        }
+
+        // Validate State
+        if (!state) {
+            document.getElementById("state-error").innerText = "State is required!";
+            document.getElementById("state-error").style.display = "block";
+            isValid = false;
+        } else if (!lettersOnlyPattern.test(state)) {
+            document.getElementById("state-error").innerText = "State should only contain letters!";
+            document.getElementById("state-error").style.display = "block";
+            isValid = false;
+        }
+
+        // Validate Pincode
+        if (!pincode) {
+            document.getElementById("pincode-error").innerText = "Pincode is required!";
+            document.getElementById("pincode-error").style.display = "block";
+            isValid = false;
+        } else if (!pincodePattern.test(pincode)) {
+            document.getElementById("pincode-error").innerText = "Pincode must be exactly 6 digits!";
+            document.getElementById("pincode-error").style.display = "block";
+            isValid = false;
+        }
+
+        // Validate Phone
+        if (!phone) {
+            document.getElementById("phone-error").innerText = "Phone number is required!";
+            document.getElementById("phone-error").style.display = "block";
+            isValid = false;
+        } else if (!phonePattern.test(phone)) {
+            document.getElementById("phone-error").innerText = "Phone number must be exactly 10 digits!";
+            document.getElementById("phone-error").style.display = "block";
+            isValid = false;
+        }
+
+        // Validate Alternate Phone (if entered)
+        if (altPhone && !phonePattern.test(altPhone)) {
+            document.getElementById("altPhone-error").innerText = "Alternate phone number must be exactly 10 digits!";
+            document.getElementById("altPhone-error").style.display = "block";
+            isValid = false;
+        }
+
+        return isValid; // Form submits only if isValid is true
+    }
+    function enableConfirmButton() {
+        document.getElementById("confirm-button").disabled = false;
     }
 </script>
 

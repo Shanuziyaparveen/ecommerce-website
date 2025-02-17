@@ -67,24 +67,24 @@ router.post("/addBanner", adminAuth, uploads.single("images"), bannerController.
 router.get("/deleteBanner", adminAuth, bannerController.deleteBanner);
 
 // Order Management Routes
-router.get('/orderList', adminController.getOrderList); // Route to get the order list
-router.post('/updateOrderStatus', adminController.updateOrderStatus); // Route to update the order status
-router.put('/updateProductStatus', adminController.updateProductStatus); // Route to update the product status
-router.get('/orderDetails/:orderId', orderController.getOrderDetails); // Route to get order details
+router.get('/orderList',adminAuth, adminController.getOrderList); // Route to get the order list
+router.post('/updateOrderStatus', adminAuth,adminController.updateOrderStatus); // Route to update the order status
+router.put('/updateProductStatus', adminAuth,adminController.updateProductStatus); // Route to update the product status
+router.get('/orderDetails/:orderId', adminAuth,orderController.getOrderDetails); // Route to get order details
 
 // Sales Management Routes
-router.get('/sales', adminsalesController.getAdminSalesReport); // Route to get sales report
-router.get('/revenue/today', adminsalesController.getTodaysRevenue); // Route to get today's revenue
-router.get('/orders/today', adminsalesController.getTodaysOrders); // Route to get today's orders
+router.get('/sales',adminAuth, adminsalesController.getAdminSalesReport); // Route to get sales report
+router.get('/revenue/today',adminAuth, adminsalesController.getTodaysRevenue); // Route to get today's revenue
+router.get('/orders/today',adminAuth, adminsalesController.getTodaysOrders); // Route to get today's orders
 
 // Coupon Management Routes
-router.get('/add-coupon', couponController.getaddcoupon); // Route to display add coupon page
-router.post('/add-coupon', couponController.addCoupon); // Route to add a new coupon
-router.get('/coupon', couponController.getCoupon); // Route to get coupon list
-router.get('/delete-coupon/:id', couponController.deleteCoupon); // Route to delete a coupon
-router.get('/edit-coupon/:id', couponController.getEditCoupon); // Route to display edit coupon page
-router.post('/edit-coupon', couponController.editCoupon); // Route to update coupon details
+router.get('/add-coupon',adminAuth, couponController.getaddcoupon); // Route to display add coupon page
+router.post('/add-coupon',adminAuth, couponController.addCoupon); // Route to add a new coupon
+router.get('/coupon',adminAuth, couponController.getCoupon); // Route to get coupon list
+router.get('/delete-coupon/:id',adminAuth, couponController.deleteCoupon); // Route to delete a coupon
+router.get('/edit-coupon/:id',adminAuth, couponController.getEditCoupon); // Route to display edit coupon page
+router.post('/edit-coupon', adminAuth,couponController.editCoupon); // Route to update coupon details
 
-router.get('/products/:id',productController.productDetail);
+router.get('/products/:id',adminAuth,productController.productDetail);
 
 module.exports=router

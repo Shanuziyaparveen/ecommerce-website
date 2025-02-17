@@ -381,18 +381,50 @@ text-decoration: underline;
         </tbody>
         
     </table>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.getElementById('generateReportButton').addEventListener('click', function () {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+      document.getElementById('generateReportButton').addEventListener('click', function () {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
 
-            if (startDate && endDate) {
-                window.location.href = `/admin/sales?startDate=${startDate}&endDate=${endDate}`;
-            } else {
-                window.location.href = '/admin/sales';
-            }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (!startDate || !endDate) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Dates!',
+            text: 'Please select both start and end dates.',
         });
+        return;
+    }
+
+    if (start > today) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Start Date!',
+            text: 'Start date cannot be in the future.',
+        });
+        return;
+    }
+
+   
+    if (start > end) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date Range!',
+            text: 'Start date cannot be greater than the end date.',
+        });
+        return;
+    }
+
+    window.location.href = `/admin/sales?startDate=${startDate}&endDate=${endDate}`;
+});
+
 
     
 const ctx = document.getElementById('paymentMethodChart').getContext('2d');

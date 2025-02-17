@@ -180,7 +180,9 @@ const getListCategory = async (req, res) => {
 const getUnlistCategory = async (req, res) => {
   try {
     const id = req.query.id;
+    
     await Category.updateOne({ _id: id }, { $set: { isListed: true } });
+
     res.redirect("/admin/category");
   } catch (error) {
     console.error("Error unlisting category:", error);

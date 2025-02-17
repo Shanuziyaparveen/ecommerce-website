@@ -109,9 +109,107 @@
         .payment-button:hover {
             background-color: #218838;
         }
+        /* Breadcrumb Styles */
+.breadcrumb-wrap {
+    background: #f8f9fa; /* Light grey background */
+    padding: 10px 15px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.breadcrumb a {
+    text-decoration: none;
+    color: #671966; /* Blue link color */
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumb a:hover {
+    color: #580b3d; /* Darker blue on hover */
+}
+
+.breadcrumb span {
+    color: #6c757d; /* Grey separator */
+    font-size: 14px;
+}
+
+.breadcrumb span::after {
+    content: '›'; /* Breadcrumb arrow */
+    padding: 0 5px;
+    color: #6c757d; /* Grey arrow */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .breadcrumb {
+        font-size: 14px;
+        flex-wrap: wrap;
+    }
+}
+.available-coupons {
+    margin-top: 15px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column; /* Ensures coupons are stacked vertically */
+    gap: 10px; /* Adds space between each coupon */
+}
+
+.coupon-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: flex-start; /* Align text to the left */
+}
+
+    .coupon-card strong {
+        font-size: 16px;
+    }
+    .coupon-card .coupon-code {
+        font-weight: bold;
+        color: green;
+    }
+    .copy-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-top: 5px;
+    }
+    .copy-btn:hover {
+        background-color: #0056b3;
+    }
+    
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="page-header breadcrumb-wrap">
+          <div class="breadcrumb">
+            <a href="/" rel="nofollow">Home</a>
+            <span>
+                
+            </span>
+            <a href="/cart" rel="nofollow">Cart</a>
+            <span>
+                
+            </span>
+            <a href="/checkout" rel="nofollow">Address</a>
+          </div>
+        </div>
+       
+
     <div class="container">
         <h1>Confirm Checkout</h1>
 
@@ -170,7 +268,6 @@
             </div>
         </div>
 
-        <!-- Coupon Section -->
         <section class="coupon-section">
             <h3>Apply Coupon</h3>
             <div>
@@ -178,7 +275,25 @@
                 <input type="hidden" id="totalAmount" value="<%= cartTotal %>">
                 <button onclick="applyCoupon()" class="btn-primary">Apply Coupon</button>
             </div>
+        
+            <!-- Display Available Coupons -->
+            <div class="available-coupons">
+                <h4>Available Coupons</h4>
+                <% if (coupons.length > 0) { %>
+                    <% coupons.forEach(coupon => { %>
+                        <div class="coupon-card">
+                            <p>Code: <span class="coupon-code"><%= coupon.couponcode %></span></p>
+                            <p>Copy this coupon code to get ₹<%= coupon.cashback %> Discount</p>
+                            <p>Min Purchase: ₹<%= coupon.minamount %></p>
+                            <button class="copy-btn" onclick="copyCoupon('<%= coupon.couponcode %>')">Copy Code</button>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>No available coupons</p>
+                <% } %>
+            </div>
         </section>
+        
 
         <!-- Proceed to Payment Button -->
         <button type="button" class="payment-button" onclick="proceedToPayment()">Proceed to Payment</button>
@@ -192,7 +307,24 @@
 
     <script>
 
-        
+function copyCoupon(code) {
+    navigator.clipboard.writeText(code).then(() => {
+        Swal.fire({
+            title: "Coupon Copied!",
+            text: "Code: " + code,
+            icon: "success",
+            confirmButtonText: "OK"
+        });
+    }).catch(err => {
+        Swal.fire({
+            title: "Oops!",
+            text: "Failed to copy the coupon. Try again!",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+    });
+            document.getElementById("couponCode").value = code;
+        }
 function applyCoupon() {
     const couponCode = document.getElementById("couponCode").value;
     const totalAmount = document.getElementById("totalAmount").value;

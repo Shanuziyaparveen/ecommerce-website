@@ -298,36 +298,52 @@ text-decoration: underline;
     reader.readAsDataURL(input.files[0]);
 }
 const selectedImages =[];
-document.getElementById("input1").addEventListener("change",handleFileSelect);
-function handleFileSelect(event){
+
+document.getElementById("input1").addEventListener("change", handleFileSelect);
+
+function handleFileSelect(event) {
     const addedImagesContainer = document.getElementById("addedImagesContainer");
-    addedImagesContainer.innerHTML = "";
-    const files = event.target.files;
-    for (let i = 0; i < files.length; i++) {
-        const file =files[i];
-        selectedImages.push(file);
-        const thumbnail = document.createElement('div');
-        thumbnail.classList.add('image-thumbnail');
-        const img=document.createElement('img');
+    addedImagesContainer.innerHTML = ""; // Clear existing images
+
+    const files = Array.from(event.target.files); // Convert to array
+    selectedImages.push(...files); // Store files in array
+
+    selectedImages.forEach((file, index) => {
+        const thumbnail = document.createElement("div");
+        thumbnail.classList.add("image-thumbnail");
+        thumbnail.dataset.index = index; // Store index for removal
+
+        const img = document.createElement("img");
         img.src = URL.createObjectURL(file);
-        img.alt="thumbnail";
-        img.style.width="50px";
-        img.style.height="auto";
-        const removeIcon = document.createElement('span')
-        removeIcon.classList.add('remove-icon');
-        removeIcon.innerHTML="&times";
-        removeIcon.addEventListener('click',function(){
-            if(index!==-1){
-                selectedImages.splice(index, 1);
-                
-            }
-            thumbnail.remove();
+        img.alt = "thumbnail";
+        img.style.width = "50px";
+        img.style.height = "auto";
+
+        const removeIcon = document.createElement("span");
+        removeIcon.classList.add("remove-icon");
+        removeIcon.innerHTML = "&times;"; // Fix the incorrect symbol
+        removeIcon.style.cursor = "pointer";
+        removeIcon.style.marginLeft = "5px";
+        removeIcon.style.color = "red";
+        removeIcon.addEventListener("click", function () {
+            const removeIndex = parseInt(thumbnail.dataset.index);
+            selectedImages.splice(removeIndex, 1); // Remove from array
+            updateFileInput(); // Update the input field
+            thumbnail.remove(); // Remove thumbnail
         });
+
         thumbnail.appendChild(img);
         thumbnail.appendChild(removeIcon);
         addedImagesContainer.appendChild(thumbnail);
-} 
+    });
 }
+
+function updateFileInput() {
+    const fileList = new DataTransfer();
+    selectedImages.forEach((file) => fileList.items.add(file));
+    document.getElementById("input1").files = fileList.files;
+}
+
         function validateForm() {
               clearErrorMessages();
               const name = document.getElementsByName('productName')[0].value;

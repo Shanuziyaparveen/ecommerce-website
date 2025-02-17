@@ -180,7 +180,7 @@
         </div>
         <div class="order-total">
           <h3>Total Amount: ₹<%= initialCartTotal %></h3>
-          <p>Payment of: ₹<%= finalAmount %> via <%= paymentMethod %></p>
+          <p>Payment of: ₹<%= finalAmount %> via <%= paymentMethod === 'Razorpay' ? 'Online Payment' : paymentMethod %></p>
         </div>
       </div>
     <% } %>
@@ -196,8 +196,8 @@
     <!-- Payment Method Section -->
     <div class="payment-method">
       <h2>Payment Method</h2>
-      <p><%= paymentMethod %></p>
-    </div>
+      <p><%= paymentMethod === 'Razorpay' ? 'Online Payment' : paymentMethod %></p>
+        </div>
 
     <!-- Home Button -->
     <a href="/" class="home-button">Go Back to Home</a>

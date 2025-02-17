@@ -189,6 +189,93 @@
     font-size: 14px;
   }
 }
+/* Address Section Styling */
+.tab-pane {
+  padding: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Address Type Badge */
+.address-type {
+  display: inline-block;
+  background-color: #6a176a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  border: none;
+  cursor: default;
+}
+
+/* Address Content */
+.card-body {
+  padding: 15px;
+}
+
+address {
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+
+p {
+  margin-bottom: 5px;
+  color: #555;
+}
+
+/* Buttons */
+.btn-small {
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #28a745;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+.btn-small:hover {
+  background-color: #218838;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Add Address Button */
+.w-70 {
+  width: 70%;
+  margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+  .col-lg-6 {
+    width: 100%;
+  }
+}
+
+
 
 </style>
 
@@ -290,20 +377,23 @@
 
 
                        <div class="card-body">
-                         <address>
-                          <h1><%=address.addressType%></h1>
-                       <h3> <%=address.name%></h3><br>
-                        <%=address.street%><br>
-                        <%=address.landMark%><br>
-
-                        <%=address.city%><br>
+                         <address><h1 style="display: inline-block; background-color: #65035d; color: white; font-size: 12px; font-weight: bold; padding: 5px 10px; border-radius: 4px; text-transform: uppercase; border: none; cursor: default;">
+                          <%= address.addressType %>
+                        </h1>
+                        <br>
+              
                         
-                        <%=address.state%>
+                       <h3>Name:  <%=address.name%></h3>
+                     LandMark:   <%=address.landMark%><br>
+
+                     City:   <%=address.city%><br>
+                        
+                      State:  <%=address.state%>
                         
                          </address>
-                         <p><%=address.pincode%></p>
-                         <p><%=address.phone%></p>
-                         <p><%=address.altPhone%></p>
+                         <p>Pincode: <%=address.pincode%></p>
+                         <p>Phone :<%=address.phone%></p>
+                         <p>Alt Phone: <%=address.altPhone%></p>
                          <div class="d-flex justify-content-between">
                            <a href="/editAddress?id=<%=address._id%>" class="btn-small">Edit</a>
                            <a href="/deleteAddress?id=<%=address._id%>" class="btn-small" onclick="return confirm ('are you sure you wanted to delete?')">Delete</a>

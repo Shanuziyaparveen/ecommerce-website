@@ -90,11 +90,14 @@
   <div class="container">
     <h1>Edit Address</h1>
     <form action="/checkout/edit-address/<%= address._id %>" method="POST">
-      <div class="form-group">
+      <div class="form-group col-md-4">
         <label for="addressType">Address Type:</label>
-        <input type="text" name="addressType" id="addressType" value="<%= address.addressType %>">
-      </div>
-
+        <select class="form-control border-3" id="addressType" name="addressType">
+            <option value="Home">Home</option>
+            <option value="Work">Work</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
       <div class="form-group">
         <label for="name">Name:</label>
         <input type="text" name="name" id="name" value="<%= address.name %>">

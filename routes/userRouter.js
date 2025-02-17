@@ -58,12 +58,12 @@ router.post('/login', userController.login);
 router.get('/logout', userController.logout);
 
 // Forgot password routes
-router.get('/forgot-password', profileController.getForgotPassPage);
-router.post('/forgot-email-valid', profileController.forgotEmailValid);
-router.post('/verify-passForgot-otp', profileController.verifyForgotPassOtp);
-router.get('/reset-password', profileController.getResetPassPage);
-router.post('/resend-forgot-otp', profileController.resendOtp);
-router.post('/reset-password', profileController.postNewPassword);
+router.get('/forgot-password', userAuth, profileController.getForgotPassPage);
+router.post('/forgot-email-valid',  userAuth,profileController.forgotEmailValid);
+router.post('/verify-passForgot-otp', userAuth, profileController.verifyForgotPassOtp);
+router.get('/reset-password',  userAuth,profileController.getResetPassPage);
+router.post('/resend-forgot-otp', userAuth, profileController.resendOtp);
+router.post('/reset-password',  userAuth,profileController.postNewPassword);
 
 // User profile routes
 router.get('/userProfile', userAuth, profileController.userProfile);
@@ -88,9 +88,9 @@ router.get('/cart', userAuth, productController.getCartPage);
 router.post('/cart/update', userAuth, productController.updateCart);
 router.post('/removeFromCart', userAuth, productController.removeFromCart);
 // Checkout routes
-router.get('/checkout', productController.getCheckout);
-router.post('/checkout/select-address', productController.selectAddress);
-router.post('/checkout/save-address', productController.saveAddress);
+router.get('/checkout', userAuth, productController.getCheckout);
+router.post('/checkout/select-address', userAuth, productController.selectAddress);
+router.post('/checkout/save-address',  userAuth,productController.saveAddress);
 
 // Payment routes
 router.get('/payment', userAuth, orderController.getPaymentPage);
@@ -103,30 +103,30 @@ router.get('/viewOrder/:id', userAuth, orderController.viewOrder);
 router.get('/cancelOrder', userAuth, orderController.cancelOrder);
 router.get('/cancel-product/:id', userAuth, orderController.cancelSpecificItem);
 router.post('/returnOrder', userAuth, orderController.returnOrder);
-router.get('/payment-failed', orderController.handleFailedPayment);
-router.post('/payment/retry', orderController.retryPayment);
+router.get('/payment-failed', userAuth, orderController.handleFailedPayment);
+router.post('/payment/retry',  userAuth,orderController.retryPayment);
 
 // Wishlist routes
-router.get('/wishList', wishlistController.getwishList);
-router.post('/addTowishList', wishlistController.addTowishList);
-router.post('/deleteProduct/:id', wishlistController.getRemoveFromWishlist);
-router.post('/couponApply', orderController.couponApply);
+router.get('/wishList', userAuth, wishlistController.getwishList);
+router.post('/addTowishList', userAuth, wishlistController.addTowishList);
+router.post('/deleteProduct/:id', userAuth, wishlistController.getRemoveFromWishlist);
+router.post('/couponApply', userAuth, orderController.couponApply);
 
 // Wallet routes
-router.post('/wallet/add-money', userController.addMoney);
-router.post('/cart/select-wallet', userController.selectWallet);
+router.post('/wallet/add-money',  userAuth,userController.addMoney);
+router.post('/cart/select-wallet',  userAuth,userController.selectWallet);
 
 // Confirm checkout route
-router.get('/confirm-checkout', orderController.confirmCheckout);
+router.get('/confirm-checkout', userAuth, orderController.confirmCheckout);
 
 // Return single product route
-router.post('/return-product/:productId', orderController.returnSingleProduct);
+router.post('/return-product/:productId',  userAuth,orderController.returnSingleProduct);
 
 
 // Routes for footer pages
-router.get('/contact', userController.getContactPage);
-router.get('/payment-methods', userController.getPaymentMethodsPage);
-router.get('/delivery', userController.getDeliveryPage);
-router.get('/returns-and-exchanges', userController.getReturnsAndExchangesPage);
+router.get('/contact', userAuth, userController.getContactPage);
+router.get('/payment-methods', userAuth, userController.getPaymentMethodsPage);
+router.get('/delivery', userAuth, userController.getDeliveryPage);
+router.get('/returns-and-exchanges',  userAuth,userController.getReturnsAndExchangesPage);
 
 module.exports = router;  
