@@ -2,7 +2,7 @@ const User = require("../../models/userSchema")
 const mongoose=require("mongoose")
 const bcrypt= require("bcrypt")
 const Order=require ("../../models/orderSchema")
-
+const Product=require ("../../models/productSchema")
 const pageerror= async(req,res)=>{
   const errorMessage = "Something went wrong. Please try again.";
   res.render("admin-error", { errorMessage });
@@ -21,16 +21,16 @@ const login = async (req, res) => {
         const admin = await User.findOne({ email, isAdmin: true });
 
         if (!admin) {
-            return res.render("admin/login", { message: "Admin not found" });
+            return res.render("admin-login", { message: "Admin not found" });
         }
 
         if (admin.isBlocked) {
-            return res.render("admin/login", { message: "Admin is blocked by Super Admin" });
+            return res.render("admin-login", { message: "Admin is blocked by Super Admin" });
         }
 
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if (!passwordMatch) {
-            return res.render("admin/login", { message: "Incorrect password" });
+            return res.render("admin-login", { message: "Incorrect password" });
         }
 
         // Store admin details in session (similar to user login)
@@ -299,13 +299,13 @@ const getOrderList = async (req, res) => {
       currentPage: page,
       totalPages,
     });
-  } catch (error) {
-    console.error('Error fetching order list:', error);
-    res.redirect('errorPage');
-  }
+  }catch(error){
+    console.log('logout error',error);
+   response.redirect("/admin/pageerror")
+}
 };
 
-  const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res) => {
     try {
       const { orderId, status } = req.body;
   
@@ -324,24 +324,35 @@ const getOrderList = async (req, res) => {
       // Update the order status in the database
       const updatedOrder = await Order.findByIdAndUpdate(orderId, updateFields, { new: true });
   
-      // If the order exists, update all the products' statuses to match the order status
       if (updatedOrder) {
         // Update productStatus for each ordered item
-        updatedOrder.orderedItems.forEach(item => {
-          item.productStatus = status; // Set the product status to match the order status
-        });
+        for (const item of updatedOrder.orderedItems) {
+          item.productStatus = status;
+        }
   
         // Save the updated order with updated product statuses
         await updatedOrder.save();
+  
+        // If order is Cancelled or Returned, update stock quantity
+        if (status === 'Cancelled' || status === 'Returned') {
+          for (const item of updatedOrder.orderedItems) {
+            const product = await Product.findById(item.product);
+            if (product) {
+              product.quantity += item.quantity; // Restore stock quantity
+              await product.save();
+            }
+          }
+        }
       }
   
       // Redirect back to the order list page
       res.redirect('orderList');
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      res.redirect('errorPage'); // Redirect to an error page if needed
+    }catch(error){
+        console.log('logout error',error);
+       response.redirect("/admin/pageerror")
     }
   };
+  
   const updateProductStatus = async (req, res) => {
     const { orderId, productId, productStatus } = req.body;
   
@@ -353,7 +364,7 @@ const getOrderList = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Order not found' });
       }
   
-      // Find the product item to be updated
+      // Find the product item in the order
       const itemIndex = order.orderedItems.findIndex(item => item.product._id.toString() === productId);
   
       if (itemIndex === -1) {
@@ -363,11 +374,20 @@ const getOrderList = async (req, res) => {
       // Update the product status
       order.orderedItems[itemIndex].productStatus = productStatus;
   
-      // If there is only one item in the order, the productStatus becomes the order status
+      // Handle stock restoration for Cancelled or Returned products
+      if (productStatus === 'Cancelled' || productStatus === 'Returned') {
+        const product = await Product.findById(productId);
+        if (product) {
+          product.quantity += order.orderedItems[itemIndex].quantity; // Restore stock
+          await product.save();
+        }
+      }
+  
+      // If there's only one item in the order, sync order status with product status
       if (order.orderedItems.length === 1) {
-        order.status = productStatus;  // set order status to productStatus
+        order.status = productStatus;
       } else {
-        // If all products in the order have the same status, set order status to that status
+        // If all items have the same status, update order status accordingly
         const allSameStatus = order.orderedItems.every(item => item.productStatus === productStatus);
         if (allSameStatus) {
           order.status = productStatus;
@@ -379,10 +399,11 @@ const getOrderList = async (req, res) => {
   
       return res.json({ success: true, message: 'Product status updated successfully' });
     } catch (err) {
-      console.error(err);
+      console.error('Error updating product status:', err);
       return res.status(500).json({ success: false, message: 'Error updating product status' });
     }
   };
+  
   
   
 module.exports={

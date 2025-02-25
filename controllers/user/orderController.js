@@ -593,7 +593,9 @@ const returnOrder = async (req,res,next) => {
     console.error('Error while submitting return request:', err);
     res.status(500).json({ success: false, message: 'An error occurred while processing the return request.' });
   }
-};const couponApply = (req,res,next) => {
+};
+
+const couponApply = (req,res,next) => {
   const { couponCode, totalAmount } = req.body;
   const userId = req.session.user?._id;  // Ensure user ID is correctly fetched from session
 
@@ -619,7 +621,8 @@ const returnOrder = async (req,res,next) => {
           }
 
           const discount = coupon.cashback;
-          const updatedAmount = Math.max(totalAmount - discount, 0); // Prevent negative totals
+          let updatedAmount = Math.max(totalAmount - discount, 0); // Prevent negative totals
+          updatedAmount = parseFloat(updatedAmount.toFixed(2));
 let remainingAmountToPay=updatedAmount;
           // Save coupon application status and discount to session
           req.session.couponApplied = true;
@@ -772,7 +775,8 @@ let couponDiscount= req.session.couponDiscount;
     console.log('Wallet Remaining:', req.session.walletRemaining);
     console.log('Remaining Amount to Pay:', remainingAmountToPay);
       // Fetch active coupons
-      const coupons = await Coupon.find({ status: 'active' });
+const today = new Date();
+const coupons = await Coupon.find({ expdate: { $gte: today } });
 req.session.remainingAmountToPay = remainingAmountToPay;
       res.render('confirmCheckout', {
           selectedAddress,

@@ -282,7 +282,7 @@
                 <% if (coupons.length > 0) { %>
                     <% coupons.forEach(coupon => { %>
                         <div class="coupon-card">
-                            <p>Code: <span class="coupon-code"><%= coupon.couponcode %></span></p>
+                            <p><span class="coupon-code"><%= coupon.couponcode %></span></p>
                             <p>Copy this coupon code to get ₹<%= coupon.cashback %> Discount</p>
                             <p>Min Purchase: ₹<%= coupon.minamount %></p>
                             <button class="copy-btn" onclick="copyCoupon('<%= coupon.couponcode %>')">Copy Code</button>

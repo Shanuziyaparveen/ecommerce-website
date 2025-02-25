@@ -39,9 +39,9 @@ const customerInfo = async (req, res) => {
 
         // Render the customers view with necessary data
         res.render("customers", {
-            data: userData,         // Pass the customer data to the view
-            totalPages: totalPages,  // Total number of pages for pagination
-            currentPage: page,       // Current page for highlighting
+            data: userData,       
+            totalPages: totalPages,  
+            currentPage: page,      
         });
 
     } catch (error) {
