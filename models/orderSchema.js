@@ -38,7 +38,7 @@ const orderSchema = new Schema({
     }, 
     productStatus: {
       type: String,
-      enum: ['Cancelled', 'Active','Pending', 'Processing', 'Shipped', 'Delivered', 'Return Request', 'Returned'], // Include all potential statuses
+      enum: ['Cancelled', 'Placed','Active','Pending', 'Processing', 'Shipped', 'Delivered', 'Return Request', 'Returned'], // Include all potential statuses
       default: 'Active'
     },
     

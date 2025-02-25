@@ -204,8 +204,7 @@
           </p>
 
           <!-- Display product status -->
-          <% if (item.productStatus === 'Cancelled' || order.status === 'Cancelled' || order.status === 'Shipped' || order.status === 'Return Request' || order.status === 'Returned'||order.status === 'Payment Pending' ) { %>
-            <p style="color: red; font-weight: bold;" id="itemStatus_<%= index %>">Status: <%= item.productStatus %></p>
+          <% if (item.productStatus === 'Cancelled' || order.status === 'Cancelled' || order.status === 'Shipped' || order.status === 'Return Request' || order.status === 'Returned'||order.status === 'Payment Pending' || order.status === 'Processed') { %>
             <button class="btn btn-secondary action-btn" id="actionBtn_<%= index %>" disabled>
               <%= item.productStatus === 'Return Request' ? 'Return Requested' : 'Cancelled/Non-Cancellable' %>
             </button>

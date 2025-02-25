@@ -434,7 +434,17 @@ const cancelOrder = async (req,res,next) => {
     // Update the order status to 'Cancelled'
     order.status = 'Cancelled';
     await order.save();
+   // Loop through each ordered item and update the product quantity
+   for (const item of order.orderedItems) {
+    const product = await Product.findById(item.product);
+    if (product) {
+      product.quantity += item.quantity;  // Increase product quantity based on canceled quantity
+      await product.save();
+      console.log(`Product ${product._id} quantity updated: +${item.quantity}`);
 
+    }
+    item.productStatus = 'Cancelled';
+  }
     // Add the final amount back to the user's wallet and log the transaction
     const user = await User.findById(userId);
     if (!user) {
@@ -514,7 +524,13 @@ const cancelSpecificItem = async (req,res,next) => {
       { _id: orderId, "orderedItems.product": productId },
       { $set: { "orderedItems.$.productStatus": "Cancelled" } }
     );
-
+  // Increase product quantity back
+  const product = await Product.findById(productId);
+  if (product) {
+    product.quantity += item.quantity;
+    await product.save();
+    console.log(`Product ${productId} quantity updated: +${item.quantity}`);
+  }
     // Wallet refund logic
     const refundAmount = item.price * item.quantity;
     const user = await User.findById(order.userId);
