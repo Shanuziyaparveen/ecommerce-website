@@ -413,69 +413,64 @@ const confirmOrder = async (req,res,next) => {
 }
 };
 
-const cancelOrder = async (req,res,next) => {
+const cancelOrder = async (req, res, next) => {
   try {
-    const orderId = req.query.id; // Get the order ID from the query parameters
-    const userId = req.session.user; // Assuming the user ID is stored in the session
+    const orderId = req.query.id;
+    const userId = req.session.user;
 
-    // Find the order by ID
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not logged in." });
+    }
+
     const order = await Order.findById(orderId);
     if (!order) {
-      console.error('Order not found');
-      return res.redirect('/userProfile'); // Redirect if order not found
+      return res.status(404).json({ success: false, message: "Order not found." });
     }
 
-    // Check if the order is already cancelled
     if (order.status === 'Cancelled') {
-      console.error('Order is already cancelled');
-      return res.redirect('/userProfile');
+      return res.status(400).json({ success: false, message: "Order already cancelled." });
     }
 
-    // Update the order status to 'Cancelled'
+    // Cancel order
     order.status = 'Cancelled';
-    await order.save();
-   // Loop through each ordered item and update the product quantity
-   for (const item of order.orderedItems) {
-    const product = await Product.findById(item.product);
-    if (product) {
-      product.quantity += item.quantity;  // Increase product quantity based on canceled quantity
-      await product.save();
-      console.log(`Product ${product._id} quantity updated: +${item.quantity}`);
-
+    for (const item of order.orderedItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        await product.save();
+      }
+      item.productStatus = 'Cancelled';
     }
-    item.productStatus = 'Cancelled';
-  }
-    // Add the final amount back to the user's wallet and log the transaction
+    await order.save();
+
+    // Process refund if paid via Razorpay
     const user = await User.findById(userId);
     if (!user) {
-      console.error('User not found');
-      return res.redirect('/userProfile');
+      return res.status(404).json({ success: false, message: "User not found." });
     }
-  // Refund logic based on payment method
-  if (order.paymentMethod === 'Razorpay') {
-    const refundAmount = order.finalAmount;
-    user.wallet += refundAmount;
 
-    // Log the transaction
-    user.transactions.push({
-      amount: refundAmount,
-      type: 'Refund',
-      orderId: order._id,
-      status: 'Completed',
-    });
+    if (order.paymentMethod === 'Razorpay') {
+      const refundAmount = order.finalAmount;
+      user.wallet += refundAmount;
 
-    await user.save();
-    console.log(`Order ${orderId} cancelled and ₹${refundAmount} refunded to wallet.`);
-  } else {
-    console.log(`Order ${orderId} cancelled. No wallet refund needed for payment method: ${order.paymentMethod}`);
-  }
+      user.transactions.push({
+        amount: refundAmount,
+        type: 'Refund',
+        orderId: order._id,
+        status: 'Completed',
+      });
 
-    res.redirect('/userProfile');
+      user.markModified('transactions'); // Ensure changes are detected
+      await user.save();
+    }
+
+    res.json({ success: true, message: "Order cancelled successfully." });
   } catch (error) {
     console.error('Error cancelling order:', error);
-    res.redirect('/pageNotFound');
+    res.status(500).json({ success: false, message: "Internal Server Error." });
   }
 };
+
 const viewOrder = async (req,res,next) => {
   try {
     const { id } = req.params;

@@ -289,9 +289,14 @@
   <% } else if (allReturned) { %>
     <!-- Show "Order Returned" if all items have been returned -->
     <button class="btn btn-secondary disabled-btn" disabled>Order Returned</button>
-  <% } else if (order.status === 'Placed' || order.status === 'Processing' || order.status === 'Shipped'||  order.status === 'Payment Successful' ||  order.status === 'Payment Pending' || order.status==='Payment Processed') { %>
+  <% } else if (order.status === 'Placed' || order.status === 'Processing' || order.status === 'Payment Successful' ||  order.status === 'Payment Pending' || order.status==='Payment Processed') { %>
     <!-- Allow cancelling the entire order -->
-    <a href="/cancelOrder?id=<%= order._id %>" class="btn btn-danger">Cancel Order</a>
+    <a href="javascript:void(0);" 
+   class="btn btn-danger" 
+   onclick="cancelOrder('<%= order._id %>')">
+   Cancel Order
+</a>
+
   <% } else if (order.status === 'Delivered' && allReturnable) { %>
     <!-- Allow returning the entire order if all items are returnable -->
     <button class="btn btn-warning" onclick="returnOrder('<%= order._id %>')">Return Order</button>
@@ -309,6 +314,35 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  function cancelOrder(orderId) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This action will cancel your order.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, cancel it!",
+    cancelButtonText: "No, keep it",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/cancelOrder?id=${orderId}`, { method: "GET" })
+        .then((response) => response.json()) 
+        .then((data) => {
+          if (data.success) {
+            Swal.fire("Canceled!", "Your order has been canceled.", "success")
+              .then(() => window.location.reload());
+          } else {
+            Swal.fire("Error", data.message || "Failed to cancel the order.", "error");
+          }
+        })
+        .catch(() => {
+          Swal.fire("Error", "An error occurred. Please try again later.", "error");
+        });
+    }
+  });
+}
+
  function cancelProduct(productId, orderId) {
   // Use SweetAlert2 for the confirmation dialog
   Swal.fire({
