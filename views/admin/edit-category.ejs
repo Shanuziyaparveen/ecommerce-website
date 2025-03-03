@@ -2,21 +2,75 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6 mt-60">
-            <form method="post" action="/admin/editCategory/<%=category._id%>">
-                <div class="d-grid text-end mt-30 col-md-5">
-                    <button class="btn btn-primary" type="submit">Update category</button>
-                </div>
-                <div class="mb-4 mt-30">
-                    <label for="product_name" class="form-label">Name</label>
-                    <input type="text" name="categoryName" value="<%=category.name%>" class="form-control border" />
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control border"><%=category.description%></textarea>
-                </div>
-            </form>
+          <form id="editCategoryForm" method="post" action="/admin/editCategory/<%= category._id %>">
+            <div class="d-grid text-end mt-30 col-md-5">
+              <button class="btn btn-primary" type="submit">Update category</button>
+            </div>
+            
+            <div class="mb-4 mt-30">
+                <label for="categoryName" class="form-label">Name</label>
+                <input type="text" name="categoryName" id="categoryName" value="<%= category.name %>" class="form-control border" />
+            </div>
+            <div class="mb-4">
+                <label for="descriptionId" class="form-label">Description</label>
+                <textarea name="description" id="descriptionId" class="form-control border"><%= category.description %></textarea>
+            </div>
+        </form>
+        <a href="/admin/category"><button type="button" class="btn btn-primary" >Back to Categories </button></a>
+        
         </div>
     </div>
 </div>
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("editCategoryForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const _id = "<%= category._id %>"; // Get category ID
+    const name = document.getElementById("categoryName").value.trim();
+    const description = document.getElementById("descriptionId").value.trim();
+
+    if (!name || !description) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Fields!",
+        text: "Please fill out all fields before submitting."
+      });
+      return;
+    }
+
+    fetch(`/admin/editCategory/${_id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ categoryName: name, description })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: "Category updated successfully.",
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => location.reload()); // Reload after success
+      })
+      .catch(error => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops!",
+          text: error.message || "An unexpected error occurred!"
+        });
+      });
+  });
+});
+
+
+</script>
 <%- include("../../views/partials/admin/footer") %>

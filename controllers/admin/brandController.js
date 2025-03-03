@@ -21,24 +21,29 @@ totalBrands:totalBrands
         res.redirect("/admin/pageerror")
     }
 }
-const addBrand= async (req, res) => {
-    try {
-        const brand=req.body.name;
-        const findBrand =await Brand.findOne({ brand})
-        if(!findBrand){
-            const image = req.file.filename;
-            const newBrand = new Brand({
-                brandName:brand,
-                brandImage:image,
+const addBrand = async (req, res) => {
+  try {
+      const brand = req.body.name.trim(); // Trim whitespace
+      const findBrand = await Brand.findOne({ brandName: { $regex: `^${brand}$`, $options: "i" } });
 
-            })
-            await newBrand.save();
-            res.redirect('/admin/brands')
-        }
-    } catch (error) {
-        res.redirect("/admin/pageerror")
-    }
-}
+      if (findBrand) {
+          return res.json({ success: false, message: "Brand name already exists!" });
+      }
+
+      const image = req.file.filename;
+      const newBrand = new Brand({
+          brandName: brand,
+          brandImage: image,
+      });
+
+      await newBrand.save();
+      res.json({ success: true, message: "Brand added successfully!" });
+  } catch (error) {
+      console.error("Error adding brand:", error);
+      res.json({ success: false, message: "Something went wrong!" });
+  }
+};
+
 
 const blockBrand = async (req, res) => {
     try {
@@ -82,22 +87,31 @@ const editBrand = async (req, res) => {
   
   const updateBrand = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { name } = req.body;
-      const image = req.file ? req.file.filename : null;
-  
-      const updateData = { brandName: name };
-      if (image) {
-        updateData.brandImage = [image];
-      }
-  
-      await Brand.findByIdAndUpdate(id, updateData);
-      res.redirect("/admin/brands"); // Redirect to the brand list page after update
+        const { id } = req.params;
+        const { name } = req.body;
+        const image = req.file ? req.file.filename : null;
+
+        // Check if brand name already exists (excluding the current brand ID)
+        const existingBrand = await Brand.findOne({ brandName: name, _id: { $ne: id } });
+
+        if (existingBrand) {
+            return res.json({ success: false, message: "Brand name already exists!" });
+        }
+
+        // Prepare update data
+        const updateData = { brandName: name };
+        if (image) {
+            updateData.brandImage = [image];
+        }
+
+        await Brand.findByIdAndUpdate(id, updateData);
+        return res.json({ success: true, message: "Brand updated successfully!" });
+
     } catch (error) {
-      res.redirect("/admin/pageerror");
+        return res.json({ success: false, message: "Something went wrong!" });
     }
-  };
-  
+};
+
   
   
 module.exports={

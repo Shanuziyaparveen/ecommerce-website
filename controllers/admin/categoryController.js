@@ -68,6 +68,7 @@ const categoryInfo = async (req, res) => {
       console.error("Error adding category:", error);
       renderAdminErrorPage(res, "Failed to add the category.");    }
   };
+  
   const addCategoryOffer = async (req, res) => {
     try {
       const percentage = parseInt(req.body.percentage);
@@ -201,16 +202,15 @@ const getEditCategory = async (req, res) => {
     renderAdminErrorPage(res, "Failed to fetch category for editing.");
   }
 };
-
-// Edit Category
 const editCategory = async (req, res) => {
   try {
     const id = req.params.id;
     const { categoryName, description } = req.body;
 
     const existingCategory = await Category.findOne({ name: categoryName });
+
     if (existingCategory) {
-      return renderAdminErrorPage(res, "Category already exists.");
+      return res.status(400).json({ error: "Category already exists" });  // Send JSON error response
     }
 
     const updateCategory = await Category.findByIdAndUpdate(
@@ -220,13 +220,13 @@ const editCategory = async (req, res) => {
     );
 
     if (updateCategory) {
-      res.redirect("/admin/category");
+      return res.json({ success: true, message: "Category updated successfully" }); // Send success response
     } else {
-      renderAdminErrorPage(res, "Category not found.");
+      return res.status(404).json({ error: "Category not found" });
     }
   } catch (error) {
     console.error("Error editing category:", error);
-    renderAdminErrorPage(res, "Failed to edit category.");
+    return res.status(500).json({ error: "Failed to edit category" });
   }
 };
 

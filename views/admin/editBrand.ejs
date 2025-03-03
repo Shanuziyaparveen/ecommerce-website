@@ -50,10 +50,13 @@ text-decoration: underline;
 <body>
 <div class="navbar">
 <a href="/admin/">Admin Home</a>
+<a href="/admin/brands">Back to Brands</a>
+
 <a href="/logout">Logout</a>
 </div>
 
 <section class="content-main">
+  
   <div class="content-header">
     <div>
       <h2 class="content-title card-title">Edit Brand</h2>
@@ -89,12 +92,61 @@ text-decoration: underline;
               <button class="btn btn-primary mt-20" type="submit">
                 Update Brand
               </button>
+              
             </div>
           </form>
+        
+
         </div>
       </div>
     </div>
   </div>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("form").submit(function (event) {
+      event.preventDefault(); // Prevent default form submission
+
+      var formData = new FormData(this); // Get form data
+
+      $.ajax({
+        url: "/admin/editBrand/<%= brand._id %>",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          if (response.success) {
+            Swal.fire({
+              icon: "success",
+              title: "Success!",
+              text: response.message,
+              showConfirmButton: false,
+              timer: 2000,
+            }).then(() => {
+              window.location.href = "/admin/brands"; // Redirect after success
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: response.message,
+            });
+          }
+        },
+        error: function () {
+          Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: "Something went wrong!",
+          });
+        },
+      });
+    });
+  });
+</script>
 
 <%- include("../../views/partials/admin/footer") %>
