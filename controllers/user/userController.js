@@ -202,29 +202,43 @@ const verifyOtp=async (req,res,next )=>{
             await saveUserData.save();
 
              // Reward the referrer if the user was referred by someone
-if (user.referredBy) {
-    const referrer = await User.findOne({ referralCode: user.referredBy });
-    if (referrer) {
-        const rewardAmount = 200; // Example reward points or currency value
+             if (user.referredBy) {
+                const referrer = await User.findOne({ referralCode: user.referredBy });
 
-        // Add reward to the referrer's wallet
-        referrer.wallet = (referrer.wallet || 0) + rewardAmount;
+                if (referrer) {
+                    const referrerBonus = 200;
+                    const userReferralBonus = 100; // New reward for referred user
 
-        // Add reward to the referrer's rewards
-        referrer.rewards = (referrer.rewards || 0) + rewardAmount;
+                    // Update referrer rewards
+                    referrer.wallet = (referrer.wallet ?? 0) + referrerBonus;
+                    referrer.rewards = (referrer.rewards ?? 0) + referrerBonus;
+                    referrer.transactions = referrer.transactions || [];
 
-        // Log the transaction in the referrer's transaction history
-        referrer.transactions.push({
-            amount: rewardAmount,
-            type: 'Referral Reward',
-            description: `Reward for referring user: ${user._id}`,
-            status: 'Completed',
-        });
+                    referrer.transactions.push({
+                        amount: referrerBonus,
+                        type: 'Referral Reward',
+                        description: `Reward for referring user: ${user.email}`,
+                        status: 'Completed',
+                    });
 
-        // Save the referrer's updated details
-        await referrer.save();
-    }
-}
+                    try {
+                        await referrer.save();
+                        console.log("Referrer updated successfully:", referrer);
+                    } catch (error) {
+                        console.error("Error saving referrer:", error);
+                    }
+
+                    // Reward the referred user with an extra 100 points
+                    saveUserData.wallet += userReferralBonus;
+                    saveUserData.rewards += userReferralBonus;
+                    saveUserData.transactions.push({
+                        amount: userReferralBonus,
+                        type: 'Reference Reward',
+                        description: 'Bonus for signing up through a referral.',
+                        status: 'Completed',
+                    });
+                }
+            }
 
 // Reward the new user
 const newUserReward = 100; // Example reward points for the new user

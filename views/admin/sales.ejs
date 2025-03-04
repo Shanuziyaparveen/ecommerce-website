@@ -364,7 +364,7 @@ text-decoration: underline;
             <% if (report.orders.length > 0) { %>
                 <% report.orders.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn)).forEach(order => { %>
                     <tr>
-                        <td><%= order._id %></td>
+                        <td><%= order.orderId %></td>
                         <td><%= new Date(order.createdOn).toLocaleDateString() %></td>
                         <td><%= order.status %></td>
                         <td>Rs <%= order.totalAmount ? order.totalAmount.toFixed(2) : '0.00' %></td>

@@ -119,7 +119,7 @@ const processPayment = async (req,res,next) => {
 
     // Calculate totals
     const cartTotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-    const cartTax = cartTotal * 0.1;
+const cartTax = Math.round(cartTotal * 0.1);
     const remainingAmountToPay = req.session.remainingAmountToPay || 0;
 
     let finalAmount = remainingAmountToPay;
@@ -759,7 +759,7 @@ const confirmCheckout = async (req,res,next) => {
       const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
       const cartSubtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
       const taxRate = 0.1;
-      const cartTax = cartSubtotal * taxRate;
+      const cartTax = Math.round(cartSubtotal * taxRate);
       const cartTotal = cartSubtotal + cartTax;
 let couponDiscount= req.session.couponDiscount;
       let discountedAmount = cartTotal;

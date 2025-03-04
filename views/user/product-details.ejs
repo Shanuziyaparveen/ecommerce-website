@@ -13,6 +13,8 @@
      <div class="container">
          <div class="row">
              <div class="col-lg-9">
+             
+                
                  <div class="product-detail accordion-detail">
                      <div class="row mb-50">
                          <div class="col-md-6 col-sm-12 col-xs-12">
@@ -66,11 +68,11 @@
                                          <ins><span class="old-price font-md ml-15"><%=product.regularPrice%></span></ins>
                                          <span class="save-price  font-md color3 ml-15">
 
-                                            <%if(!totalOffer){%>
-                                                No Offers Available
-                                                <%}else{%>
-                                                    <%=totalOffer%>% Offer
-                                                    <%}%>
+                                            <% if (product.isBlocked) { %>
+                                                <div class="alert alert-danger" style="color: red; font-weight: bold;">
+                                                    This product is currently unavailable.
+                                                </div>
+                                            <% } %>
                                        </span>
                                      </div>
                                  </div>

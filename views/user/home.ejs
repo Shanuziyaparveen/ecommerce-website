@@ -6,138 +6,171 @@
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 <style>
-  body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-  }
+ /* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
 
-  .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-      background-color: #673ab7; /* Deep Purple */
-      border: none;
-      border-radius: 5px;
-      transition: background-color 0.3s, transform 0.3s;
-      cursor: pointer;
-      text-align: center;
-  }
+/* Button Styling */
+.btn {
+    display: inline-block;
+    padding: 12px 22px; /* Increased padding for better clickability */
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #673ab7; /* Deep Purple */
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+    cursor: pointer;
+    text-align: center;
+}
 
-  .btn:hover {
-      background-color: #512da8; /* Darker Purple */
-      transform: translateY(-2px);
-  }
+.btn:hover {
+    background-color: #512da8; /* Darker Purple */
+    transform: translateY(-2px);
+}
 
-  .btn:active {
-      transform: translateY(1px);
-  }
+.btn:active {
+    transform: translateY(1px);
+}
 
-  .product-cart-wrap {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
-      transition: box-shadow 0.3s;
-  }
+/* Product Card Styling */
+.product-cart-wrap {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #fff;
+    transition: transform 0.3s ease-in-out;
+}
 
-  .product-cart-wrap:hover {
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  }
+.product-cart-wrap:hover {
+    transform: translateY(-5px);
+}
 
-  .product-img {
-      position: relative;
-      text-align: center;
-      padding: 15px;
-      background-color: #f1f1f1;
-  }
+/* Product Image Styling */
+.product-img img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    transition: transform 0.3s;
+}
 
-  .product-img img {
-      max-width: 100%;
-      height: auto;
-      transition: transform 0.3s;
-  }
+.product-img img:hover {
+    transform: scale(1.05);
+}
 
-  .product-img img:hover {
-      transform: scale(1.05);
-  }
+/* Wishlist Button */
+.wishlist-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(103, 58, 183, 0.8); /* Semi-transparent Deep Purple */
+    padding: 8px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 18px;
+    z-index: 10;
+    transition: background-color 0.3s, transform 0.3s;
+}
 
-  .wishlist-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: rgba(103, 58, 183, 0.8); /* Semi-transparent Deep Purple */
-      padding: 8px;
-      border-radius: 50%;
-      color: #fff;
-      font-size: 18px;
-      z-index: 10;
-      transition: background-color 0.3s, transform 0.3s;
-  }
+.wishlist-btn:hover {
+    background-color: rgba(81, 45, 168, 1); /* Darker Purple */
+    transform: translateY(-2px);
+}
 
-  .wishlist-btn:hover {
-      background-color: rgba(81, 45, 168, 1); /* Darker Purple */
-      transform: translateY(-2px);
-  }
+/* Product Content */
+.product-content {
+    padding: 15px;
+    text-align: center;
+}
 
-  .product-content {
-      padding: 15px;
-      text-align: center;
-  }
+.product-content h6 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px; /* Improved spacing */
+}
 
-  .product-content h6 {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 8px;
-  }
+.product-content h5 {
+    font-size: 16px;
+    color: #673ab7;
+    margin-bottom: 20px; /* More spacing for better readability */
+}
 
-  .product-content h5 {
-      font-size: 16px;
-      color: #673ab7;
-      margin-bottom: 15px;
-  }
+/* Button Container */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 
-  .btn-container {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-  }
+.add-to-cart-btn, .add-to-wishlist-btn {
+    font-size: 14px;
+    padding: 10px 14px;
+}
 
-  .btn.add-to-cart-btn {
-      background-color: #673ab7;
-  }
+/* Add to Cart Button */
+.btn.add-to-cart-btn {
+    background-color: #673ab7;
+}
 
-  .btn.add-to-cart-btn:hover {
-      background-color: #512da8;
-  }
+.btn.add-to-cart-btn:hover {
+    background-color: #512da8;
+}
 
-  .btn.add-to-wishlist-btn {
-      background-color: white;
-      color: #673ab7;
-      border: 1px solid #673ab7;
-  }
+/* Add to Wishlist Button */
+.btn.add-to-wishlist-btn {
+    background-color: white;
+    color: #673ab7;
+    border: 1px solid #673ab7;
+}
 
-  .btn.add-to-wishlist-btn:hover {
-      background-color: #673ab7;
-      color: white;
-  }
+.btn.add-to-wishlist-btn:hover {
+    background-color: #673ab7;
+    color: white;
+}
 
-  .product-section {
-      padding: 40px 0;
-  }
+/* Product Section */
+.product-section {
+    padding: 40px 0;
+}
 
-  .product__filter {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-  }
+/* Responsive Grid Fix */
+.product__filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
 
-  .product__filter > div {
-      flex: 1 1 calc(25% - 20px);
-      max-width: calc(25% - 20px);
-  }
+.product__filter > div {
+    flex: 1 1 calc(25% - 20px);
+    max-width: calc(25% - 20px);
+}
+
+@media (max-width: 1200px) {
+    .product__filter > div {
+        flex: 1 1 calc(33.33% - 20px); /* 3 columns */
+        max-width: calc(33.33% - 20px);
+    }
+}
+
+@media (max-width: 992px) {
+    .product__filter > div {
+        flex: 1 1 calc(50% - 20px); /* 2 columns */
+        max-width: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 576px) {
+    .product__filter > div {
+        flex: 1 1 100%; /* 1 column */
+        max-width: 100%;
+    }
+}
+
 </style>
 
 <!-- Hero Section -->
@@ -190,41 +223,44 @@
 
 <!-- Product Section -->
 <section class="product-section">
-  <div class="container">
-      <div class="row">
-          <div class="col-lg-12">
-              <ul class="filter__controls">
-                  <li data-filter=".new-arrivals">New Arrivals</li>
-              </ul>
-          </div>
-      </div>
-      <div class="row product__filter">
-          <% for(let i = 0; i < products.length; i++) { %>
-              <div>
-                  <div class="product-cart-wrap">
-                      <div class="product-img">
-                          <a href="/productDetails?id=<%= products[i]._id %>">
-                              <img src="/uploads/re-image/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
-                          </a>
-                          
-                      </div>
-                      <div class="product-content">
-                          <h6><%= products[i].productName %></h6>
-                          <h5> <span>Rs. <del><%= products[i].regularPrice %></del> <b>Rs. <%= products[i].salePrice %></b></span></h5>
-                          <div class="btn-container">
-                            <button class="btn add-to-cart-btn" onclick="addToCart('<%= products[i]._id %>')">
-                                <i class="fas fa-cart-plus me-2"></i>Add to Cart
-                            </button>
-                              <button class="btn add-to-wishlist-btn" onclick="<%= products[i].isInWishlist ? `removeFromWishList('${products[i]._id}')` : `addToWishList('${products[i]._id}')` %>">
-                                  <i class="<%= products[i].isInWishlist ? 'fas fa-heart' : 'far fa-heart' %>"></i> Wishlist
-                              </button>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          <% } %>
-      </div>
-  </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <ul class="filter__controls">
+                    <li data-filter=".new-arrivals">New Arrivals</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row product__filter">
+            <% for(let i = 0; i < products.length; i++) { %>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="product-cart-wrap">
+                        <div class="product-img">
+                            <a href="/productDetails?id=<%= products[i]._id %>">
+                                <img src="/uploads/re-image/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+                            </a>
+                        </div>
+                        <div class="product-content text-center">
+                            <h6><%= products[i].productName %></h6>
+                            <h5>
+                                <span>Rs. <del><%= products[i].regularPrice %></del> 
+                                    <b>Rs. <%= products[i].salePrice %></b>
+                                </span>
+                            </h5>
+                            <div class="btn-container d-flex justify-content-center gap-2">
+                                <button class="btn btn-primary add-to-cart-btn" onclick="addToCart('<%= products[i]._id %>')">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
+                                <button class="btn btn-outline-danger add-to-wishlist-btn" onclick="<%= products[i].isInWishlist ? `removeFromWishList('${products[i]._id}')` : `addToWishList('${products[i]._id}')` %>">
+                                    <i class="<%= products[i].isInWishlist ? 'fas fa-heart' : 'far fa-heart' %>"></i> Wishlist
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
 </section>
 
 <%- include("../../views/partials/user/footer") %>

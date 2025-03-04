@@ -381,29 +381,28 @@ ul li:before {
           <!-- Rating -->
           <p class="rating">Rating: <%= product.rating %> ⭐</p>
 
-          <!-- Stock Availability -->
-          <p class="stock">
-            <% if (product.quantity > 0) { %>
-              <span class="in-stock">In Stock</span>
-            <% } else { %>
-              <span class="out-of-stock">Out of Stock</span>
-            <% } %>
-          </p>
+         
 
           <!-- Product Highlights -->
           <h3>Product Highlights</h3>
           <ul>
             <li><%= product.description %></li>
           </ul>
-
+          <p class="stock">
+            <span id="stock-status" class="<%= product.isBlocked || product.quantity === 0 ? 'out-of-stock' : 'in-stock' %>">
+              <%= product.stockMessage %>
+            </span>
+          </p>
+          
           <!-- Add to Cart Button -->
           <div>
-            <% if (product.quantity === 0) { %>
-              <p class="out-of-stock">Out of Stock</p>
+            <% if (product.quantity === 0 || product.isBlocked) { %>
+              <button class="add-to-cart-btn disabled" disabled>Notify when restocks</button>
             <% } else { %>
               <button data-product-id="<%= product._id %>" class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
             <% } %>
           </div>
+          
 
           <!-- Related Products Section -->
           <h3>Related Products</h3>

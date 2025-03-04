@@ -158,7 +158,7 @@ const getCartPage = async (req,res,next) => {
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     const cartSubtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
     const taxRate = 0.1; // You can make this configurable
-    const cartTax = cartSubtotal * taxRate;
+    const cartTax = Math.round(cartSubtotal * taxRate);
     const cartTotal = cartSubtotal + cartTax;
     req.session.updatedAmount=cartTotal;
     let discountedAmount = cartTotal;
@@ -243,8 +243,10 @@ const updateCart = async (req,res,next) => {
       // Recalculate totals
       const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
       const cartSubtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-      const cartTax = (cartSubtotal * 0.18).toFixed(2); // 18% tax example
-      const cartTotal = (cartSubtotal + parseFloat(cartTax)).toFixed(2);
+      const taxRate = 0.1;
+
+      const cartTax = Math.round(cartSubtotal * taxRate);
+      const cartTotal = (cartSubtotal + parseFloat(cartTax)).toFixed(1);
 
       cart.cartTotal = cartTotal;
 
@@ -397,29 +399,31 @@ const saveAddress = async (req,res,next) => {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
 }
 };
-const productDetails = async (req,res,next) => {
+const productDetails = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const userData = await User.findById(userId);
 
-    // Correctly extract productId
     const productId = req.query.id;
     if (!productId) {
       return res.render('error', { errorMessage: 'Product ID not provided' });
     }
 
-    // Fetch the product and its category
     const product = await Product.findById(productId).populate('category');
     if (!product) {
       return res.render('error', { errorMessage: 'Product not found' });
     }
 
-    const findCategory = product.category || {}; // Handle missing category
+    // Check if the product is blocked by admin
+    if (product.isBlocked) {
+      return res.render('error', { errorMessage: 'This product has been blocked by the admin.' });
+    }
+
+    const findCategory = product.category || {};
     const categoryOffer = findCategory.categoryOffer || 0;
     const productOffer = product.productOffer || 0;
     const totalOffer = categoryOffer + productOffer;
 
-    // Render the product details page
     res.render('product-details', {
       user: userData,
       product: product,
@@ -427,11 +431,12 @@ const productDetails = async (req,res,next) => {
       totalOffer: totalOffer,
       category: findCategory,
     });
-  }catch (error) {
-    // Forward the error with a status if it exists
+
+  } catch (error) {
     next({ status: error.status || 500, message: error.message || 'Unexpected error occurred.' });
-}
+  }
 };
+
 const getAllProducts = async (req, res, next) => {
   try {
       // Get pagination parameters from query
@@ -505,11 +510,13 @@ const getProductDetails = async (req,res,next) => {
       if (!product) {
           return res.status(404).send('Product not found');
       }
+      if (product.isBlocked) {
+        product.stockMessage = "Product is blocked by admin";
+      } else {
+        product.stockMessage = product.quantity > 0 ? "In Stock" : "Out of Stock";
+      }
       
- // Redirect to the home page if the product is blocked
- if (product.isBlocked) {
-  return res.redirect('/'); // Redirect to the home page
-}
+      
       // Ensure product.images is always an array, fallback to an empty array if it's not
       product.images = Array.isArray(product.productImage) ? product.productImage : [product.productImage];
 
